@@ -1320,19 +1320,36 @@ const SHURIKEN = { name:'shuriken', pts:50, color:'#ffd700', draw:drawShuriken, 
 let spawnAcc = 0;
 let clocksDropped = 0;
 let maxClocks = 1 + Math.floor(Math.random()*2); // 1-2 per game
+let blindBoxesDropped = 0;
+let maxBlindBoxes = 2 + Math.floor(Math.random()*2); // 2-3 per game
+let blindBoxTimes = []; // scheduled spawn times
+function initBlindBoxTimes() {
+  blindBoxTimes = [];
+  for (let i = 0; i < maxBlindBoxes; i++) {
+    blindBoxTimes.push(4 + Math.random() * (ROUND - 8)); // between 4s and ROUND-4s
+  }
+  blindBoxTimes.sort((a,b) => a-b);
+}
 function spawnItem() {
   let type;
   const r = Math.random();
+  // Check if a blind box is due
+  if (blindBoxTimes.length > 0 && gameTime >= blindBoxTimes[0]) {
+    blindBoxTimes.shift();
+    blindBoxesDropped++;
+    type = BLINDBOX;
+  }
+  else {
   // Randomized spawn bands with jitter
   const jitter = (Math.random()-0.5)*0.02;
   if (r < 0.01+jitter) type = LUCKY;                              // ~1% lucky star
   else if (r < 0.025) type = SHIELD;                              // 1.5% shield
   else if (r < 0.03 && clocksDropped < maxClocks && gameTime > 10) { type = CLOCK; clocksDropped++; } // 1-2 per game, after 10s
-  else if (r < 0.04+jitter) type = BLINDBOX;                      // ~1% blind box
   else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
   else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
   else if (r < 0.19) type = ITEMS[6];                             // 5% rainbow
   else type = ITEMS[Math.floor(Math.random()*ITEMS.length)];      // all normal items (inc rainbow)
+  } // end else (non-blindbox)
   const x = 20 + Math.random()*(W-40);                            // wider spread
   const speedRng = 0.8 + Math.random()*0.4;                       // 80-120% speed variance
   const levelMod = 1 + (gameLevel - 1) * 0.06;
@@ -1480,17 +1497,10 @@ function drawCelebration() {
 function drawBg() {
   bgHue = (bgHue + 0.15) % 360;
   const g = X.createLinearGradient(0,0,0,H);
-  if (fever) {
-    const fh = (frame*5)%360;
-    g.addColorStop(0, `hsl(${fh},90%,85%)`);
-    g.addColorStop(0.5, `hsl(${(fh+120)%360},80%,88%)`);
-    g.addColorStop(1, `hsl(${(fh+240)%360},85%,85%)`);
-  } else {
-    g.addColorStop(0, `hsl(${(bgHue+320)%360},80%,92%)`);
-    g.addColorStop(0.3, `hsl(${(bgHue+210)%360},70%,90%)`);
-    g.addColorStop(0.6, `hsl(${(bgHue+270)%360},60%,92%)`);
-    g.addColorStop(1, `hsl(${(bgHue+140)%360},60%,88%)`);
-  }
+  g.addColorStop(0, `hsl(${(bgHue+320)%360},80%,92%)`);
+  g.addColorStop(0.3, `hsl(${(bgHue+210)%360},70%,90%)`);
+  g.addColorStop(0.6, `hsl(${(bgHue+270)%360},60%,92%)`);
+  g.addColorStop(1, `hsl(${(bgHue+140)%360},60%,88%)`);
   X.fillStyle = g; X.fillRect(0,0,W,H);
   X.fillStyle = 'rgba(255,255,255,0.3)';
   for (let i = 0; i < 15; i++) {
@@ -1583,13 +1593,13 @@ function drawHUD() {
   if (combo >= 3) {
     const p = 1 + Math.sin(frame*0.15)*0.08;
     X.save(); X.translate(W/2, 62); X.scale(p, p);
-    X.fillStyle = fever ? 'rgba(255,100,200,0.9)' : 'rgba(255,255,255,0.9)';
+    X.fillStyle = 'rgba(255,255,255,0.9)';
     rrc(0, 0, 130, 28, 14);
     const cc = ['#ff6b9d','#e040fb','#ffd54f','#89c4f4'];
-    X.fillStyle = fever ? '#fff' : cc[Math.floor(frame*0.1)%4];
+    X.fillStyle = cc[Math.floor(frame*0.1)%4];
     X.font = 'bold 15px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText((fever?'🔥 ':'') + combo + 'x COMBO!' + (fever?' 🔥':''), 0, 1);
+    X.fillText(combo + 'x COMBO!', 0, 1);
     X.restore();
   }
 
@@ -1605,7 +1615,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v6.0', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v6.1', W-8, H-8);
 }
 
 // ====== CHARACTERS ======
@@ -1821,7 +1831,7 @@ function drawMenu() {
     X.fillText('🎯 '+T('beat')+' '+challScore+'!', W/2, 392);
   }
 
-  const by = challScore ? 435 : 415;
+  const by = challScore ? 420 : 395;
   const bp = 1+Math.sin(frame*0.06)*0.03;
   X.save(); X.translate(W/2, by); X.scale(bp, bp);
   X.fillStyle = '#ff8a9e'; rrc(0, 0, 220, 56, 28);
@@ -1857,8 +1867,8 @@ function drawMenu() {
     X.fillText(T('playingAs')+': '+playerName, W/2, by+82);
   }
 
-  // Bottom buttons row - tighter spacing
-  const btnStart = by + (playerName ? 108 : 90);
+  // Bottom buttons - better spacing
+  const btnStart = by + (playerName ? 100 : 85);
 
   // Leaderboard button
   X.fillStyle = '#fff3e0'; rrc(W/2, btnStart, 180, 38, 19);
@@ -1876,7 +1886,7 @@ function drawMenu() {
   X.fillText(T('leaderboard'), W/2, btnStart+2);
 
   // Collection button
-  const cby = btnStart + 44;
+  const cby = btnStart + 42;
   const collected = getCollectionCount();
   X.fillStyle = '#fce4ec'; rrc(W/2, cby, 180, 38, 19);
   X.strokeStyle = '#e91e63'; X.lineWidth = 2;
@@ -1893,7 +1903,7 @@ function drawMenu() {
   X.fillText('\u2728 Collection '+collected+'/9', W/2, cby+2);
 
   // How to Play + Set Name row
-  const hby = cby + 42;
+  const hby = cby + 40;
   X.fillStyle = '#e3f2fd'; rrc(W/2-55, hby, 100, 30, 15);
   X.fillStyle = '#1565c0'; X.font = 'bold 11px "Fredoka One",sans-serif';
   X.textAlign = 'center';
@@ -1904,7 +1914,7 @@ function drawMenu() {
   X.fillText(playerName ? T('tapName') : T('setName'), W/2+55, hby+1);
 
   // Share with friends button
-  const sby = hby + 38;
+  const sby = hby + 36;
   X.fillStyle = '#25d366'; rrc(W/2, sby, 190, 34, 17);
   X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif';
   X.textAlign = 'center';
@@ -1928,7 +1938,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v6.0', W-14, H-12);
+  X.fillText('v6.1', W-14, H-12);
 }
 
 function drawResults() {
@@ -2176,30 +2186,11 @@ function update(dt) {
     sndCelebration();
   }
 
-  if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, T('feverMode'), '#e040fb'); trackEvent('fever_mode', { score, combo }); }
-  if (combo < 15) fever = false;
-  if (fever) feverTimer += dt;
-
-  const rate = fever ? 0.10 : Math.max(0.20, 0.42 - gameTime*0.008);
+  const rate = Math.max(0.25, 0.45 - gameTime*0.006);
   spawnAcc += dt;
   if (spawnAcc >= rate) { spawnAcc = 0; spawnItem(); }
 
-  if (gameTime >= ROUND - 8) {
-    if (!ninja.active) { ninja.active = true; ninja.announced = false; ninja.tt = 0; }
-    if (!ninja.announced) {
-      ninja.announced = true;
-      addText(W/2, 140, T('daddyNinja'), '#ff3333');
-      addSpark(W/2, 80, '#ff3333', 12);
-      shake(8);
-    }
-    ninja.tx = W/2 + Math.sin(gameTime*1.5)*140;
-    ninja.x += (ninja.tx - ninja.x) * (1 - Math.exp(-5 * dt));
-    ninja.tt += dt;
-    if (ninja.tt > 0.3) {
-      ninja.tt = 0;
-      items.push({ x:ninja.x+(Math.random()-.5)*40, y:ninja.y+40, type:SHURIKEN, speed:180+Math.random()*60, wobble:Math.random()*Math.PI*2, size:16, t:0 });
-    }
-  }
+  // Ninja removed
 
   flyC.t += dt;
   if (!flyC.on && flyC.t > 4) { flyC.on = true; flyC.x = -60; flyC.y = 60+Math.random()*80; flyC.t = 0; }
@@ -2334,7 +2325,7 @@ function update(dt) {
       } else {
         let pts = it.type.pts * (1 + Math.floor(combo/5)*0.5);
         if (powerups.double > 0) pts *= 2;
-        if (fever) pts *= 2;
+        // fever removed
         score += Math.floor(pts);
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
@@ -2349,9 +2340,7 @@ function update(dt) {
           sndComboBurst();
           addText(W/2, 180, T('magnetBurst'), '#ffd700');
         }
-        const streak = getStreak(combo);
-        if (streak && [5,10,15,20,30].includes(combo)) {
-          addText(W/2, 200, streak.t, streak.c);
+        if (false) { // combo callouts disabled
           sndCombo(); shake(6);
         }
       }
@@ -2414,7 +2403,7 @@ function drawGame() {
   drawPurinSide(); drawFlyC();
   items.forEach(it => it.type.draw(it.x, it.y, it.size));
   drawPlayer();
-  if (ninja.active) drawNinja(ninja.x, ninja.y);
+  // ninja removed
   // Hello Kitty Shower overlay
   if (hkShower.active) {
     X.fillStyle = `rgba(255,105,180,${0.12+Math.sin(frame*0.2)*0.08})`;
@@ -2586,9 +2575,9 @@ function gc(cx, cy) {
 let primaryTouch = null;
 
 function getMenuBtnY() {
-  const by = challScore ? 435 : 415;
-  const btnStart = by + (playerName ? 108 : 90);
-  return { play: by, lb: btnStart, collection: btnStart + 44, howto: btnStart + 86, name: btnStart + 86, share: btnStart + 124 };
+  const by = challScore ? 420 : 395;
+  const btnStart = by + (playerName ? 100 : 85);
+  return { play: by, lb: btnStart, collection: btnStart + 42, howto: btnStart + 82, name: btnStart + 82, share: btnStart + 118 };
 }
 
 function startGame() {
@@ -2603,6 +2592,7 @@ function startGame() {
   comboBurst = {active:false,timer:0,triggered:[]};
   hkShower = {active:false,timer:0,spawnAcc:0};
   clocksDropped = 0; maxClocks = 1 + Math.floor(Math.random()*2);
+  blindBoxesDropped = 0; maxBlindBoxes = 2 + Math.floor(Math.random()*2); initBlindBoxTimes();
   boxPops = [];
   bbReveal = null;
   sessionCollected = [];
