@@ -179,7 +179,7 @@ let lang = localStorage.getItem('aria_lang') || 'en';
 const LANG = {
   en: {
     title1: "Aria's", title2: 'Boba Adventure', by: 'Game by Aria Smushkevich 💕',
-    sub: 'Catch Sanrio friends, boba & treats!', catchThese: 'Catch these!',
+    sub: 'Catch boba, treats & collect Sanrio friends!', catchThese: 'Catch these!',
     tapToPlay: 'Tap to Play!', best: 'Best', playingAs: 'Playing as',
     leaderboard: '🏆 Leaderboard', howToPlay: '❓ How to Play',
     challengeFriend: '📲 Challenge a Friend!', tapName: 'Tap name to change',
@@ -214,7 +214,7 @@ const LANG = {
   },
   es: {
     title1: "Aria's", title2: 'Boba Aventura', by: 'Juego por Aria Smushkevich 💕',
-    sub: '¡Atrapa amigos Sanrio, boba y dulces!', catchThese: '¡Atrapa estos!',
+    sub: '¡Atrapa boba, dulces y colecciona amigos Sanrio!', catchThese: '¡Atrapa estos!',
     tapToPlay: '¡Toca para Jugar!', best: 'Mejor', playingAs: 'Jugando como',
     leaderboard: '🏆 Clasificación', howToPlay: '❓ Cómo Jugar',
     challengeFriend: '📲 ¡Reta a un Amigo!', tapName: 'Toca para cambiar nombre',
@@ -430,10 +430,6 @@ function buildTutorialItems() {
     {name:'Heart',draw:drawHeart,pts:'+8',bg:'#fce4ec'},
     {name:'Pudding',draw:drawPudding,pts:'+12',bg:'#fff8e1'},
     {name:'Rainbow',draw:drawRainbow,pts:'+30',bg:'#f3e5f5'},
-    {name:'Hello Kitty',draw:drawHelloKitty,pts:'+25',bg:'#fce4ec'},
-    {name:'My Melody',draw:drawMyMelody,pts:'+18',bg:'#fff0f5'},
-    {name:'Kuromi',draw:drawKuromi,pts:'+22',bg:'#f3e5f5'},
-    {name:'Keroppi',draw:drawKeroppi,pts:'+20',bg:'#e8f5e9'},
   ];
   const bad = [{name:'Kuromi',draw:drawBomb,pts:'-20!',bg:'#f3e5f5'}];
   const power = [
@@ -512,6 +508,29 @@ let trail = [];
 let hkShower = { active: false, timer: 0, spawnAcc: 0 };
 let boxPops = []; // Sanrio character pop-out animations from blind boxes
 let bbReveal = null; // Blind box reveal popup: { charDraw, charName, rarity, timer, maxTimer, sparks[] }
+
+// ====== SANRIO COLLECTION (Pokemon-style) ======
+const SANRIO_CHARS = [
+  { id:'hello_kitty', name:'Hello Kitty', draw:drawHelloKitty, rarity:'legendary', color:'#e91e63' },
+  { id:'kuromi', name:'Kuromi', draw:drawKuromi, rarity:'rare', color:'#9c27b0' },
+  { id:'badtz_maru', name:'Badtz-Maru', draw:drawBadtzMaru, rarity:'rare', color:'#1a1a2e' },
+  { id:'cinnamoroll', name:'Cinnamoroll', draw:drawCinnaBox, rarity:'powerup', color:'#89c4f4' },
+  { id:'pompompurin', name:'Pompompurin', draw:drawPurinBox, rarity:'powerup', color:'#fdd835' },
+  { id:'my_melody', name:'My Melody', draw:drawMyMelody, rarity:'common', color:'#ffb6c1' },
+  { id:'pochacco', name:'Pochacco', draw:drawPochacco, rarity:'common', color:'#2196f3' },
+  { id:'keroppi', name:'Keroppi', draw:drawKeroppi, rarity:'common', color:'#4caf50' },
+];
+function getCollection() { try { return JSON.parse(localStorage.getItem('aria_collection') || '{}'); } catch(e) { return {}; } }
+function saveCollection(col) { localStorage.setItem('aria_collection', JSON.stringify(col)); }
+function collectChar(charId) {
+  const col = getCollection();
+  if (!col[charId]) col[charId] = { count: 0, first: Date.now() };
+  col[charId].count++;
+  col[charId].last = Date.now();
+  saveCollection(col);
+}
+function getCollectionCount() { return Object.keys(getCollection()).length; }
+let showCollection = false;
 
 // Ninja
 const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 };
@@ -1272,15 +1291,6 @@ const ITEMS = [
   { name:'heart', pts:8, color:'#ff6b9d', draw:drawHeart, w:0.8 },
   { name:'pudding', pts:12, color:'#ffd54f', draw:drawPudding, w:1.0 },
   { name:'rainbow', pts:30, color:'#e040fb', draw:drawRainbow, w:1.0 },
-  // Sanrio character drops
-  { name:'hello kitty', pts:25, color:'#e91e63', draw:drawHelloKitty, w:1.3 },
-  { name:'my melody', pts:18, color:'#ffb6c1', draw:drawMyMelody, w:1.3 },
-  { name:'kuromi', pts:22, color:'#9c27b0', draw:drawKuromi, w:1.3 },
-  { name:'pochacco', pts:15, color:'#2196f3', draw:drawPochacco, w:1.2 },
-  { name:'keroppi', pts:20, color:'#4caf50', draw:drawKeroppi, w:1.3 },
-  { name:'badtz-maru', pts:22, color:'#1a1a2e', draw:drawBadtzMaru, w:1.2 },
-  { name:'cinnamoroll', pts:18, color:'#89c4f4', draw:drawCinnaBox, w:1.3 },
-  { name:'pompompurin', pts:16, color:'#fdd835', draw:drawPurinBox, w:1.2 },
 ];
 const POWERUPS = [
   { name:'magnet', pts:0, color:'#2196f3', draw:drawMagnet, w:1.0, isPower:true },
@@ -1674,6 +1684,74 @@ function drawPlayer() {
 }
 
 // ====== SCREENS ======
+function drawCollection() {
+  drawBg();
+  X.fillStyle = 'rgba(255,255,255,0.92)';
+  rrc(W/2, H/2, W-30, H-60, 24);
+
+  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif';
+  X.textAlign = 'center';
+  X.fillText('\u2728 Sanrio Collection \u2728', W/2, 60);
+
+  const col = getCollection();
+  const count = Object.keys(col).length;
+  X.fillStyle = '#999'; X.font = 'bold 13px "Quicksand",sans-serif';
+  X.fillText(count + '/8 Collected', W/2, 82);
+
+  const cols = 2, pad = 20, cardW = (W-pad*3)/cols, cardH = 130;
+  const startY = 100;
+  SANRIO_CHARS.forEach((ch, i) => {
+    const cx = pad + (i % cols) * (cardW + pad) + cardW/2;
+    const cy = startY + Math.floor(i / cols) * (cardH + 10) + cardH/2;
+    const owned = !!col[ch.id];
+    const rarColors = { legendary:'#ffd700', rare:'#9c27b0', powerup:'#2196f3', common:'#ffb6c1' };
+
+    // Card bg
+    X.fillStyle = owned ? '#fff' : '#f5f5f5';
+    rrc(cx, cy, cardW-4, cardH-4, 14);
+    X.strokeStyle = owned ? (rarColors[ch.rarity] || '#ccc') : '#ddd';
+    X.lineWidth = owned ? 2.5 : 1;
+    X.beginPath();
+    const hw = (cardW-4)/2, hh = (cardH-4)/2, cr = 14;
+    X.moveTo(cx-hw+cr, cy-hh); X.lineTo(cx+hw-cr, cy-hh);
+    X.quadraticCurveTo(cx+hw, cy-hh, cx+hw, cy-hh+cr);
+    X.lineTo(cx+hw, cy+hh-cr); X.quadraticCurveTo(cx+hw, cy+hh, cx+hw-cr, cy+hh);
+    X.lineTo(cx-hw+cr, cy+hh); X.quadraticCurveTo(cx-hw, cy+hh, cx-hw, cy+hh-cr);
+    X.lineTo(cx-hw, cy-hh+cr); X.quadraticCurveTo(cx-hw, cy-hh, cx-hw+cr, cy-hh);
+    X.closePath(); X.stroke();
+
+    if (owned) {
+      ch.draw(cx, cy - 12, 28);
+      X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif';
+      X.textAlign = 'center';
+      X.fillText(ch.name, cx, cy + 38);
+      X.fillStyle = rarColors[ch.rarity]; X.font = 'bold 9px "Quicksand",sans-serif';
+      X.fillText(ch.rarity.toUpperCase(), cx, cy + 52);
+      if (col[ch.id].count > 1) {
+        X.fillStyle = '#999'; X.font = '9px "Quicksand",sans-serif';
+        X.fillText('x'+col[ch.id].count, cx, cy + 62);
+      }
+    } else {
+      // Silhouette / locked
+      X.fillStyle = '#ddd'; X.font = 'bold 36px sans-serif';
+      X.textAlign = 'center';
+      X.fillText('?', cx, cy - 2);
+      X.fillStyle = '#bbb'; X.font = 'bold 11px "Quicksand",sans-serif';
+      X.fillText('???', cx, cy + 38);
+      X.fillStyle = '#ccc'; X.font = 'bold 9px "Quicksand",sans-serif';
+      X.fillText(ch.rarity.toUpperCase(), cx, cy + 52);
+    }
+  });
+
+  // Back button
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 40, 120, 38, 19);
+  X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif';
+  X.textAlign = 'center';
+  X.fillText('Back', W/2, H - 38);
+
+  drawGround();
+}
+
 function drawMenu() {
   drawBg();
   X.fillStyle = '#fff'; X.strokeStyle = '#e91e63'; X.lineWidth = 5;
@@ -1749,42 +1827,62 @@ function drawMenu() {
 
   if (playerName) {
     X.fillStyle = 'rgba(255,255,255,0.8)';
-    rrc(W/2, by+90, 180, 28, 14);
-    X.fillStyle = '#e91e63'; X.font = 'bold 13px "Quicksand",sans-serif';
+    rrc(W/2, by+80, 180, 26, 13);
+    X.fillStyle = '#e91e63'; X.font = 'bold 12px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText(T('playingAs')+': '+playerName, W/2, by+92);
+    X.fillText(T('playingAs')+': '+playerName, W/2, by+82);
   }
 
-  const lby = by + 125;
-  X.fillStyle = '#fff3e0'; rrc(W/2, lby, 190, 44, 22);
+  // Bottom buttons row - tighter spacing
+  const btnStart = by + (playerName ? 108 : 90);
+
+  // Leaderboard button
+  X.fillStyle = '#fff3e0'; rrc(W/2, btnStart, 180, 38, 19);
   X.strokeStyle = '#ffd54f'; X.lineWidth = 2;
   X.beginPath();
-  X.moveTo(W/2-73,lby-22); X.lineTo(W/2+73,lby-22);
-  X.quadraticCurveTo(W/2+95,lby-22,W/2+95,lby);
-  X.quadraticCurveTo(W/2+95,lby+22,W/2+73,lby+22);
-  X.lineTo(W/2-73,lby+22);
-  X.quadraticCurveTo(W/2-95,lby+22,W/2-95,lby);
-  X.quadraticCurveTo(W/2-95,lby-22,W/2-73,lby-22);
+  X.moveTo(W/2-68,btnStart-19); X.lineTo(W/2+68,btnStart-19);
+  X.quadraticCurveTo(W/2+90,btnStart-19,W/2+90,btnStart);
+  X.quadraticCurveTo(W/2+90,btnStart+19,W/2+68,btnStart+19);
+  X.lineTo(W/2-68,btnStart+19);
+  X.quadraticCurveTo(W/2-90,btnStart+19,W/2-90,btnStart);
+  X.quadraticCurveTo(W/2-90,btnStart-19,W/2-68,btnStart-19);
   X.closePath(); X.stroke();
-  X.fillStyle = '#e65100'; X.font = 'bold 15px "Fredoka One",sans-serif';
+  X.fillStyle = '#e65100'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('leaderboard'), W/2, lby+2);
+  X.fillText(T('leaderboard'), W/2, btnStart+2);
 
-  // How to Play button
-  const hby = lby + 50;
-  X.fillStyle = '#e3f2fd'; rrc(W/2, hby, 150, 34, 17);
-  X.fillStyle = '#1565c0'; X.font = 'bold 13px "Fredoka One",sans-serif';
+  // Collection button
+  const cby = btnStart + 44;
+  const collected = getCollectionCount();
+  X.fillStyle = '#fce4ec'; rrc(W/2, cby, 180, 38, 19);
+  X.strokeStyle = '#e91e63'; X.lineWidth = 2;
+  X.beginPath();
+  X.moveTo(W/2-68,cby-19); X.lineTo(W/2+68,cby-19);
+  X.quadraticCurveTo(W/2+90,cby-19,W/2+90,cby);
+  X.quadraticCurveTo(W/2+90,cby+19,W/2+68,cby+19);
+  X.lineTo(W/2-68,cby+19);
+  X.quadraticCurveTo(W/2-90,cby+19,W/2-90,cby);
+  X.quadraticCurveTo(W/2-90,cby-19,W/2-68,cby-19);
+  X.closePath(); X.stroke();
+  X.fillStyle = '#e91e63'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('howToPlay'), W/2, hby+2);
+  X.fillText('\u2728 Collection '+collected+'/8', W/2, cby+2);
 
-  X.fillStyle = '#bbb'; X.font = '11px "Quicksand",sans-serif';
+  // How to Play + Set Name row
+  const hby = cby + 42;
+  X.fillStyle = '#e3f2fd'; rrc(W/2-55, hby, 100, 30, 15);
+  X.fillStyle = '#1565c0'; X.font = 'bold 11px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(playerName ? T('tapName') : T('setName'), W/2, hby+24);
+  X.fillText(T('howToPlay'), W/2-55, hby+1);
+
+  X.fillStyle = '#f3e5f5'; rrc(W/2+55, hby, 100, 30, 15);
+  X.fillStyle = '#7c4dff'; X.font = 'bold 11px "Fredoka One",sans-serif';
+  X.fillText(playerName ? T('tapName') : T('setName'), W/2+55, hby+1);
 
   // Share with friends button
-  const sby = hby + 46;
-  X.fillStyle = '#25d366'; rrc(W/2, sby, 200, 38, 19);
-  X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif';
+  const sby = hby + 38;
+  X.fillStyle = '#25d366'; rrc(W/2, sby, 190, 34, 17);
+  X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif';
   X.textAlign = 'center';
   X.fillText(T('challengeFriend'), W/2, sby+2);
 
@@ -1806,7 +1904,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.7', W-14, H-12);
+  X.fillText('v5.8', W-14, H-12);
 }
 
 function drawResults() {
@@ -1860,14 +1958,14 @@ function drawResults() {
   const lb = getLeaderboard();
   if (lb.length > 0) {
     X.fillStyle = '#fff3e0';
-    rrc(W/2, 395, 260, 60, 12);
+    rrc(W/2, 390, 260, 56, 12);
     X.fillStyle = '#e65100'; X.font = 'bold 10px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(T('topPlayers'), W/2, 375);
-    const medals = ['🥇','🥈','🥉'];
+    X.fillText(T('topPlayers'), W/2, 372);
+    const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
     const top3 = lb.slice(0, 3);
     top3.forEach((e, i) => {
-      const ty = 390 + i * 16;
+      const ty = 387 + i * 15;
       X.font = 'bold 11px "Quicksand",sans-serif';
       X.textAlign = 'left';
       X.fillStyle = '#888';
@@ -1878,32 +1976,31 @@ function drawResults() {
     });
   }
 
-  const btnY = lb.length > 0 ? 442 : 420;
+  const btnY = lb.length > 0 ? 450 : 420;
 
-  X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 38, 19);
+  X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 36, 18);
   X.fillStyle = '#fff'; X.font = 'bold 14px "Quicksand",sans-serif';
   X.textAlign = 'center';
   X.fillText(T('shareScore'), W/2, btnY+1);
 
-  X.fillStyle = '#ff8a9e'; rrc(W/2, btnY+46, 180, 42, 21);
+  X.fillStyle = '#ff8a9e'; rrc(W/2, btnY+42, 180, 40, 20);
   X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('playAgain'), W/2, btnY+48);
+  X.fillText(T('playAgain'), W/2, btnY+44);
 
-  X.fillStyle = '#fff3e0'; rrc(W/2, btnY+92, 160, 34, 17);
+  X.fillStyle = '#fff3e0'; rrc(W/2, btnY+84, 160, 32, 16);
   X.fillStyle = '#e65100'; X.font = 'bold 13px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('leaderboard'), W/2, btnY+93);
+  X.fillText(T('leaderboard'), W/2, btnY+85);
 
-  if (frame%8===0) addSpark(Math.random()*W, Math.random()*200, ['#ff6b9d','#ffd54f','#89c4f4','#e040fb'][Math.floor(Math.random()*4)], 2);
-  drawSparkFx(); drawTextFx();
+  drawTextFx();
 }
 
 // Store button positions for results click handling
 function getResultsBtnY() {
   const lb = getLeaderboard();
-  const btnY = lb.length > 0 ? 442 : 420;
-  return { share: btnY, play: btnY + 46, lb: btnY + 92 };
+  const btnY = lb.length > 0 ? 450 : 420;
+  return { share: btnY, play: btnY + 42, lb: btnY + 84 };
 }
 
 function drawLoading() {
@@ -2096,38 +2193,41 @@ function update(dt) {
         const rarity = Math.random();
         const rarityTier = rarity < 0.02 ? 'legendary' : rarity < 0.10 ? 'rare' : rarity < 0.35 ? 'powerup' : 'common';
         trackEvent('blind_box_opened', { score, detail: rarityTier });
-        let popColor, charDraw, charName, revealTime;
+        let popColor, charDraw, charName, charId, revealTime, isNew = false;
         if (rarity < 0.02) {
           // LEGENDARY - Hello Kitty
           triggerHelloKittyShower();
           score += 100;
           addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ff69b4');
-          popColor = '#ffd700'; charDraw = drawHelloKitty; charName = 'Hello Kitty'; revealTime = 2.5;
+          popColor = '#ffd700'; charDraw = drawHelloKitty; charName = 'Hello Kitty'; charId = 'hello_kitty'; revealTime = 2.5;
         } else if (rarity < 0.10) {
           // RARE - Kuromi or Badtz-Maru
           score += 75; if (ROUND < 35) ROUND += 1;
           addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
-          const rareChars = [{d:drawKuromi,n:'Kuromi'},{d:drawBadtzMaru,n:'Badtz-Maru'}];
+          const rareChars = [{d:drawKuromi,n:'Kuromi',id:'kuromi'},{d:drawBadtzMaru,n:'Badtz-Maru',id:'badtz_maru'}];
           const pick = rareChars[Math.floor(Math.random()*rareChars.length)];
-          popColor = '#9c27b0'; charDraw = pick.d; charName = pick.n; revealTime = 2.0;
+          popColor = '#9c27b0'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 2.0;
         } else if (rarity < 0.35) {
           // POWERUP - Cinnamoroll or Pompompurin
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
           if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '\uD83E\uDDF2 '+T('magnet'), '#2196f3'); }
           else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
           else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '\uD83D\uDEE1 '+T('shield'), '#64c8ff'); }
-          const pwChars = [{d:drawCinnaBox,n:'Cinnamoroll'},{d:drawPurinBox,n:'Pompompurin'}];
+          const pwChars = [{d:drawCinnaBox,n:'Cinnamoroll',id:'cinnamoroll'},{d:drawPurinBox,n:'Pompompurin',id:'pompompurin'}];
           const pick = pwChars[Math.floor(Math.random()*pwChars.length)];
-          popColor = '#ffd700'; charDraw = pick.d; charName = pick.n; revealTime = 1.5;
+          popColor = '#ffd700'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 1.5;
         } else {
           // COMMON - My Melody, Pochacco, or Keroppi
           const bp = 15 + Math.floor(Math.random()*20);
           score += bp;
           addText(it.x, it.y-20, '+' + bp, '#ff69b4');
-          const comChars = [{d:drawMyMelody,n:'My Melody'},{d:drawPochacco,n:'Pochacco'},{d:drawKeroppi,n:'Keroppi'}];
+          const comChars = [{d:drawMyMelody,n:'My Melody',id:'my_melody'},{d:drawPochacco,n:'Pochacco',id:'pochacco'},{d:drawKeroppi,n:'Keroppi',id:'keroppi'}];
           const pick = comChars[Math.floor(Math.random()*comChars.length)];
-          popColor = '#ff69b4'; charDraw = pick.d; charName = pick.n; revealTime = 1.2;
+          popColor = '#ff69b4'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 1.2;
         }
+        // Collect the character!
+        isNew = !getCollection()[charId];
+        collectChar(charId);
         // Trigger full-screen reveal popup
         const revealSparks = [];
         for (let i = 0; i < 20; i++) {
@@ -2138,7 +2238,7 @@ function update(dt) {
             r: 2+Math.random()*3, color: [popColor,'#ffd700','#fff','#ff69b4'][Math.floor(Math.random()*4)]
           });
         }
-        bbReveal = { charDraw, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0 };
+        bbReveal = { charDraw, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0, isNew };
         // Also push a small floating pop-out
         boxPops.push({ x:it.x, y:it.y, drawFn:charDraw, size:36, life:1.2, ml:1.2, vy:-180, scale:0 });
         addSpark(it.x, it.y, '#ffd700', 20);
@@ -2334,7 +2434,15 @@ function drawGame() {
     X.fillStyle = '#333';
     X.font = 'bold 16px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(rv.charName, 0, ch/2 - 22);
+    X.fillText(rv.charName, 0, ch/2 - 28);
+    // NEW! badge or Collected
+    if (rv.isNew) {
+      X.fillStyle = '#ff1744'; X.font = 'bold 11px "Fredoka One",sans-serif';
+      X.fillText('\u2728 NEW! Added to Collection \u2728', 0, ch/2 - 10);
+    } else {
+      X.fillStyle = '#999'; X.font = '10px "Quicksand",sans-serif';
+      X.fillText('Already collected', 0, ch/2 - 10);
+    }
 
     // Sparkle particles
     rv.sparks.forEach(sp => {
@@ -2364,7 +2472,8 @@ function loop(timestamp) {
   try {
     if (imgsLoaded < imgsTotal && state === 'menu') {
       drawLoading();
-    } else if (state === 'menu') drawMenu();
+    } else if (state === 'menu' && showCollection) drawCollection();
+    else if (state === 'menu') drawMenu();
     else if (state === 'playing') { update(dt); drawGame(); }
     else if (state === 'results') {
       updateCelebration(dt);
@@ -2401,7 +2510,8 @@ let primaryTouch = null;
 
 function getMenuBtnY() {
   const by = challScore ? 435 : 415;
-  return { play: by, lb: by + 125, howto: by + 175, name: by + 90, share: by + 175 + 46 };
+  const btnStart = by + (playerName ? 108 : 90);
+  return { play: by, lb: btnStart, collection: btnStart + 44, howto: btnStart + 86, name: btnStart + 86, share: btnStart + 124 };
 }
 
 function startGame() {
@@ -2438,12 +2548,17 @@ function handleTap(x, y) {
       playTone(880, 0.15, 'sine', 0.15);
       return;
     }
+    // Collection screen back button
+    if (showCollection) {
+      if (Math.abs(x-W/2)<60 && Math.abs(y-(H-40))<20) { showCollection = false; return; }
+      return;
+    }
     const mb = getMenuBtnY();
-    if (Math.abs(x-W/2)<95 && Math.abs(y-mb.lb)<24) { openLB(); return; }
-    if (Math.abs(x-W/2)<75 && Math.abs(y-mb.howto)<20) { showTutorial(); return; }
-    if (Math.abs(x-W/2)<90 && Math.abs(y-mb.name)<18) { promptName(); return; }
-    if (Math.abs(x-W/2)<90 && Math.abs(y-(mb.howto+24))<16) { promptName(); return; }
-    if (Math.abs(x-W/2)<100 && Math.abs(y-mb.share)<22) { shareChallenge(); return; }
+    if (Math.abs(x-W/2)<95 && Math.abs(y-mb.lb)<22) { openLB(); return; }
+    if (Math.abs(x-W/2)<95 && Math.abs(y-mb.collection)<22) { showCollection = true; return; }
+    if (Math.abs(x-(W/2-55))<55 && Math.abs(y-mb.howto)<18) { showTutorial(); return; }
+    if (Math.abs(x-(W/2+55))<55 && Math.abs(y-mb.name)<18) { promptName(); return; }
+    if (Math.abs(x-W/2)<100 && Math.abs(y-mb.share)<20) { shareChallenge(); return; }
     if (!playerName) { promptNameThenPlay(); return; }
     showTutorialOrStart();
   } else if (state === 'results') {
