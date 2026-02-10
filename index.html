@@ -1279,11 +1279,7 @@ function drawMenu() {
   X.fillStyle = '#ff8a9e'; X.font = '13px "Quicksand",sans-serif';
   X.fillText('Catch boba, treats & open blind boxes!', W/2, 154);
 
-  // Version
-  X.fillStyle = '#ccc'; X.font = '10px "Quicksand",sans-serif';
-  X.textAlign = 'right';
-  X.fillText('v5.0', W-12, H-8);
-  X.textAlign = 'center';
+  // Version (drawn after ground below)
 
   const cb = Math.sin(frame*0.04)*8;
   drawImg(imgs.cinnaFly, W/2-80, 220+cb, 90, 58);
@@ -1376,6 +1372,11 @@ function drawMenu() {
   drawImg(imgs.cinna, 50, H-50, 38, 38);
   drawImg(imgs.purin, W-50, H-50, 45, 45);
   drawGround();
+
+  // Version number
+  X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
+  X.textAlign = 'right';
+  X.fillText('v5.0', W-14, H-12);
 }
 
 function drawResults() {
