@@ -909,8 +909,8 @@ function spawnItem() {
   const spd = (170 + Math.random()*140 + (gameTime/ROUND)*140) * speedRng;
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
 
-  // Random Hello Kitty Shower event (~0.3% per spawn, after 10s)
-  if (!hkShower.active && gameTime > 10 && Math.random() < 0.003) triggerHelloKittyShower();
+  // Random Hello Kitty Shower event (~5% per spawn, after 8s) - DEMO MODE
+  if (!hkShower.active && gameTime > 8 && Math.random() < 0.05) triggerHelloKittyShower();
 }
 
 function triggerHelloKittyShower() {
@@ -1630,7 +1630,7 @@ function update(dt) {
         const rewards = ['points','magnet','double','shield'];
         const reward = rewards[Math.floor(Math.random()*rewards.length)];
         if (reward === 'points') { score += 50; addText(it.x, it.y-20, '+50 LUCKY!', '#ffd700'); }
-        else if (reward === 'magnet') { powerups.magnet = 3.5; addText(it.x, it.y-20, '🧲 MAGNET!', '#2196f3'); }
+        else if (reward === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 MAGNET!', '#2196f3'); }
         else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '2x POINTS!', '#ffd700'); }
         else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 SHIELD!', '#64c8ff'); }
         addSpark(it.x, it.y, '#ffd700', 15);
@@ -1652,7 +1652,7 @@ function update(dt) {
         } else if (rarity < 0.35) {
           // UNCOMMON: Power-up
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
-          if (pw === 'magnet') { powerups.magnet = 3.5; addText(it.x, it.y-20, '📦 Magnet!', '#2196f3'); }
+          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '📦 Magnet!', '#2196f3'); }
           else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '📦 2x Points!', '#ffd700'); }
           else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '📦 Shield!', '#64c8ff'); }
         } else {
@@ -1667,7 +1667,7 @@ function update(dt) {
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type.isPower) {
-        if (it.type.name === 'magnet') powerups.magnet = 3.5;
+        if (it.type.name === 'magnet') powerups.magnet = 5;
         else if (it.type.name === 'double') powerups.double = 3.5;
         else if (it.type.name === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; sndShieldUp(); }
         addSpark(it.x, it.y, it.type.color, 10);
