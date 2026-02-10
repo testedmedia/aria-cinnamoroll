@@ -1302,7 +1302,7 @@ let spawnAcc = 0;
 let clocksDropped = 0;
 let maxClocks = 1 + Math.floor(Math.random()*2); // 1-2 per game
 let blindBoxesDropped = 0;
-let maxBlindBoxes = 2 + Math.floor(Math.random()*2); // 2-3 per game
+let maxBlindBoxes = 3 + Math.floor(Math.random()*2); // 3-4 per game
 let blindBoxTimes = []; // scheduled spawn times
 function initBlindBoxTimes() {
   blindBoxTimes = [];
@@ -1706,7 +1706,7 @@ function drawCollection() {
 
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('\u2728 Sanrio Collection \u2728', W/2, 60);
+  X.fillText('\uD83C\uDF92 My Backpack \uD83C\uDF92', W/2, 60);
 
   const col = getCollection();
   const count = Object.keys(col).length;
@@ -1871,7 +1871,7 @@ function drawMenu() {
   X.closePath(); X.stroke();
   X.fillStyle = '#e91e63'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('\u2728 Collection '+collected+'/9', W/2, cby+2);
+  X.fillText('\uD83C\uDF92 Backpack '+collected+'/9', W/2, cby+2);
 
   // How to Play button (centered)
   const hby = cby + 48;
@@ -1904,7 +1904,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v6.2', W-14, H-12);
+  X.fillText('v6.3', W-14, H-12);
 }
 
 function drawResults() {
@@ -2550,7 +2550,7 @@ function startGame() {
   state = 'playing';
   score=0; combo=0; maxCombo=0; caught=0; missed=0;
   gameTime=0; items=[]; sparkles=[]; texts=[]; trail=[];
-  ROUND = 25; gameLevel = 1; prevLevel = 1;
+  ROUND = 35; gameLevel = 1; prevLevel = 1;
   flyC = {on:false,x:-60,y:120,t:0};
   ninja.active=false; ninja.announced=false; ninja.tt=0;
   P.x=W/2; P.tx=W/2; P.y=P.baseY; P.vy=0; P.jumping=false;
@@ -2558,7 +2558,7 @@ function startGame() {
   comboBurst = {active:false,timer:0,triggered:[]};
   hkShower = {active:false,timer:0,spawnAcc:0};
   clocksDropped = 0; maxClocks = 1 + Math.floor(Math.random()*2);
-  blindBoxesDropped = 0; maxBlindBoxes = 2 + Math.floor(Math.random()*2); initBlindBoxTimes();
+  blindBoxesDropped = 0; maxBlindBoxes = 3 + Math.floor(Math.random()*2); initBlindBoxTimes();
   boxPops = [];
   bbReveal = null;
   sessionCollected = [];
