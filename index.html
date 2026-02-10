@@ -897,11 +897,11 @@ function spawnItem() {
   else if (r < 0.03) type = CLOCK;                                // 0.5% time extend (rare!)
   else if (r < 0.05) type = BLINDBOX;                             // 2% blind box
   else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
-  else if (r < 0.12 && gameTime > 8) type = BOMB;                // 3% bomb after 8s
+  else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
   else if (r < 0.17) type = ITEMS[6];                             // 5% rainbow
   else type = ITEMS[Math.floor(Math.random()*6)];                 // rest: normal items
   const x = 30 + Math.random()*(W-60);
-  const spd = 150 + Math.random()*130 + (gameTime/ROUND)*120;    // faster items = harder
+  const spd = 170 + Math.random()*140 + (gameTime/ROUND)*140;    // faster = harder
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
 
   // Random Hello Kitty Shower event (~0.3% per spawn, after 10s)
