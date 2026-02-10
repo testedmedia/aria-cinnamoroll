@@ -511,6 +511,112 @@
     50% { opacity: 0.5; transform: scale(0.8); }
   }
 
+  /* Funnel */
+  .funnel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+  .funnel-step {
+    text-align: center;
+    flex: 1;
+    min-width: 80px;
+    position: relative;
+  }
+  .funnel-bar {
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    color: #fff;
+    margin: 0 4px;
+    transition: width 0.6s;
+  }
+  .funnel-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .funnel-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pink);
+    margin-top: 2px;
+  }
+  .funnel-arrow {
+    font-size: 18px;
+    color: #ccc;
+    flex-shrink: 0;
+    padding: 0 2px;
+  }
+
+  /* Player Stats Table */
+  .ps-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    font-size: 13px;
+  }
+  .ps-table th {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 4px 8px 8px;
+    text-align: left;
+  }
+  .ps-table th:not(:nth-child(1)) { text-align: right; }
+  .ps-table td {
+    padding: 10px 8px;
+    font-weight: 600;
+  }
+  .ps-table td:not(:nth-child(1)) { text-align: right; }
+  .ps-table tr td:first-child { border-radius: 10px 0 0 10px; }
+  .ps-table tr td:last-child { border-radius: 0 10px 10px 0; }
+  .ps-table tbody tr {
+    background: var(--pink-pale);
+    transition: background 0.15s;
+  }
+  .ps-table tbody tr:hover { background: #ffe0ec; }
+
+  /* Engagement grid */
+  .engage-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .engage-card {
+    background: var(--pink-pale);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+    transition: transform 0.15s;
+  }
+  .engage-card:hover { transform: translateY(-2px); }
+  .engage-icon { font-size: 24px; margin-bottom: 4px; }
+  .engage-val {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    color: var(--pink);
+  }
+  .engage-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .metrics-grid {
@@ -527,6 +633,11 @@
     .lb-table th:nth-child(4),
     .lb-table td:nth-child(4) { display: none; }
     .chart-container { height: 160px; }
+    .engage-grid { grid-template-columns: repeat(2, 1fr); }
+    .funnel-arrow { display: none; }
+    .funnel-container { gap: 8px; }
+    .funnel-step { min-width: 70px; }
+    .ps-table th:nth-child(n+5), .ps-table td:nth-child(n+5) { display: none; }
   }
 
   @media (max-width: 420px) {
@@ -586,6 +697,50 @@
     </div>
   </div>
 
+  <!-- Second KPI row -->
+  <div class="metrics-grid" id="kpi2Row" style="display:none;">
+    <div class="metric-card">
+      <div class="metric-icon">&#x23F1;</div>
+      <div class="metric-value" id="avgSessionTime" style="color:var(--green);">-</div>
+      <div class="metric-label">Avg Play Time</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F501;</div>
+      <div class="metric-value" id="replaysPerPlayer" style="color:var(--pink);">-</div>
+      <div class="metric-label">Plays / Player</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F680;</div>
+      <div class="metric-value" id="viralityRate" style="color:var(--purple);">-</div>
+      <div class="metric-label">Virality Rate</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F3AF;</div>
+      <div class="metric-value" id="challengeRate" style="color:var(--orange);">-</div>
+      <div class="metric-label">Challenge Conv.</div>
+    </div>
+  </div>
+
+  <!-- Conversion Funnel -->
+  <div class="section-grid">
+    <div class="section-card full-width">
+      <div class="section-title"><span class="icon">&#x1F4CA;</span> Conversion Funnel</div>
+      <div id="funnelContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading funnel...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Stats -->
+  <div class="section-grid">
+    <div class="section-card full-width">
+      <div class="section-title"><span class="icon">&#x1F464;</span> Player Stats</div>
+      <div id="playerStatsContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading player stats...</div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Leaderboard + Plays Over Time -->
   <div class="section-grid">
     <div class="section-card full-width">
@@ -601,6 +756,16 @@
       <div class="section-title"><span class="icon">&#x1F4C8;</span> Plays Over Time (Last 7 Days)</div>
       <div id="playsChartContent">
         <div class="loading"><div class="spinner"></div><div class="loading-text">Loading chart...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engagement Stats -->
+  <div class="section-grid">
+    <div class="section-card full-width">
+      <div class="section-title"><span class="icon">&#x1F525;</span> Engagement Stats</div>
+      <div id="engagementContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
       </div>
     </div>
   </div>
@@ -744,20 +909,26 @@ async function loadDashboard() {
     leaderboardRes,
     sharesRes,
     eventsAllRes,
-    recentRes
+    recentRes,
+    playStartsRes,
+    challengeRes,
+    engageRes
   ] = await Promise.all([
-    query('game_events', 'select=score,created_at&event=eq.play_end&order=created_at.desc'),
+    query('game_events', 'select=score,duration_s,player_name,created_at&event=eq.play_end&order=created_at.desc'),
     query('game_leaderboard', 'select=name,score,combo,caught,created_at&order=score.desc&limit=10'),
-    query('game_events', 'select=event,created_at&or=(event.eq.share_tw,event.eq.share_wa,event.eq.share_copy)'),
+    query('game_events', 'select=event,player_name,created_at&or=(event.eq.share_tw,event.eq.share_wa,event.eq.share_copy,event.eq.share_challenge)'),
     query('game_events', 'select=event,player_name,utm_source,user_agent,created_at'),
-    query('game_events', 'select=event,player_name,score,combo,caught,created_at&order=created_at.desc&limit=20')
+    query('game_events', 'select=event,player_name,score,combo,caught,created_at&order=created_at.desc&limit=20'),
+    query('game_events', 'select=player_name,created_at&event=eq.play_start'),
+    query('game_events', 'select=event,player_name&or=(event.eq.challenge_received,event.eq.challenge_beat)'),
+    query('game_events', 'select=event,player_name,score&or=(event.eq.bomb_hit,event.eq.bomb_blocked,event.eq.blind_box_opened,event.eq.powerup_collected,event.eq.fever_mode,event.eq.hello_kitty_shower)')
   ]);
 
   // Also get unique players
   const uniqueRes = await query('game_leaderboard', 'select=name');
   const uniqueNames = new Set(uniqueRes.data.map(r => r.name).filter(Boolean));
 
-  // --- Metric Cards ---
+  // --- Metric Cards Row 1 ---
   const totalPlays = playsRes.data.length;
   const uniquePlayers = uniqueNames.size;
   const totalShares = sharesRes.data.length;
@@ -769,6 +940,117 @@ async function loadDashboard() {
   document.getElementById('uniquePlayers').textContent = formatNumber(uniquePlayers);
   document.getElementById('totalShares').textContent = formatNumber(totalShares);
   document.getElementById('avgScore').textContent = formatNumber(avgScore);
+
+  // --- Metric Cards Row 2 ---
+  const totalDuration = playsRes.data.reduce((s, r) => s + (r.duration_s || 0), 0);
+  const avgSession = totalPlays > 0 ? Math.round(totalDuration / totalPlays) : 0;
+  const totalStarts = playStartsRes.data.length;
+  const playsPerPlayer = uniquePlayers > 0 ? (totalStarts / uniquePlayers).toFixed(1) : '0';
+  const viralityPct = totalPlays > 0 ? Math.round((totalShares / totalPlays) * 100) : 0;
+  const challReceived = challengeRes.data.filter(r => r.event === 'challenge_received').length;
+  const challBeat = challengeRes.data.filter(r => r.event === 'challenge_beat').length;
+  const pageViews = eventsAllRes.data.filter(r => r.event === 'page_view').length;
+  const challConv = challReceived > 0 ? Math.round((challBeat / challReceived) * 100) : 0;
+
+  document.getElementById('avgSessionTime').textContent = avgSession + 's';
+  document.getElementById('replaysPerPlayer').textContent = playsPerPlayer;
+  document.getElementById('viralityRate').textContent = viralityPct + '%';
+  document.getElementById('challengeRate').textContent = challConv + '%';
+  document.getElementById('kpi2Row').style.display = 'grid';
+
+  // --- Conversion Funnel ---
+  const funnelEl = document.getElementById('funnelContent');
+  const nameSetCount = eventsAllRes.data.filter(r => r.event === 'name_set').length;
+  const shareCount = totalShares;
+  const funnelSteps = [
+    { label: 'Visited', count: pageViews, color: '#1da1f2' },
+    { label: 'Played', count: totalStarts, color: '#7c4dff' },
+    { label: 'Finished', count: totalPlays, color: '#e91e63' },
+    { label: 'Shared', count: shareCount, color: '#25d366' }
+  ];
+  const maxFunnel = Math.max(...funnelSteps.map(s => s.count), 1);
+  if (pageViews === 0) {
+    funnelEl.innerHTML = emptyState('\u{1F4CA}', 'No funnel data yet.');
+  } else {
+    let fHtml = '<div class="funnel-container">';
+    funnelSteps.forEach((step, i) => {
+      const widthPct = Math.max((step.count / maxFunnel) * 100, 20);
+      const dropPct = i > 0 && funnelSteps[i-1].count > 0
+        ? Math.round((step.count / funnelSteps[i-1].count) * 100) : 100;
+      if (i > 0) fHtml += '<div class="funnel-arrow">\u25B6</div>';
+      fHtml += `<div class="funnel-step">
+        <div class="funnel-bar" style="background:${step.color};width:${widthPct}%;margin:0 auto;">${step.count}</div>
+        <div class="funnel-label">${step.label}</div>
+        ${i > 0 ? `<div class="funnel-pct">${dropPct}% conv.</div>` : ''}
+      </div>`;
+    });
+    fHtml += '</div>';
+    funnelEl.innerHTML = fHtml;
+  }
+
+  // --- Player Stats ---
+  const psEl = document.getElementById('playerStatsContent');
+  const playerMap = {};
+  // Aggregate play_end data
+  playsRes.data.forEach(r => {
+    const name = r.player_name || 'Unknown';
+    if (name === 'Unknown' || name === 'Jarvis_QA') return;
+    if (!playerMap[name]) playerMap[name] = { plays: 0, totalTime: 0, totalScore: 0, bestScore: 0, shares: 0 };
+    playerMap[name].plays++;
+    playerMap[name].totalTime += (r.duration_s || 0);
+    playerMap[name].totalScore += (r.score || 0);
+    if ((r.score || 0) > playerMap[name].bestScore) playerMap[name].bestScore = r.score || 0;
+  });
+  // Count shares per player
+  sharesRes.data.forEach(r => {
+    const name = r.player_name || 'Unknown';
+    if (name === 'Unknown' || name === 'Jarvis_QA') return;
+    if (!playerMap[name]) playerMap[name] = { plays: 0, totalTime: 0, totalScore: 0, bestScore: 0, shares: 0 };
+    playerMap[name].shares++;
+  });
+
+  const players = Object.entries(playerMap).sort((a, b) => b[1].totalTime - a[1].totalTime);
+  if (players.length === 0) {
+    psEl.innerHTML = emptyState('\u{1F464}', 'No player data yet.');
+  } else {
+    let psHtml = `<table class="ps-table"><thead><tr>
+      <th>Player</th><th>Plays</th><th>Total Time</th><th>Avg Score</th><th>Best Score</th><th>Shares</th>
+    </tr></thead><tbody>`;
+    players.forEach(([name, d]) => {
+      const avgSc = d.plays > 0 ? Math.round(d.totalScore / d.plays) : 0;
+      const mins = Math.floor(d.totalTime / 60);
+      const secs = d.totalTime % 60;
+      const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+      psHtml += `<tr>
+        <td style="font-weight:700;color:#555;">${escapeHtml(name)}</td>
+        <td><span style="font-family:'Fredoka One',cursive;color:var(--purple);">${d.plays}</span></td>
+        <td><span style="font-family:'Fredoka One',cursive;color:var(--green);">${timeStr}</span></td>
+        <td>${formatNumber(avgSc)}</td>
+        <td><span style="font-family:'Fredoka One',cursive;color:var(--pink);">${formatNumber(d.bestScore)}</span></td>
+        <td><span style="font-family:'Fredoka One',cursive;color:var(--blue);">${d.shares}</span></td>
+      </tr>`;
+    });
+    psHtml += '</tbody></table>';
+    psEl.innerHTML = psHtml;
+  }
+
+  // --- Engagement Stats ---
+  const engEl = document.getElementById('engagementContent');
+  const eCounts = { bomb_hit: 0, bomb_blocked: 0, blind_box_opened: 0, powerup_collected: 0, fever_mode: 0, hello_kitty_shower: 0 };
+  engageRes.data.forEach(r => { if (eCounts[r.event] !== undefined) eCounts[r.event]++; });
+  const engTotal = Object.values(eCounts).reduce((a,b) => a+b, 0);
+  if (engTotal === 0) {
+    engEl.innerHTML = emptyState('\u{1F525}', 'No engagement data yet.');
+  } else {
+    engEl.innerHTML = `<div class="engage-grid">
+      <div class="engage-card"><div class="engage-icon">\u{1F4E6}</div><div class="engage-val">${eCounts.blind_box_opened}</div><div class="engage-lbl">Blind Boxes</div></div>
+      <div class="engage-card"><div class="engage-icon">\u{26A1}</div><div class="engage-val">${eCounts.powerup_collected}</div><div class="engage-lbl">Powerups</div></div>
+      <div class="engage-card"><div class="engage-icon">\u{1F525}</div><div class="engage-val">${eCounts.fever_mode}</div><div class="engage-lbl">Fever Modes</div></div>
+      <div class="engage-card"><div class="engage-icon">\u{1F6E1}</div><div class="engage-val">${eCounts.bomb_blocked}</div><div class="engage-lbl">Bombs Blocked</div></div>
+      <div class="engage-card"><div class="engage-icon">\u{1F4A5}</div><div class="engage-val">${eCounts.bomb_hit}</div><div class="engage-lbl">Bombs Hit</div></div>
+      <div class="engage-card"><div class="engage-icon">\u{1F431}</div><div class="engage-val">${eCounts.hello_kitty_shower}</div><div class="engage-lbl">HK Showers</div></div>
+    </div>`;
+  }
 
   // --- Leaderboard ---
   const lbEl = document.getElementById('leaderboardContent');
