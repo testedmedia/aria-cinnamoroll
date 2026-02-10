@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Aria's Boba Adventure</title>
-<meta name="description" content="Aria's Boba Adventure - Catch boba, donuts & more with Cinnamoroll & Pompompurin!">
-<meta property="og:title" content="Aria's Boba Adventure">
+<title>Aria's Sanrio Adventure</title>
+<meta name="description" content="Aria's Sanrio Adventure - Catch boba, donuts & more with Cinnamoroll & Pompompurin!">
+<meta property="og:title" content="Aria's Sanrio Adventure">
 <meta property="og:description" content="Can you beat my score? Catch treats with Cinnamoroll & Pompompurin!">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aria's Boba Adventure">
+<meta name="twitter:title" content="Aria's Sanrio Adventure">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -178,7 +178,7 @@ C.width = W; C.height = H;
 let lang = localStorage.getItem('aria_lang') || 'en';
 const LANG = {
   en: {
-    title1: "Aria's", title2: 'Boba Adventure', by: 'Game by Aria Smushkevich 💕',
+    title1: "Aria's", title2: 'Sanrio Adventure', by: 'Game by Aria Smushkevich 💕',
     sub: 'Catch boba, treats & collect Sanrio friends!', catchThese: 'Catch these!',
     tapToPlay: 'Tap to Play!', best: 'Best', playingAs: 'Playing as',
     leaderboard: '🏆 Leaderboard', howToPlay: '❓ How to Play',
@@ -209,8 +209,8 @@ const LANG = {
     noScores: 'No scores yet! Play to get on the board!', close: 'Close',
     shareTitle: 'Share Your Score!', challengeBeat: 'Challenge your friends to beat it!',
     shareX: 'Share on X', shareWA: 'Share on WhatsApp', copyLink: '📋 Copy Challenge Link',
-    shareTxt: (n,s) => `${n||'I'} scored ${s} in Aria's Boba Adventure! 🧋 Can you beat me? 🐰🐶`,
-    challengeTxt: (hi,url) => `Play Aria's Boba Adventure! 🧋🎀 Catch boba & open blind boxes with Cinnamoroll! Can you beat ${hi>0?hi+' points':'my score'}?\n${url}`,
+    shareTxt: (n,s) => `${n||'I'} scored ${s} in Aria's Sanrio Adventure! 🧋 Can you beat me? 🐰🐶`,
+    challengeTxt: (hi,url) => `Play Aria's Sanrio Adventure! 🧋🎀 Catch boba & open blind boxes with Cinnamoroll! Can you beat ${hi>0?hi+' points':'my score'}?\n${url}`,
   },
   es: {
     title1: "Aria's", title2: 'Boba Aventura', by: 'Juego por Aria Smushkevich 💕',
@@ -244,7 +244,7 @@ const LANG = {
     shareTitle: '¡Comparte tu Puntuación!', challengeBeat: '¡Reta a tus amigos a superarla!',
     shareX: 'Compartir en X', shareWA: 'Compartir en WhatsApp', copyLink: '📋 Copiar Enlace',
     shareTxt: (n,s) => `${n||'Yo'} hice ${s} puntos en Aria's Boba Aventura! 🧋 ¿Puedes ganarme? 🐰🐶`,
-    challengeTxt: (hi,url) => `¡Juega Aria's Boba Aventura! 🧋🎀 ¡Atrapa boba y abre cajas con Cinnamoroll! ¿Puedes superar ${hi>0?hi+' puntos':'mi récord'}?\n${url}`,
+    challengeTxt: (hi,url) => `¡Juega Aria's Sanrio Aventura! 🧋🎀 ¡Atrapa boba y abre cajas con Cinnamoroll! ¿Puedes superar ${hi>0?hi+' puntos':'mi récord'}?\n${url}`,
   }
 };
 function T(k) { return LANG[lang][k] || LANG.en[k] || k; }
@@ -515,11 +515,12 @@ let bbReveal = null; // Blind box reveal popup: { charDraw, charName, rarity, ti
 
 // ====== SANRIO COLLECTION (Pokemon-style) ======
 const SANRIO_CHARS = [
-  { id:'hello_kitty', name:'Hello Kitty', imgKey:'hk', rarity:'legendary', color:'#e91e63' },
+  { id:'cinnamoroll', name:'Cinnamoroll', imgKey:'cinna', rarity:'legendary', color:'#89c4f4' },
+  { id:'pompompurin', name:'Pompompurin', imgKey:'purin', rarity:'legendary', color:'#fdd835' },
   { id:'kuromi', name:'Kuromi', imgKey:'kuromi', rarity:'rare', color:'#9c27b0' },
   { id:'badtz_maru', name:'Badtz-Maru', imgKey:'badtz', rarity:'rare', color:'#1a1a2e' },
-  { id:'cinnamoroll', name:'Cinnamoroll', imgKey:'cinna', rarity:'powerup', color:'#89c4f4' },
-  { id:'pompompurin', name:'Pompompurin', imgKey:'purin', rarity:'powerup', color:'#fdd835' },
+  { id:'hangyodon', name:'Hangyodon', imgKey:'hangyodon', rarity:'rare', color:'#4a90d9' },
+  { id:'hello_kitty', name:'Hello Kitty', imgKey:'hk', rarity:'common', color:'#e91e63' },
   { id:'my_melody', name:'My Melody', imgKey:'melody', rarity:'common', color:'#ffb6c1' },
   { id:'pochacco', name:'Pochacco', imgKey:'pochacco', rarity:'common', color:'#2196f3' },
   { id:'keroppi', name:'Keroppi', imgKey:'keroppi', rarity:'common', color:'#4caf50' },
@@ -625,7 +626,7 @@ function sndCelebration() {
 
 // ====== IMAGES ======
 const imgs = {};
-let imgsLoaded = 0, imgsTotal = 10;
+let imgsLoaded = 0, imgsTotal = 11;
 function loadI(n, s) {
   const i = new Image(); i.crossOrigin='anonymous'; i.src = s;
   i.onload = () => imgsLoaded++;
@@ -641,6 +642,7 @@ loadI('kuromi', 'kuromi.png');
 loadI('pochacco', 'pochacco.png');
 loadI('keroppi', 'keroppi.png');
 loadI('badtz', 'badtzmaru.png');
+loadI('hangyodon', 'hangyodon.png');
 
 function drawImg(img, x, y, mw, mh) {
   if (!img?.complete || !img.naturalWidth) return;
@@ -1603,7 +1605,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v5.9', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v6.0', W-8, H-8);
 }
 
 // ====== CHARACTERS ======
@@ -1718,7 +1720,7 @@ function drawCollection() {
   const col = getCollection();
   const count = Object.keys(col).length;
   X.fillStyle = '#999'; X.font = 'bold 13px "Quicksand",sans-serif';
-  X.fillText(count + '/8 Collected', W/2, 82);
+  X.fillText(count + '/9 Collected', W/2, 82);
 
   const cols = 2, pad = 20, cardW = (W-pad*3)/cols, cardH = 130;
   const startY = 100;
@@ -1888,7 +1890,7 @@ function drawMenu() {
   X.closePath(); X.stroke();
   X.fillStyle = '#e91e63'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('\u2728 Collection '+collected+'/8', W/2, cby+2);
+  X.fillText('\u2728 Collection '+collected+'/9', W/2, cby+2);
 
   // How to Play + Set Name row
   const hby = cby + 42;
@@ -1926,7 +1928,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.9', W-14, H-12);
+  X.fillText('v6.0', W-14, H-12);
 }
 
 function drawResults() {
@@ -2267,33 +2269,35 @@ function update(dt) {
         trackEvent('blind_box_opened', { score, detail: rarityTier });
         let popColor, charImgKey, charName, charId, revealTime, isNew = false;
         if (rarity < 0.02) {
-          // LEGENDARY - Hello Kitty
+          // LEGENDARY - Cinnamoroll or Pompompurin (rarest!)
           triggerHelloKittyShower();
           score += 100;
-          addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ff69b4');
-          popColor = '#ffd700'; charImgKey = 'hk'; charName = 'Hello Kitty'; charId = 'hello_kitty'; revealTime = 2.5;
+          addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ffd700');
+          const legChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
+          const pick = legChars[Math.floor(Math.random()*legChars.length)];
+          popColor = '#ffd700'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 2.5;
         } else if (rarity < 0.10) {
-          // RARE - Kuromi or Badtz-Maru
+          // RARE - Kuromi, Badtz-Maru, or Hangyodon
           score += 75; if (ROUND < 35) ROUND += 1;
           addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
-          const rareChars = [{ik:'kuromi',n:'Kuromi',id:'kuromi'},{ik:'badtz',n:'Badtz-Maru',id:'badtz_maru'}];
+          const rareChars = [{ik:'kuromi',n:'Kuromi',id:'kuromi'},{ik:'badtz',n:'Badtz-Maru',id:'badtz_maru'},{ik:'hangyodon',n:'Hangyodon',id:'hangyodon'}];
           const pick = rareChars[Math.floor(Math.random()*rareChars.length)];
           popColor = '#9c27b0'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 2.0;
         } else if (rarity < 0.35) {
-          // POWERUP - Cinnamoroll or Pompompurin
+          // POWERUP - Hello Kitty or My Melody
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
           if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '\uD83E\uDDF2 '+T('magnet'), '#2196f3'); }
           else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
           else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '\uD83D\uDEE1 '+T('shield'), '#64c8ff'); }
-          const pwChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
+          const pwChars = [{ik:'hk',n:'Hello Kitty',id:'hello_kitty'},{ik:'melody',n:'My Melody',id:'my_melody'}];
           const pick = pwChars[Math.floor(Math.random()*pwChars.length)];
-          popColor = '#ffd700'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.5;
+          popColor = '#ff69b4'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.5;
         } else {
-          // COMMON - My Melody, Pochacco, or Keroppi
+          // COMMON - Pochacco, Keroppi
           const bp = 15 + Math.floor(Math.random()*20);
           score += bp;
           addText(it.x, it.y-20, '+' + bp, '#ff69b4');
-          const comChars = [{ik:'melody',n:'My Melody',id:'my_melody'},{ik:'pochacco',n:'Pochacco',id:'pochacco'},{ik:'keroppi',n:'Keroppi',id:'keroppi'}];
+          const comChars = [{ik:'pochacco',n:'Pochacco',id:'pochacco'},{ik:'keroppi',n:'Keroppi',id:'keroppi'}];
           const pick = comChars[Math.floor(Math.random()*comChars.length)];
           popColor = '#ff69b4'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.2;
         }
