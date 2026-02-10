@@ -2660,8 +2660,10 @@ C.addEventListener('touchstart', e => {
     const {x, y} = gc(touch.clientX, touch.clientY);
 
     if (state === 'playing') {
-      // Check backpack icon or backpack back button first
-      if (showCollection || (Math.abs(x-14)<20 && Math.abs(y-64)<20)) {
+      // Check backpack overlay or backpack icon
+      if (showCollection) {
+        handleTap(x, y);
+      } else if (Math.abs(x-14)<20 && Math.abs(y-64)<20) {
         handleTap(x, y);
       } else if (!primaryTouch) {
         primaryTouch = { id: touch.identifier, startX: x, startY: y, moved: false };
