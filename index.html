@@ -2193,12 +2193,13 @@ function update(dt) {
           trackEvent('bomb_blocked', { score, combo });
         } else {
           score = Math.max(0, score + it.type.pts);
+          ROUND = Math.max(gameTime + 2, ROUND - 2); // Steal 2 seconds!
           combo = 0; fever = false;
           comboBurst.triggered = [];
           addSpark(it.x, it.y, '#6a1b9a', 8);
-          addText(it.x, it.y-20, it.type.pts+'', '#e74c3c');
+          addText(it.x, it.y-20, '-20 & -2s!', '#e74c3c');
           shake(10); sndBomb();
-          trackEvent('bomb_hit', { score, detail: 'combo_lost' });
+          trackEvent('bomb_hit', { score, detail: 'combo_lost_time_lost' });
         }
       } else if (it.type === CLOCK) {
         // Time extension!
