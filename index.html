@@ -2042,7 +2042,14 @@ function drawResults() {
   X.textAlign = 'center';
   X.fillText(T('leaderboard'), W/2, btnY+85);
 
-  // Backpack icon on results screen
+  // Backpack button on results screen
+  X.fillStyle = '#ffe0ec'; rrc(W/2, btnY+122, 160, 32, 16);
+  X.fillStyle = '#e91e63'; X.font = 'bold 13px "Fredoka One",sans-serif';
+  X.textAlign = 'center';
+  const bpCount = getCollectionCount();
+  X.fillText('\uD83C\uDF92 Backpack ' + bpCount + '/9', W/2, btnY+123);
+
+  // Backpack icon on results screen (top-left)
   drawBackpackIcon(14, 64);
 
   // Version on results
@@ -2064,7 +2071,7 @@ function getResultsBtnY() {
   const topN = lb.slice(0, 5);
   const lbH = topN.length > 0 ? 20 + topN.length * 15 + 12 : 0;
   const btnY = lb.length > 0 ? lbTop + lbH : stashEndY + 12;
-  return { share: btnY, play: btnY + 42, lb: btnY + 84 };
+  return { share: btnY, play: btnY + 42, lb: btnY + 84, bp: btnY + 122 };
 }
 
 function drawLoading() {
@@ -2657,6 +2664,7 @@ function handleTap(x, y) {
     const rb = getResultsBtnY();
     if (Math.abs(x-W/2)<100 && Math.abs(y-rb.share)<22) { openShare(); return; }
     if (Math.abs(x-W/2)<90 && Math.abs(y-rb.lb)<20) { openLB(); return; }
+    if (Math.abs(x-W/2)<90 && Math.abs(y-rb.bp)<20) { showCollection = true; return; }
     if (Math.abs(x-W/2)<90 && Math.abs(y-rb.play)<24) state = 'menu';
   }
 }
