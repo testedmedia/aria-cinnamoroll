@@ -889,20 +889,24 @@ const SHURIKEN = { name:'shuriken', pts:50, color:'#ffd700', draw:drawShuriken, 
 
 // ====== SPAWN ======
 let spawnAcc = 0;
-let lastClockSpawn = -999;
+let clocksDropped = 0;
+let maxClocks = 1 + Math.floor(Math.random()*2); // 1-2 per game
 function spawnItem() {
   let type;
   const r = Math.random();
-  if (r < 0.01) type = LUCKY;                                    // 1% lucky star
+  // Randomized spawn bands with jitter
+  const jitter = (Math.random()-0.5)*0.02;
+  if (r < 0.01+jitter) type = LUCKY;                              // ~1% lucky star
   else if (r < 0.025) type = SHIELD;                              // 1.5% shield
-  else if (r < 0.03 && (gameTime - lastClockSpawn) > 45) { type = CLOCK; lastClockSpawn = gameTime; } // max 1 per 45s
-  else if (r < 0.05) type = BLINDBOX;                             // 2% blind box
+  else if (r < 0.03 && clocksDropped < maxClocks && gameTime > 10) { type = CLOCK; clocksDropped++; } // 1-2 per game, after 10s
+  else if (r < 0.05+jitter) type = BLINDBOX;                      // ~2% blind box
   else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
   else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
-  else if (r < 0.17) type = ITEMS[6];                             // 5% rainbow
-  else type = ITEMS[Math.floor(Math.random()*6)];                 // rest: normal items
-  const x = 30 + Math.random()*(W-60);
-  const spd = 170 + Math.random()*140 + (gameTime/ROUND)*140;    // faster = harder
+  else if (r < 0.19) type = ITEMS[6];                             // 5% rainbow
+  else type = ITEMS[Math.floor(Math.random()*ITEMS.length)];      // all normal items (inc rainbow)
+  const x = 20 + Math.random()*(W-40);                            // wider spread
+  const speedRng = 0.8 + Math.random()*0.4;                       // 80-120% speed variance
+  const spd = (170 + Math.random()*140 + (gameTime/ROUND)*140) * speedRng;
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
 
   // Random Hello Kitty Shower event (~0.3% per spawn, after 10s)
@@ -1825,6 +1829,7 @@ function startGame() {
   powerups = {magnet:0,double:0,shield:false,shieldTimer:0}; fever=false; spawnAcc=0;
   comboBurst = {active:false,timer:0,triggered:[]};
   hkShower = {active:false,timer:0,spawnAcc:0};
+  clocksDropped = 0; maxClocks = 1 + Math.floor(Math.random()*2);
   lbSaved = false;
   celebActive = false;
   ensureAudio();
