@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aria's Star Catcher Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #e91e63;
+    --pink-light: #ff6b9d;
+    --pink-pale: #fff0f5;
+    --purple: #7c4dff;
+    --purple-light: #b388ff;
+    --blue: #1da1f2;
+    --green: #25d366;
+    --orange: #ff9800;
+    --bg: #faf0f5;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text: #333;
+    --text-muted: #999;
+    --shadow: 0 8px 32px rgba(233, 30, 99, 0.1);
+    --radius: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Quicksand', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Floating background decorations */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::before {
+    width: 400px; height: 400px;
+    background: var(--pink);
+    top: -100px; right: -100px;
+  }
+  body::after {
+    width: 300px; height: 300px;
+    background: var(--purple);
+    bottom: -50px; left: -50px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b42 50%, #3d1f5c 100%);
+    padding: 28px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(233,30,99,0.15), rgba(124,77,255,0.15));
+    pointer-events: none;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+  }
+  .header-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 12px rgba(233,30,99,0.4);
+  }
+  .header h1 span {
+    background: linear-gradient(135deg, #ff8a9e, #ff6b9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .subtitle {
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #ff8a9e, var(--pink));
+    color: #fff;
+    text-decoration: none;
+    border-radius: 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(233,30,99,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .play-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(233,30,99,0.4);
+  }
+  .last-updated {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* Container */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 8px 16px 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Metric Cards */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .metric-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.6);
+    transition: transform 0.2s;
+  }
+  .metric-card:hover {
+    transform: translateY(-2px);
+  }
+  .metric-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .metric-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    color: var(--pink);
+    line-height: 1.1;
+  }
+  .metric-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+  .metric-card:nth-child(1) .metric-value { color: var(--pink); }
+  .metric-card:nth-child(2) .metric-value { color: var(--purple); }
+  .metric-card:nth-child(3) .metric-value { color: var(--blue); }
+  .metric-card:nth-child(4) .metric-value { color: var(--orange); }
+
+  /* Section Cards */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .section-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.6);
+  }
+  .section-card.full-width {
+    grid-column: 1 / -1;
+  }
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: var(--pink);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .icon {
+    font-size: 20px;
+  }
+
+  /* Leaderboard */
+  .lb-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+  }
+  .lb-table th {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 4px 8px 8px;
+    text-align: left;
+  }
+  .lb-table th:first-child { text-align: center; width: 40px; }
+  .lb-table th:nth-child(3),
+  .lb-table th:nth-child(4),
+  .lb-table th:nth-child(5) { text-align: right; }
+  .lb-table td {
+    padding: 10px 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .lb-table tr td:first-child { text-align: center; border-radius: 10px 0 0 10px; }
+  .lb-table tr td:last-child { border-radius: 0 10px 10px 0; }
+  .lb-table tr td:nth-child(3),
+  .lb-table tr td:nth-child(4),
+  .lb-table tr td:nth-child(5) { text-align: right; }
+  .lb-table tbody tr {
+    background: var(--pink-pale);
+    transition: background 0.15s;
+  }
+  .lb-table tbody tr:hover {
+    background: #ffe0ec;
+  }
+  .lb-rank {
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+  }
+  .lb-rank.gold { color: #ffd700; }
+  .lb-rank.silver { color: #c0c0c0; }
+  .lb-rank.bronze { color: #cd7f32; }
+  .lb-name {
+    font-weight: 700;
+    color: #555;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lb-score {
+    font-family: 'Fredoka One', cursive;
+    color: var(--pink);
+    font-size: 16px;
+  }
+  .lb-combo {
+    color: var(--purple);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .lb-date {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  /* Bar chart */
+  .chart-container {
+    position: relative;
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 0 4px;
+  }
+  .chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .chart-bar-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    color: var(--pink);
+  }
+  .chart-bar {
+    width: 100%;
+    max-width: 48px;
+    border-radius: 10px 10px 4px 4px;
+    background: linear-gradient(180deg, var(--pink-light), var(--pink));
+    min-height: 4px;
+    transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+  .chart-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+    border-radius: 10px 10px 0 0;
+  }
+  .chart-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  /* Share bars */
+  .share-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .share-label {
+    font-size: 13px;
+    font-weight: 700;
+    width: 80px;
+    flex-shrink: 0;
+    color: #555;
+  }
+  .share-bar-track {
+    flex: 1;
+    height: 28px;
+    background: #f5f0f8;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+  .share-bar-fill {
+    height: 100%;
+    border-radius: 14px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-size: 13px;
+    font-family: 'Fredoka One', cursive;
+    color: #fff;
+    min-width: 40px;
+  }
+  .share-bar-fill.tw { background: linear-gradient(90deg, #1da1f2, #4fc3f7); }
+  .share-bar-fill.wa { background: linear-gradient(90deg, #25d366, #66bb6a); }
+  .share-bar-fill.cp { background: linear-gradient(90deg, #ff9800, #ffb74d); }
+
+  /* Traffic & Device */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(233,30,99,0.08);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-count {
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    color: var(--pink);
+  }
+  .stat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .stat-pct {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  /* Activity Feed */
+  .feed-list {
+    max-height: 360px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+  .feed-list::-webkit-scrollbar { width: 4px; }
+  .feed-list::-webkit-scrollbar-thumb { background: #ffb3c6; border-radius: 4px; }
+  .feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(233,30,99,0.06);
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .feed-dot.view { background: #e3f2fd; }
+  .feed-dot.play { background: #fce4ec; }
+  .feed-dot.share { background: #e8f5e9; }
+  .feed-text {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.4;
+  }
+  .feed-text strong { color: var(--pink); }
+  .feed-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-muted);
+  }
+  .empty-state .empty-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+  .empty-state p {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Loading spinner */
+  .loading {
+    text-align: center;
+    padding: 24px;
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid #ffe0ec;
+    border-top-color: var(--pink);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px 16px 32px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Pulse animation for live indicator */
+  .live-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #4caf50;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .metrics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .section-grid {
+      grid-template-columns: 1fr;
+    }
+    .header h1 { font-size: 22px; }
+    .metric-value { font-size: 26px; }
+    .metric-card { padding: 16px 12px; }
+    .container { padding: 8px 12px 24px; }
+    .section-card { padding: 16px; }
+    .lb-table th:nth-child(4),
+    .lb-table td:nth-child(4) { display: none; }
+    .chart-container { height: 160px; }
+  }
+
+  @media (max-width: 420px) {
+    .header { padding: 20px 16px 28px; }
+    .header h1 { font-size: 19px; }
+    .play-btn { padding: 8px 14px; font-size: 12px; }
+    .metric-value { font-size: 22px; }
+    .metric-icon { font-size: 22px; }
+    .metric-label { font-size: 10px; }
+    .section-title { font-size: 16px; }
+    .lb-table th:nth-child(5),
+    .lb-table td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <div class="header-row">
+      <div>
+        <h1><span>Aria's Star Catcher</span> Analytics</h1>
+        <div class="subtitle">Real-time Game Dashboard</div>
+      </div>
+      <a href="./index.html" class="play-btn">&#x1F3AE; Play Game</a>
+    </div>
+    <div class="last-updated">
+      <span class="live-dot"></span>
+      <span id="lastUpdated">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Metric Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F3AE;</div>
+      <div class="metric-value" id="totalPlays">-</div>
+      <div class="metric-label">Total Plays</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F464;</div>
+      <div class="metric-value" id="uniquePlayers">-</div>
+      <div class="metric-label">Unique Players</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x1F4E4;</div>
+      <div class="metric-value" id="totalShares">-</div>
+      <div class="metric-label">Total Shares</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">&#x2B50;</div>
+      <div class="metric-value" id="avgScore">-</div>
+      <div class="metric-label">Avg Score</div>
+    </div>
+  </div>
+
+  <!-- Leaderboard + Plays Over Time -->
+  <div class="section-grid">
+    <div class="section-card full-width">
+      <div class="section-title"><span class="icon">&#x1F3C6;</span> Top 10 Leaderboard</div>
+      <div id="leaderboardContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading leaderboard...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-grid">
+    <div class="section-card full-width">
+      <div class="section-title"><span class="icon">&#x1F4C8;</span> Plays Over Time (Last 7 Days)</div>
+      <div id="playsChartContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading chart...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-grid">
+    <!-- Share Breakdown -->
+    <div class="section-card">
+      <div class="section-title"><span class="icon">&#x1F4E3;</span> Share Breakdown</div>
+      <div id="shareContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- Traffic Sources -->
+    <div class="section-card">
+      <div class="section-title"><span class="icon">&#x1F310;</span> Traffic Sources</div>
+      <div id="trafficContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-grid">
+    <!-- Device Stats -->
+    <div class="section-card">
+      <div class="section-title"><span class="icon">&#x1F4F1;</span> Device Stats</div>
+      <div id="deviceContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="section-card">
+      <div class="section-title"><span class="icon">&#x26A1;</span> Recent Activity</div>
+      <div id="activityContent">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Dashboard by Jarvis &nbsp;|&nbsp; Data refreshes every 30s
+</div>
+
+<script>
+const SUPABASE_URL = 'https://wbfdnqgzopupxhntvpct.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SPwu1EsHnKuf3t61kPEyxw_e7-R5jqp';
+
+async function query(table, params = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?${params}`;
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'count=exact'
+      }
+    });
+    const count = res.headers.get('content-range');
+    const data = await res.json();
+    return { data, count: count ? parseInt(count.split('/')[1]) : data.length };
+  } catch (e) {
+    console.error('Query failed:', table, e);
+    return { data: [], count: 0 };
+  }
+}
+
+function emptyState(icon, msg) {
+  return `<div class="empty-state"><div class="empty-icon">${icon}</div><p>${msg}</p></div>`;
+}
+
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function timeAgo(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  const secs = Math.floor((now - d) / 1000);
+  if (secs < 60) return 'just now';
+  if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
+  if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+  return Math.floor(secs / 86400) + 'd ago';
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function isMobile(ua) {
+  if (!ua) return false;
+  return /mobile|android|iphone|ipad|ipod|blackberry|opera mini|iemobile|wpdesktop/i.test(ua);
+}
+
+function getEventEmoji(event) {
+  switch(event) {
+    case 'page_view': return '\u{1F440}';
+    case 'play_start': return '\u{1F3AE}';
+    case 'play_end': return '\u{1F3C1}';
+    case 'share_tw': return '\u{1F426}';
+    case 'share_wa': return '\u{1F4AC}';
+    case 'share_copy': return '\u{1F4CB}';
+    default: return '\u{2B50}';
+  }
+}
+
+function getEventText(ev) {
+  switch(ev.event) {
+    case 'page_view':
+      return `Someone visited the game`;
+    case 'play_start':
+      return `<strong>${ev.player_name || 'A player'}</strong> started playing`;
+    case 'play_end':
+      return `<strong>${ev.player_name || 'A player'}</strong> scored <strong>${ev.score || 0}</strong> points`;
+    case 'share_tw':
+      return `<strong>${ev.player_name || 'Someone'}</strong> shared on Twitter/X`;
+    case 'share_wa':
+      return `<strong>${ev.player_name || 'Someone'}</strong> shared on WhatsApp`;
+    case 'share_copy':
+      return `<strong>${ev.player_name || 'Someone'}</strong> copied the link`;
+    default:
+      return `Event: ${ev.event}`;
+  }
+}
+
+function getFeedDotClass(event) {
+  if (event === 'page_view') return 'view';
+  if (event.startsWith('play')) return 'play';
+  return 'share';
+}
+
+async function loadDashboard() {
+  // Fetch all data in parallel
+  const [
+    playsRes,
+    leaderboardRes,
+    sharesRes,
+    eventsAllRes,
+    recentRes
+  ] = await Promise.all([
+    query('game_events', 'select=score,created_at&event=eq.play_end&order=created_at.desc'),
+    query('game_leaderboard', 'select=name,score,combo,caught,created_at&order=score.desc&limit=10'),
+    query('game_events', 'select=event,created_at&or=(event.eq.share_tw,event.eq.share_wa,event.eq.share_copy)'),
+    query('game_events', 'select=event,player_name,utm_source,user_agent,created_at'),
+    query('game_events', 'select=event,player_name,score,combo,caught,created_at&order=created_at.desc&limit=20')
+  ]);
+
+  // Also get unique players
+  const uniqueRes = await query('game_leaderboard', 'select=name');
+  const uniqueNames = new Set(uniqueRes.data.map(r => r.name).filter(Boolean));
+
+  // --- Metric Cards ---
+  const totalPlays = playsRes.data.length;
+  const uniquePlayers = uniqueNames.size;
+  const totalShares = sharesRes.data.length;
+  const avgScore = totalPlays > 0
+    ? Math.round(playsRes.data.reduce((s, r) => s + (r.score || 0), 0) / totalPlays)
+    : 0;
+
+  document.getElementById('totalPlays').textContent = formatNumber(totalPlays);
+  document.getElementById('uniquePlayers').textContent = formatNumber(uniquePlayers);
+  document.getElementById('totalShares').textContent = formatNumber(totalShares);
+  document.getElementById('avgScore').textContent = formatNumber(avgScore);
+
+  // --- Leaderboard ---
+  const lbEl = document.getElementById('leaderboardContent');
+  if (leaderboardRes.data.length === 0) {
+    lbEl.innerHTML = emptyState('\u{1F3C6}', 'No scores yet. Be the first to play!');
+  } else {
+    let html = `<table class="lb-table"><thead><tr>
+      <th>#</th><th>Player</th><th>Score</th><th>Combo</th><th>Date</th>
+    </tr></thead><tbody>`;
+    leaderboardRes.data.forEach((r, i) => {
+      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const rankDisplay = i < 3 ? ['\u{1F947}', '\u{1F948}', '\u{1F949}'][i] : (i + 1);
+      html += `<tr>
+        <td><span class="lb-rank ${rankClass}">${rankDisplay}</span></td>
+        <td class="lb-name">${escapeHtml(r.name || 'Anonymous')}</td>
+        <td class="lb-score">${r.score || 0}</td>
+        <td class="lb-combo">${r.combo || 0}x</td>
+        <td class="lb-date">${formatDate(r.created_at)}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    lbEl.innerHTML = html;
+  }
+
+  // --- Plays Over Time (Last 7 days) ---
+  const chartEl = document.getElementById('playsChartContent');
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+
+  const playCounts = {};
+  days.forEach(d => playCounts[d] = 0);
+  playsRes.data.forEach(r => {
+    if (r.created_at) {
+      const day = r.created_at.split('T')[0];
+      if (playCounts[day] !== undefined) playCounts[day]++;
+    }
+  });
+
+  const maxPlays = Math.max(...Object.values(playCounts), 1);
+  if (totalPlays === 0) {
+    chartEl.innerHTML = emptyState('\u{1F4C8}', 'No play data yet. Chart will appear after games are played.');
+  } else {
+    let chartHtml = '<div class="chart-container">';
+    days.forEach(day => {
+      const count = playCounts[day];
+      const pct = Math.max((count / maxPlays) * 100, 3);
+      const label = new Date(day + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+      chartHtml += `<div class="chart-bar-wrap">
+        <div class="chart-bar-value">${count}</div>
+        <div class="chart-bar" style="height: ${pct}%"></div>
+        <div class="chart-label">${label}</div>
+      </div>`;
+    });
+    chartHtml += '</div>';
+    chartEl.innerHTML = chartHtml;
+  }
+
+  // --- Share Breakdown ---
+  const shareEl = document.getElementById('shareContent');
+  const shareCounts = { share_tw: 0, share_wa: 0, share_copy: 0 };
+  sharesRes.data.forEach(r => {
+    if (shareCounts[r.event] !== undefined) shareCounts[r.event]++;
+  });
+  const maxShare = Math.max(shareCounts.share_tw, shareCounts.share_wa, shareCounts.share_copy, 1);
+
+  if (totalShares === 0) {
+    shareEl.innerHTML = emptyState('\u{1F4E3}', 'No shares yet.');
+  } else {
+    shareEl.innerHTML = `
+      <div class="share-row">
+        <div class="share-label">\u{1F426} Twitter</div>
+        <div class="share-bar-track">
+          <div class="share-bar-fill tw" style="width: ${Math.max((shareCounts.share_tw / maxShare) * 100, 8)}%">${shareCounts.share_tw}</div>
+        </div>
+      </div>
+      <div class="share-row">
+        <div class="share-label">\u{1F4AC} WhatsApp</div>
+        <div class="share-bar-track">
+          <div class="share-bar-fill wa" style="width: ${Math.max((shareCounts.share_wa / maxShare) * 100, 8)}%">${shareCounts.share_wa}</div>
+        </div>
+      </div>
+      <div class="share-row">
+        <div class="share-label">\u{1F4CB} Copy Link</div>
+        <div class="share-bar-track">
+          <div class="share-bar-fill cp" style="width: ${Math.max((shareCounts.share_copy / maxShare) * 100, 8)}%">${shareCounts.share_copy}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- Traffic Sources ---
+  const trafficEl = document.getElementById('trafficContent');
+  const utmCounts = {};
+  eventsAllRes.data.forEach(r => {
+    const src = r.utm_source || null;
+    if (src) {
+      utmCounts[src] = (utmCounts[src] || 0) + 1;
+    }
+  });
+  const utmEntries = Object.entries(utmCounts).sort((a, b) => b[1] - a[1]);
+  const totalUtm = utmEntries.reduce((s, e) => s + e[1], 0);
+
+  if (utmEntries.length === 0) {
+    trafficEl.innerHTML = emptyState('\u{1F310}', 'No UTM sources detected yet.');
+  } else {
+    const colors = ['#e91e63', '#7c4dff', '#1da1f2', '#25d366', '#ff9800', '#9c27b0', '#00bcd4'];
+    let html = '';
+    utmEntries.slice(0, 8).forEach((e, i) => {
+      const pct = totalUtm > 0 ? Math.round((e[1] / totalUtm) * 100) : 0;
+      html += `<div class="stat-row">
+        <div class="stat-name"><span class="stat-dot" style="background:${colors[i % colors.length]}"></span>${escapeHtml(e[0])}<span class="stat-pct">${pct}%</span></div>
+        <div class="stat-count">${e[1]}</div>
+      </div>`;
+    });
+    trafficEl.innerHTML = html;
+  }
+
+  // --- Device Stats ---
+  const deviceEl = document.getElementById('deviceContent');
+  let mobileCount = 0;
+  let desktopCount = 0;
+  eventsAllRes.data.forEach(r => {
+    if (r.user_agent) {
+      if (isMobile(r.user_agent)) mobileCount++;
+      else desktopCount++;
+    }
+  });
+  const deviceTotal = mobileCount + desktopCount;
+
+  if (deviceTotal === 0) {
+    deviceEl.innerHTML = emptyState('\u{1F4F1}', 'No device data yet.');
+  } else {
+    const mobilePct = Math.round((mobileCount / deviceTotal) * 100);
+    const desktopPct = 100 - mobilePct;
+    deviceEl.innerHTML = `
+      <div class="stat-row">
+        <div class="stat-name"><span class="stat-dot" style="background:#e91e63"></span>\u{1F4F1} Mobile<span class="stat-pct">${mobilePct}%</span></div>
+        <div class="stat-count">${mobileCount}</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-name"><span class="stat-dot" style="background:#7c4dff"></span>\u{1F4BB} Desktop<span class="stat-pct">${desktopPct}%</span></div>
+        <div class="stat-count">${desktopCount}</div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="share-bar-track">
+          <div style="display:flex;height:100%;border-radius:14px;overflow:hidden;">
+            <div style="width:${mobilePct}%;background:linear-gradient(90deg,#ff6b9d,#e91e63);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Fredoka One',cursive;color:#fff;">${mobilePct > 10 ? mobilePct + '%' : ''}</div>
+            <div style="width:${desktopPct}%;background:linear-gradient(90deg,#b388ff,#7c4dff);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Fredoka One',cursive;color:#fff;">${desktopPct > 10 ? desktopPct + '%' : ''}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- Recent Activity Feed ---
+  const activityEl = document.getElementById('activityContent');
+  if (recentRes.data.length === 0) {
+    activityEl.innerHTML = emptyState('\u{26A1}', 'No activity yet. Waiting for first visitor...');
+  } else {
+    let html = '<div class="feed-list">';
+    recentRes.data.forEach(ev => {
+      html += `<div class="feed-item">
+        <div class="feed-dot ${getFeedDotClass(ev.event)}">${getEventEmoji(ev.event)}</div>
+        <div class="feed-text">${getEventText(ev)}</div>
+        <div class="feed-time">${timeAgo(ev.created_at)}</div>
+      </div>`;
+    });
+    html += '</div>';
+    activityEl.innerHTML = html;
+  }
+
+  // Update timestamp
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    'Last updated: ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Initial load
+loadDashboard();
+
+// Auto-refresh every 30 seconds
+setInterval(loadDashboard, 30000);
+</script>
+
+</body>
+</html>
