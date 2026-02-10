@@ -249,6 +249,7 @@ const LANG = {
 };
 function T(k) { return LANG[lang][k] || LANG.en[k] || k; }
 function setLang(l) {
+  if (lang !== l) trackEvent('language_change', { detail: l });
   lang = l; localStorage.setItem('aria_lang', l);
   // Update HTML overlays
   document.querySelector('#nameOv h2').textContent = T('whatsName');
@@ -318,9 +319,17 @@ async function saveGlobalScore(name, sc, cmb, cgt) {
 }
 
 // ====== ANALYTICS ======
+const _sid = 'ses_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const _device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+const _ua = new URLSearchParams(window.location.search);
+const _utmSrc = _ua.get('utm_source') || _ua.get('src') || '';
+const _utmMed = _ua.get('utm_medium') || '';
+const _utmCamp = _ua.get('utm_campaign') || '';
+
 function trackEvent(event, data = {}) {
   try {
-    const u = new URLSearchParams(window.location.search);
+    // Pack extra metadata into utm_campaign (JSON) since table schema is fixed
+    const meta = JSON.stringify({ sid: _sid, d: _device, l: lang, dt: data.detail || '' });
     const payload = {
       event,
       player_name: window._pName || 'Unknown',
@@ -329,9 +338,9 @@ function trackEvent(event, data = {}) {
       caught: data.caught || 0,
       duration_s: data.duration_s || 0,
       referrer: document.referrer || '',
-      utm_source: u.get('utm_source') || u.get('src') || '',
-      utm_medium: u.get('utm_medium') || '',
-      utm_campaign: u.get('utm_campaign') || '',
+      utm_source: _utmSrc,
+      utm_medium: _utmMed,
+      utm_campaign: _utmCamp || meta,
       user_agent: navigator.userAgent || '',
       screen_w: window.innerWidth || 0,
       screen_h: window.innerHeight || 0,
@@ -346,7 +355,8 @@ loadGlobalLB();
 // ====== PLAYER NAME + LEADERBOARD ======
 let playerName = localStorage.getItem('aria_player') || '';
 window._pName = playerName;
-trackEvent('page_view');
+trackEvent('page_view', { detail: challScore ? 'challenge_s='+challScore : '' });
+if (challScore) trackEvent('challenge_received', { score: challScore });
 
 function getLeaderboard() {
   // Return global leaderboard if available, else local
@@ -374,7 +384,7 @@ function renderLB() {
     return '<div class="lb-row"><div class="lb-rank '+rc+'">'+(medals[i]||(i+1))+'</div><div class="lb-name">'+e.name+'</div><div class="lb-score">'+e.score+'</div></div>';
   }).join('');
 }
-function openLB() { loadGlobalLB().then(() => { renderLB(); document.getElementById('lbOv').classList.add('active'); }); }
+function openLB() { loadGlobalLB().then(() => { renderLB(); document.getElementById('lbOv').classList.add('active'); trackEvent('leaderboard_view'); }); }
 function closeLB() { document.getElementById('lbOv').classList.remove('active'); }
 document.getElementById('lbOv').addEventListener('click', e => { if(e.target===e.currentTarget) closeLB(); });
 function promptName() { document.getElementById('nameOv').classList.add('active'); document.getElementById('nameIn').value = playerName; setTimeout(()=>document.getElementById('nameIn').focus(),350); }
@@ -385,6 +395,7 @@ function saveName() {
   playerName = v;
   window._pName = playerName;
   localStorage.setItem('aria_player', playerName);
+  trackEvent('name_set', { detail: v });
   document.getElementById('nameOv').classList.remove('active');
   if (nameCallback) { const cb = nameCallback; nameCallback = null; cb(); }
 }
@@ -395,13 +406,13 @@ document.getElementById('nameIn').addEventListener('keydown', e => { if(e.key===
 let tutorialSeen = localStorage.getItem('aria_tut') === '1';
 
 function showTutorialOrStart() {
-  if (!tutorialSeen) { showTutorial(); return; }
   startGame();
 }
 
 function showTutorial() {
   buildTutorialItems();
   document.getElementById('tutOv').classList.add('active');
+  trackEvent('tutorial_view');
 }
 
 function closeTutorial() {
@@ -1046,6 +1057,7 @@ function triggerHelloKittyShower() {
   hkShower.timer = 3;
   hkShower.spawnAcc = 0;
   addText(W/2, 120, T('shower'), '#ff69b4');
+  trackEvent('hello_kitty_shower', { score, combo });
   shake(8);
   sndFever();
   // Initial burst
@@ -1527,7 +1539,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.3', W-14, H-12);
+  X.fillText('v5.4', W-14, H-12);
 }
 
 function drawResults() {
@@ -1699,7 +1711,7 @@ function update(dt) {
     if (hkShower.timer <= 0) hkShower.active = false;
   }
 
-  if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, T('feverMode'), '#e040fb'); }
+  if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, T('feverMode'), '#e040fb'); trackEvent('fever_mode', { score, combo }); }
   if (combo < 15) fever = false;
   if (fever) feverTimer += dt;
 
@@ -1756,6 +1768,7 @@ function update(dt) {
           addSpark(it.x, it.y, '#64c8ff', 15);
           addText(it.x, it.y-20, T('blocked'), '#64c8ff');
           shake(3); sndShieldBreak();
+          trackEvent('bomb_blocked', { score, combo });
         } else {
           score = Math.max(0, score + it.type.pts);
           combo = 0; fever = false;
@@ -1763,6 +1776,7 @@ function update(dt) {
           addSpark(it.x, it.y, '#6a1b9a', 8);
           addText(it.x, it.y-20, it.type.pts+'', '#e74c3c');
           shake(10); sndBomb();
+          trackEvent('bomb_hit', { score, detail: 'combo_lost' });
         }
       } else if (it.type === CLOCK) {
         // Time extension!
@@ -1785,8 +1799,9 @@ function update(dt) {
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type === BLINDBOX) {
         // BLIND BOX - rarity tiers with Sanrio character pop-outs!
-        // Rarity tier rewards
         const rarity = Math.random();
+        const rarityTier = rarity < 0.02 ? 'legendary' : rarity < 0.10 ? 'rare' : rarity < 0.35 ? 'powerup' : 'common';
+        trackEvent('blind_box_opened', { score, detail: rarityTier });
         let popColor, popSize;
         if (rarity < 0.02) {
           triggerHelloKittyShower();
@@ -1826,6 +1841,7 @@ function update(dt) {
         addSpark(it.x, it.y, it.type.color, 10);
         addText(it.x, it.y-20, it.type.name === 'magnet' ? '🧲 '+T('magnet') : it.type.name === 'shield' ? '🛡 '+T('shield') : T('pts2x'), it.type.color);
         shake(4); sndPowerup();
+        trackEvent('powerup_collected', { score, detail: it.type.name });
       } else {
         let pts = it.type.pts * (1 + Math.floor(combo/5)*0.5);
         if (powerups.double > 0) pts *= 2;
@@ -1889,12 +1905,15 @@ function update(dt) {
 
   if (gameTime >= ROUND) {
     state = 'results';
-    if (score > hi) { hi = score; localStorage.setItem('aria_hi', hi); }
+    const isNewRecord = score > hi;
+    if (isNewRecord) { hi = score; localStorage.setItem('aria_hi', hi); }
     if (!lbSaved) {
       lbSaved = true;
       saveToLeaderboard(playerName || 'Player', score, maxCombo, caught);
       startCelebration();
-      trackEvent('play_end', { score, combo: maxCombo, caught, duration_s: ROUND });
+      trackEvent('play_end', { score, combo: maxCombo, caught, duration_s: ROUND, detail: 'missed='+missed });
+      if (isNewRecord) trackEvent('new_record', { score, combo: maxCombo, caught });
+      if (challScore && score > challScore) trackEvent('challenge_beat', { score, detail: 'target='+challScore });
     }
   }
 }
