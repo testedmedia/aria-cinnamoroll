@@ -535,7 +535,16 @@ function collectChar(charId) {
 }
 function getCollectionCount() { return Object.keys(getCollection()).length; }
 let showCollection = false;
+let gamePausedForBP = false; // paused for backpack during gameplay
 let sessionCollected = []; // chars found this game round
+
+function drawBackpackIcon(x, y) {
+  X.fillStyle = 'rgba(255,255,255,0.7)';
+  X.beginPath(); X.arc(x, y, 16, 0, Math.PI*2); X.fill();
+  X.font = '16px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\uD83C\uDF92', x, y);
+  X.textBaseline = 'alphabetic';
+}
 
 // Ninja
 const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 };
@@ -1597,6 +1606,8 @@ function drawHUD() {
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right'; X.fillText('v6.3', W-8, H-8);
+  // Backpack icon (top-left)
+  drawBackpackIcon(14, 64);
 }
 
 // ====== CHARACTERS ======
@@ -1966,21 +1977,30 @@ function drawResults() {
     X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif';
     X.textAlign = 'center';
     X.fillText('\u2728 Collected This Round', W/2, 378);
+    const rarC = {legendary:'#ffd700',rare:'#9c27b0',common:'#ffb6c1'};
+    const rarN = {legendary:'LEGEND',rare:'RARE',common:'COMMON'};
     sessionCollected.forEach((ch, i) => {
       const col = i % 4;
       const row = Math.floor(i / 4);
       const cx = W/2 - 75 + col * 50;
       const cy = 400 + row * 52;
-      // Mini card
+      // Mini card with rarity border
       X.fillStyle = '#fff';
-      rrc(cx, cy, 42, 46, 8);
-      drawImg(imgs[ch.imgKey], cx, cy - 5, 28, 28);
+      rrc(cx, cy, 42, 50, 8);
+      X.strokeStyle = rarC[ch.rarity] || '#ccc'; X.lineWidth = 1.5;
+      X.beginPath(); X.arc(cx, cy, 22, 0, Math.PI*2); X.stroke();
+      drawImg(imgs[ch.imgKey], cx, cy - 6, 28, 28);
       X.fillStyle = '#555'; X.font = 'bold 7px "Quicksand",sans-serif';
       X.textAlign = 'center';
-      X.fillText(ch.name, cx, cy + 18);
+      X.fillText(ch.name, cx, cy + 17);
+      X.fillStyle = rarC[ch.rarity] || '#ccc'; X.font = 'bold 6px "Quicksand",sans-serif';
+      X.fillText(rarN[ch.rarity] || 'COMMON', cx, cy + 24);
       if (ch.isNew) {
-        X.fillStyle = '#ff1744'; X.font = 'bold 7px "Fredoka One",sans-serif';
-        X.fillText('NEW!', cx, cy + 26);
+        X.fillStyle = '#ff1744'; X.font = 'bold 6px "Fredoka One",sans-serif';
+        X.fillText('NEW!', cx, cy + 31);
+      } else {
+        X.fillStyle = '#999'; X.font = '6px "Quicksand",sans-serif';
+        X.fillText('DUPE', cx, cy + 31);
       }
     });
     stashEndY = 365 + stashH + 8;
@@ -1990,14 +2010,15 @@ function drawResults() {
   const lb = getLeaderboard();
   const lbTop = stashEndY + 4;
   if (lb.length > 0) {
+    const topN = lb.slice(0, 5);
+    const lbH = 20 + topN.length * 15;
     X.fillStyle = '#fff3e0';
-    rrc(W/2, lbTop + 26, 260, 56, 12);
+    rrc(W/2, lbTop + lbH/2 + 2, 260, lbH + 8, 12);
     X.fillStyle = '#e65100'; X.font = 'bold 10px "Fredoka One",sans-serif';
     X.textAlign = 'center';
     X.fillText(T('topPlayers'), W/2, lbTop + 8);
-    const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
-    const top3 = lb.slice(0, 3);
-    top3.forEach((e, i) => {
+    const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4.','5.'];
+    topN.forEach((e, i) => {
       const ty = lbTop + 23 + i * 15;
       X.font = 'bold 11px "Quicksand",sans-serif';
       X.textAlign = 'left';
@@ -2009,7 +2030,8 @@ function drawResults() {
     });
   }
 
-  const btnY = lb.length > 0 ? lbTop + 64 : stashEndY + 12;
+  const lbH2 = topN.length > 0 ? 20 + topN.length * 15 + 12 : 0;
+  const btnY = lb.length > 0 ? lbTop + lbH2 : stashEndY + 12;
 
   X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 36, 18);
   X.fillStyle = '#fff'; X.font = 'bold 14px "Quicksand",sans-serif';
@@ -2026,6 +2048,9 @@ function drawResults() {
   X.textAlign = 'center';
   X.fillText(T('leaderboard'), W/2, btnY+85);
 
+  // Backpack icon on results screen
+  drawBackpackIcon(14, 64);
+
   drawTextFx();
 }
 
@@ -2038,7 +2063,9 @@ function getResultsBtnY() {
     stashEndY = 365 + stashH + 8;
   }
   const lbTop = stashEndY + 4;
-  const btnY = lb.length > 0 ? lbTop + 64 : stashEndY + 12;
+  const topN = lb.slice(0, 5);
+  const lbH = topN.length > 0 ? 20 + topN.length * 15 + 12 : 0;
+  const btnY = lb.length > 0 ? lbTop + lbH : stashEndY + 12;
   return { share: btnY, play: btnY + 42, lb: btnY + 84 };
 }
 
@@ -2509,7 +2536,7 @@ function loop(timestamp) {
   try {
     if (imgsLoaded < imgsTotal && state === 'menu') {
       drawLoading();
-    } else if (state === 'menu' && showCollection) drawCollection();
+    } else if (showCollection) { drawCollection(); } // Backpack overlay from any screen
     else if (state === 'menu') drawMenu();
     else if (state === 'playing') { update(dt); drawGame(); }
     else if (state === 'results') {
@@ -2574,6 +2601,14 @@ function startGame() {
 }
 
 function handleTap(x, y) {
+  // Global: backpack accessible from any screen
+  if (showCollection) {
+    if (Math.abs(x-W/2)<60 && Math.abs(y-(H-40))<20) { showCollection = false; gamePausedForBP = false; return; }
+    return;
+  }
+  // Backpack icon tap (top-left on all screens)
+  if (Math.abs(x-14)<20 && Math.abs(y-64)<20) { showCollection = true; if(state==='playing') gamePausedForBP = true; return; }
+
   if (state === 'menu') {
     // Language toggle (bottom-left)
     if (Math.abs(x-32)<28 && Math.abs(y-(H-14))<14) {
@@ -2585,11 +2620,6 @@ function handleTap(x, y) {
     if (Math.abs(x-82)<18 && Math.abs(y-(H-14))<14) {
       unlockAudio();
       playTone(880, 0.15, 'sine', 0.15);
-      return;
-    }
-    // Collection screen back button
-    if (showCollection) {
-      if (Math.abs(x-W/2)<60 && Math.abs(y-(H-40))<20) { showCollection = false; return; }
       return;
     }
     const mb = getMenuBtnY();
@@ -2622,7 +2652,10 @@ C.addEventListener('touchstart', e => {
     const {x, y} = gc(touch.clientX, touch.clientY);
 
     if (state === 'playing') {
-      if (!primaryTouch) {
+      // Check backpack icon or backpack back button first
+      if (showCollection || (Math.abs(x-14)<20 && Math.abs(y-64)<20)) {
+        handleTap(x, y);
+      } else if (!primaryTouch) {
         primaryTouch = { id: touch.identifier, startX: x, startY: y, moved: false };
         P.tx = x;
       } else {
