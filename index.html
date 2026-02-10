@@ -87,7 +87,7 @@
   /* Tutorial overlay */
   .tut-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,230,245,0.92); z-index:1003; justify-content:center; align-items:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
   .tut-overlay.active { display:flex; }
-  .tut-panel { background:#fff; border-radius:28px; padding:24px 20px 20px; width:min(92vw,360px); max-height:85vh; overflow-y:auto; text-align:center; box-shadow:0 20px 60px rgba(233,30,99,0.2); animation:popIn .4s cubic-bezier(.34,1.56,.64,1); border:3px solid #ffb3c6; }
+  .tut-panel { background:#fff; border-radius:28px; padding:24px 20px 20px; width:min(92vw,360px); max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; text-align:center; box-shadow:0 20px 60px rgba(233,30,99,0.2); animation:popIn .4s cubic-bezier(.34,1.56,.64,1); border:3px solid #ffb3c6; }
   .tut-panel h2 { font-family:'Fredoka One',cursive; color:#e91e63; font-size:22px; margin-bottom:6px; }
   .tut-section { margin:12px 0 8px; }
   .tut-section h3 { font-family:'Fredoka One',cursive; font-size:16px; margin-bottom:8px; }
@@ -1389,7 +1389,7 @@ function drawMenu() {
   // Version number
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.1', W-14, H-12);
+  X.fillText('v5.2', W-14, H-12);
 }
 
 function drawResults() {
@@ -1647,36 +1647,35 @@ function update(dt) {
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type === BLINDBOX) {
         // BLIND BOX - rarity tiers with Sanrio character pop-outs!
-        const sanrioChars = ['🐰','🐶','🎀','⭐','🐱','💖','🌸','🍓','🦊','🐸'];
-        const rareChars = ['👑','💎','🌈','✨','🦄'];
+        // Rarity tier rewards
         const rarity = Math.random();
-        let popChar, popColor, popSize;
+        let popColor, popSize;
         if (rarity < 0.02) {
           triggerHelloKittyShower();
           score += 100;
           addText(it.x, it.y-20, '⭐ SHOWER! +100! ⭐', '#ff69b4');
-          popChar = '🦄'; popColor = '#ff69b4'; popSize = 40;
+          popColor = '#ff69b4'; popSize = 40;
         } else if (rarity < 0.10) {
           score += 75; if (ROUND < 35) ROUND += 1;
-          popChar = rareChars[Math.floor(Math.random()*rareChars.length)];
-          addText(it.x, it.y-20, popChar+' RARE! +75!', '#9c27b0');
+          addText(it.x, it.y-20, 'RARE! +75!', '#9c27b0');
           popColor = '#9c27b0'; popSize = 36;
         } else if (rarity < 0.35) {
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
-          popChar = sanrioChars[Math.floor(Math.random()*sanrioChars.length)];
-          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, popChar+' Magnet!', '#2196f3'); }
-          else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, popChar+' 2x Points!', '#ffd700'); }
-          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, popChar+' Shield!', '#64c8ff'); }
+          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, 'Magnet!', '#2196f3'); }
+          else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '2x Points!', '#ffd700'); }
+          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, 'Shield!', '#64c8ff'); }
           popColor = '#ffd700'; popSize = 32;
         } else {
           const bp = 15 + Math.floor(Math.random()*20);
           score += bp;
-          popChar = sanrioChars[Math.floor(Math.random()*sanrioChars.length)];
-          addText(it.x, it.y-20, popChar+' +' + bp, '#ff69b4');
+          addText(it.x, it.y-20, '+' + bp, '#ff69b4');
           popColor = '#ff69b4'; popSize = 28;
         }
-        // Pop-out character animation
-        boxPops.push({ x:it.x, y:it.y, char:popChar, size:popSize, life:1.2, ml:1.2, vy:-180, scale:0 });
+        // Pop-out Sanrio character animation
+        const popDraws = [drawDonut,drawBoba,drawCapybara,drawStar,drawHeart,drawPudding,drawRainbow];
+        const rarePops = [drawRainbow,drawShieldItem,drawLuckyStar];
+        const popDraw = (rarity < 0.10) ? rarePops[Math.floor(Math.random()*rarePops.length)] : popDraws[Math.floor(Math.random()*popDraws.length)];
+        boxPops.push({ x:it.x, y:it.y, drawFn:popDraw, size:popSize, life:1.2, ml:1.2, vy:-180, scale:0 });
         addSpark(it.x, it.y, '#ffd700', 20);
         addSpark(it.x, it.y, popColor, 12);
         shake(5); sndLuckyStar();
@@ -1785,19 +1784,19 @@ function drawGame() {
     X.restore();
   }
   drawSparkFx(); drawTextFx();
-  // Blind box character pop-outs
+  // Blind box Sanrio character pop-outs
   boxPops.forEach(bp => {
     const alpha = Math.max(0, bp.life / bp.ml);
     const s = bp.scale * (1 + Math.sin(bp.life*8)*0.1);
     X.globalAlpha = alpha;
     X.save(); X.translate(bp.x, bp.y); X.scale(s, s);
-    X.font = `${bp.size}px sans-serif`;
-    X.textAlign = 'center'; X.textBaseline = 'middle';
-    X.fillText(bp.char, 0, 0);
-    // Glow ring behind character
-    X.strokeStyle = `rgba(255,215,0,${alpha*0.5})`;
-    X.lineWidth = 2;
-    X.beginPath(); X.arc(0, 0, bp.size*0.7, 0, Math.PI*2); X.stroke();
+    // Gold glow ring
+    X.strokeStyle = `rgba(255,215,0,${alpha*0.6})`; X.lineWidth = 3;
+    X.beginPath(); X.arc(0, 0, bp.size*0.9, 0, Math.PI*2); X.stroke();
+    X.fillStyle = `rgba(255,255,200,${alpha*0.15})`;
+    X.beginPath(); X.arc(0, 0, bp.size*0.9, 0, Math.PI*2); X.fill();
+    // Draw the actual Sanrio character
+    bp.drawFn(0, 0, bp.size*0.6);
     X.restore();
   });
   X.globalAlpha = 1;
@@ -1975,7 +1974,10 @@ document.addEventListener('keydown', e => {
   if (e.code === 'Space' || e.code === 'ArrowUp') jump();
 });
 
-document.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+document.addEventListener('touchmove', e => {
+  if (e.target.closest('.tut-panel,.lb-panel,.panel,.name-panel')) return;
+  e.preventDefault();
+}, {passive:false});
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
 document.addEventListener('gestureend', e => e.preventDefault());
