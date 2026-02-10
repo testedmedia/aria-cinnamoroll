@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Aria's Sanrio Star Catcher</title>
-<meta name="description" content="Aria's Sanrio Star Catcher - Catch donuts, boba & more with Cinnamoroll & Pompompurin!">
-<meta property="og:title" content="Aria's Sanrio Star Catcher">
+<title>Aria's Boba Adventure</title>
+<meta name="description" content="Aria's Boba Adventure - Catch boba, donuts & more with Cinnamoroll & Pompompurin!">
+<meta property="og:title" content="Aria's Boba Adventure">
 <meta property="og:description" content="Can you beat my score? Catch treats with Cinnamoroll & Pompompurin!">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aria's Sanrio Star Catcher">
+<meta name="twitter:title" content="Aria's Boba Adventure">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -138,7 +138,7 @@
       <p>👆 <strong>Tap anywhere</strong> to jump up high</p>
       <p>👆 <strong>Two fingers:</strong> one moves, one jumps!</p>
       <p>🔥 <strong>Combos:</strong> catch many in a row for bonus points!</p>
-      <p>⏱️ You have <strong>30 seconds</strong> - go for the high score!</p>
+      <p>⏱️ You have <strong>25 seconds</strong> - go for the high score!</p>
     </div>
 
     <button class="tut-go" onclick="closeTutorial()">I'm Ready! Let's Go! 🚀</button>
@@ -314,13 +314,14 @@ function buildTutorialItems() {
     {name:'Pudding',draw:drawPudding,pts:'+12',bg:'#fff8e1'},
     {name:'Rainbow',draw:drawRainbow,pts:'+30',bg:'#f3e5f5'},
   ];
-  const bad = [{name:'Kuromi',draw:drawBomb,pts:'-30!',bg:'#f3e5f5'}];
+  const bad = [{name:'Kuromi',draw:drawBomb,pts:'-20!',bg:'#f3e5f5'}];
   const power = [
     {name:'Magnet',draw:drawMagnet,pts:'Pull!',bg:'#e3f2fd'},
     {name:'2x Points',draw:drawDouble,pts:'Double!',bg:'#fff8e1'},
     {name:'Shield',draw:drawShieldItem,pts:'Block!',bg:'#e0f7fa'},
     {name:'Clock',draw:drawClock,pts:'+3s!',bg:'#e8f5e9'},
     {name:'Lucky Star',draw:drawLuckyStar,pts:'Mystery!',bg:'#fffde7'},
+    {name:'Blind Box',draw:drawBlindBox,pts:'Open!',bg:'#fce4ec'},
   ];
 
   function renderGrid(items, containerId) {
@@ -363,7 +364,7 @@ let state = 'menu';
 let score = 0, combo = 0, maxCombo = 0, caught = 0, missed = 0;
 let hi = parseInt(localStorage.getItem('aria_hi') || '0');
 let frame = 0, gameTime = 0;
-let ROUND = 30;
+let ROUND = 25;
 let sparkles = [], texts = [], items = [];
 let bgHue = 0, shakeX = 0, shakeY = 0;
 let fever = false, feverTimer = 0;
@@ -383,8 +384,11 @@ let powerups = { magnet: 0, double: 0, shield: false, shieldTimer: 0 };
 // Combo burst
 let comboBurst = { active: false, timer: 0, triggered: [] };
 
-// Player trail
+// Player trail (disabled)
 let trail = [];
+
+// Hello Kitty Shower event
+let hkShower = { active: false, timer: 0, spawnAcc: 0 };
 
 // Ninja
 const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 };
@@ -787,27 +791,61 @@ function drawClock(x, y, s) {
   const ctx = window._tutCtx || X;
   const pulse = 1+Math.sin(frame*0.12)*0.08;
   ctx.save(); ctx.translate(x, y); ctx.scale(pulse, pulse);
-  // Clock body
   ctx.fillStyle = '#e8f5e9'; ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(0,0,s,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  // Clock face
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc(0,0,s*0.8,0,Math.PI*2); ctx.fill();
-  // Hour marks
   ctx.fillStyle = '#4caf50';
   for(let i=0;i<12;i++){
     const a=(i*Math.PI*2)/12;
     ctx.beginPath(); ctx.arc(Math.cos(a)*s*0.65,Math.sin(a)*s*0.65,1.5,0,Math.PI*2); ctx.fill();
   }
-  // Hands
   const ha = frame*0.02;
   ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(ha-Math.PI/2)*s*0.4,Math.sin(ha-Math.PI/2)*s*0.4); ctx.stroke();
   ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(ha*3-Math.PI/2)*s*0.55,Math.sin(ha*3-Math.PI/2)*s*0.55); ctx.stroke();
-  // +3s label
   ctx.fillStyle = '#4caf50'; ctx.font = `bold ${s*0.55}px "Fredoka One",sans-serif`;
   ctx.textAlign = 'center'; ctx.fillText('+3s', 0, s*1.5);
+  ctx.restore();
+}
+
+// BLIND BOX - mystery gift with rarity tiers
+function drawBlindBox(x, y, s) {
+  const ctx = window._tutCtx || X;
+  const wobble = Math.sin(frame * 0.08) * 2;
+  const sparkle = Math.sin(frame * 0.15) * 0.15;
+  ctx.save(); ctx.translate(x, y + wobble);
+  // Box body
+  const g = ctx.createLinearGradient(-s, -s, s, s);
+  g.addColorStop(0, '#ff69b4'); g.addColorStop(1, '#9c27b0');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-s*0.75, -s*0.25); ctx.lineTo(s*0.75, -s*0.25);
+  ctx.lineTo(s*0.65, s*0.75); ctx.lineTo(-s*0.65, s*0.75);
+  ctx.closePath(); ctx.fill();
+  // Lid
+  ctx.fillStyle = '#e91e63';
+  ctx.fillRect(-s*0.85, -s*0.45, s*1.7, s*0.22);
+  // Ribbon
+  ctx.fillStyle = '#ffd700';
+  ctx.fillRect(-s*0.08, -s*0.45, s*0.16, s*1.2);
+  ctx.fillRect(-s*0.85, -s*0.05, s*1.7, s*0.15);
+  // Bow
+  ctx.beginPath(); ctx.ellipse(-s*0.28, -s*0.55, s*0.22, s*0.13, -0.3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.28, -s*0.55, s*0.22, s*0.13, 0.3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -s*0.5, s*0.08, 0, Math.PI*2); ctx.fill();
+  // Question mark
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${s*0.9}px "Fredoka One",sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('?', 0, s*0.28);
+  // Sparkles
+  for(let i=0;i<3;i++){
+    const a = frame*0.07+(Math.PI*2*i)/3;
+    ctx.fillStyle = `rgba(255,215,0,${0.5+sparkle})`;
+    ctx.beginPath(); ctx.arc(Math.cos(a)*s*1.2, Math.sin(a)*s*1.2, 2, 0, Math.PI*2); ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -842,10 +880,11 @@ const POWERUPS = [
   { name:'magnet', pts:0, color:'#2196f3', draw:drawMagnet, w:1.0, isPower:true },
   { name:'double', pts:0, color:'#ffd700', draw:drawDouble, w:0.8, isPower:true },
 ];
-const BOMB = { name:'bomb', pts:-15, color:'#6a1b9a', draw:drawBomb, w:1.0, isBomb:true };
+const BOMB = { name:'bomb', pts:-20, color:'#6a1b9a', draw:drawBomb, w:1.0, isBomb:true };
 const SHIELD = { name:'shield', pts:0, color:'#64c8ff', draw:drawShieldItem, w:1.0, isPower:true };
 const LUCKY = { name:'lucky', pts:0, color:'#ffd700', draw:drawLuckyStar, w:1.0 };
 const CLOCK = { name:'clock', pts:0, color:'#4caf50', draw:drawClock, w:1.0 };
+const BLINDBOX = { name:'blindbox', pts:0, color:'#ff69b4', draw:drawBlindBox, w:1.2 };
 const SHURIKEN = { name:'shuriken', pts:50, color:'#ffd700', draw:drawShuriken, w:1.0 };
 
 // ====== SPAWN ======
@@ -853,16 +892,35 @@ let spawnAcc = 0;
 function spawnItem() {
   let type;
   const r = Math.random();
-  if (r < 0.02) type = LUCKY;                                   // 2% lucky star
-  else if (r < 0.05) type = SHIELD;                              // 3% shield
-  else if (r < 0.09) type = CLOCK;                               // 4% time extend
-  else if (r < 0.14) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 5% powerups
-  else if (r < 0.17 && gameTime > 8) type = BOMB;               // 3% bomb after 8s
-  else if (r < 0.26) type = ITEMS[6];                            // 4% rainbow
-  else type = ITEMS[Math.floor(Math.random()*6)];                // rest: normal items
+  if (r < 0.01) type = LUCKY;                                    // 1% lucky star
+  else if (r < 0.025) type = SHIELD;                              // 1.5% shield
+  else if (r < 0.03) type = CLOCK;                                // 0.5% time extend (rare!)
+  else if (r < 0.05) type = BLINDBOX;                             // 2% blind box
+  else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
+  else if (r < 0.12 && gameTime > 8) type = BOMB;                // 3% bomb after 8s
+  else if (r < 0.17) type = ITEMS[6];                             // 5% rainbow
+  else type = ITEMS[Math.floor(Math.random()*6)];                 // rest: normal items
   const x = 30 + Math.random()*(W-60);
-  const spd = 120 + Math.random()*100 + (gameTime/ROUND)*80;
+  const spd = 150 + Math.random()*130 + (gameTime/ROUND)*120;    // faster items = harder
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
+
+  // Random Hello Kitty Shower event (~0.3% per spawn, after 10s)
+  if (!hkShower.active && gameTime > 10 && Math.random() < 0.003) triggerHelloKittyShower();
+}
+
+function triggerHelloKittyShower() {
+  hkShower.active = true;
+  hkShower.timer = 3;
+  hkShower.spawnAcc = 0;
+  addText(W/2, 120, '🎀 HELLO KITTY SHOWER! 🎀', '#ff69b4');
+  shake(8);
+  sndFever();
+  // Initial burst
+  for (let i = 0; i < 8; i++) {
+    const x = 30 + Math.random()*(W-60);
+    const t = ITEMS[Math.floor(Math.random()*7)];
+    items.push({ x, y:-25-Math.random()*100, type:t, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
+  }
 }
 
 // ====== EFFECTS ======
@@ -1164,12 +1222,6 @@ function drawNinja(x, y) {
 // ====== PLAYER ======
 function drawPlayer() {
   const px = P.x, py = P.y;
-  // Trail afterimages
-  trail.forEach(t => {
-    X.globalAlpha = (t.life / 0.3) * 0.25;
-    drawImg(imgs.avatar, t.x, t.y, 55, 75);
-  });
-  X.globalAlpha = 1;
   // Shadow
   X.fillStyle = 'rgba(255,200,220,0.3)';
   X.beginPath(); X.ellipse(px, P.baseY+35, 40, 8, 0, 0, Math.PI*2); X.fill();
@@ -1218,14 +1270,20 @@ function drawMenu() {
   X.strokeText("Aria's", W/2, 58);
   X.fillText("Aria's", W/2, 58);
   X.strokeStyle = '#ff8a9e';
-  X.strokeText('Star Catcher', W/2, 100);
-  X.fillText('Star Catcher', W/2, 100);
+  X.strokeText('Boba Adventure', W/2, 100);
+  X.fillText('Boba Adventure', W/2, 100);
 
   X.font = '14px "Quicksand",sans-serif';
   X.fillStyle = '#e91e63';
   X.fillText('Game by Aria Smushkevich 💕', W/2, 132);
   X.fillStyle = '#ff8a9e'; X.font = '13px "Quicksand",sans-serif';
-  X.fillText('Catch treats with Cinnamoroll & Pompompurin!', W/2, 154);
+  X.fillText('Catch boba, treats & open blind boxes!', W/2, 154);
+
+  // Version
+  X.fillStyle = '#ccc'; X.font = '10px "Quicksand",sans-serif';
+  X.textAlign = 'right';
+  X.fillText('v5.0', W-12, H-8);
+  X.textAlign = 'center';
 
   const cb = Math.sin(frame*0.04)*8;
   drawImg(imgs.cinnaFly, W/2-80, 220+cb, 90, 58);
@@ -1427,7 +1485,7 @@ function drawLoading() {
   X.textAlign = 'center'; X.textBaseline = 'middle';
   X.fillText('Loading'+'.'.repeat(dots), W/2, H/2-10);
   X.fillStyle = '#ff8a9e'; X.font = '14px "Quicksand",sans-serif';
-  X.fillText("Aria's Sanrio Star Catcher", W/2, H/2+25);
+  X.fillText("Aria's Boba Adventure", W/2, H/2+25);
   const prog = imgsLoaded / imgsTotal;
   X.fillStyle = '#ffb3c6';
   rr(W/2-80, H/2+50, 160, 8, 4);
@@ -1476,18 +1534,24 @@ function update(dt) {
   if (powerups.shield && powerups.shieldTimer > 0) { powerups.shieldTimer -= dt; if (powerups.shieldTimer <= 0) powerups.shield = false; }
   if (comboBurst.active) { comboBurst.timer -= dt; if (comboBurst.timer <= 0) comboBurst.active = false; }
 
-  // Trail effect - capture position when moving fast
-  if (Math.abs(P.tx - P.x) > 3 && frame % 3 === 0) {
-    trail.push({ x: P.x, y: P.y, life: 0.3 });
-    if (trail.length > 4) trail.shift();
+  // Hello Kitty Shower spawning
+  if (hkShower.active) {
+    hkShower.timer -= dt;
+    hkShower.spawnAcc += dt;
+    if (hkShower.spawnAcc >= 0.06) {
+      hkShower.spawnAcc = 0;
+      const sx = 30 + Math.random()*(W-60);
+      const st = ITEMS[Math.floor(Math.random()*7)];
+      items.push({ x:sx, y:-25, type:st, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
+    }
+    if (hkShower.timer <= 0) hkShower.active = false;
   }
-  for (let i = trail.length-1; i >= 0; i--) { trail[i].life -= dt; if (trail[i].life <= 0) trail.splice(i, 1); }
 
   if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, '🔥 FEVER MODE! 🔥', '#e040fb'); }
   if (combo < 15) fever = false;
   if (fever) feverTimer += dt;
 
-  const rate = fever ? 0.07 : Math.max(0.08, 0.33 - gameTime*0.008);
+  const rate = fever ? 0.06 : Math.max(0.07, 0.28 - gameTime*0.01);
   spawnAcc += dt;
   if (spawnAcc >= rate) { spawnAcc = 0; spawnItem(); }
 
@@ -1557,21 +1621,49 @@ function update(dt) {
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type === LUCKY) {
-        // Mystery reward!
         const rewards = ['points','magnet','double','shield'];
         const reward = rewards[Math.floor(Math.random()*rewards.length)];
         if (reward === 'points') { score += 50; addText(it.x, it.y-20, '+50 LUCKY!', '#ffd700'); }
-        else if (reward === 'magnet') { powerups.magnet = 4; addText(it.x, it.y-20, '🧲 MAGNET!', '#2196f3'); }
-        else if (reward === 'double') { powerups.double = 4; addText(it.x, it.y-20, '2x POINTS!', '#ffd700'); }
-        else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 8; addText(it.x, it.y-20, '🛡 SHIELD!', '#64c8ff'); }
+        else if (reward === 'magnet') { powerups.magnet = 3.5; addText(it.x, it.y-20, '🧲 MAGNET!', '#2196f3'); }
+        else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '2x POINTS!', '#ffd700'); }
+        else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 SHIELD!', '#64c8ff'); }
         addSpark(it.x, it.y, '#ffd700', 15);
         shake(5); sndLuckyStar();
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
+      } else if (it.type === BLINDBOX) {
+        // BLIND BOX - rarity tiers!
+        const rarity = Math.random();
+        if (rarity < 0.02) {
+          // ULTRA RARE: Hello Kitty Shower!
+          triggerHelloKittyShower();
+          score += 100;
+          addText(it.x, it.y-20, '⭐ SHOWER! +100! ⭐', '#ff69b4');
+        } else if (rarity < 0.10) {
+          // RARE: Big reward
+          score += 75; if (ROUND < 35) ROUND += 1;
+          addText(it.x, it.y-20, '💎 RARE! +75 +2s!', '#9c27b0');
+        } else if (rarity < 0.35) {
+          // UNCOMMON: Power-up
+          const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
+          if (pw === 'magnet') { powerups.magnet = 3.5; addText(it.x, it.y-20, '📦 Magnet!', '#2196f3'); }
+          else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '📦 2x Points!', '#ffd700'); }
+          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '📦 Shield!', '#64c8ff'); }
+        } else {
+          // COMMON: Points
+          const bp = 15 + Math.floor(Math.random()*20);
+          score += bp;
+          addText(it.x, it.y-20, '📦 +' + bp, '#ff69b4');
+        }
+        addSpark(it.x, it.y, '#ffd700', 20);
+        addSpark(it.x, it.y, '#ff69b4', 10);
+        shake(5); sndLuckyStar();
+        combo++; caught++;
+        maxCombo = Math.max(maxCombo, combo);
       } else if (it.type.isPower) {
-        if (it.type.name === 'magnet') powerups.magnet = 5;
-        else if (it.type.name === 'double') powerups.double = 5;
-        else if (it.type.name === 'shield') { powerups.shield = true; powerups.shieldTimer = 8; sndShieldUp(); }
+        if (it.type.name === 'magnet') powerups.magnet = 3.5;
+        else if (it.type.name === 'double') powerups.double = 3.5;
+        else if (it.type.name === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; sndShieldUp(); }
         addSpark(it.x, it.y, it.type.color, 10);
         addText(it.x, it.y-20, it.type.name === 'magnet' ? '🧲 MAGNET!' : it.type.name === 'shield' ? '🛡 SHIELD!' : '2x POINTS!', it.type.color);
         shake(4); sndPowerup();
@@ -1646,6 +1738,20 @@ function drawGame() {
   items.forEach(it => it.type.draw(it.x, it.y, it.size));
   drawPlayer();
   if (ninja.active) drawNinja(ninja.x, ninja.y);
+  // Hello Kitty Shower overlay
+  if (hkShower.active) {
+    X.fillStyle = `rgba(255,105,180,${0.12+Math.sin(frame*0.2)*0.08})`;
+    X.fillRect(0, 0, W, H);
+    const bp = 1+Math.sin(frame*0.15)*0.05;
+    X.save(); X.translate(W/2, 88); X.scale(bp, bp);
+    X.fillStyle = 'rgba(255,255,255,0.9)';
+    rrc(0, 0, 260, 28, 14);
+    X.fillStyle = '#ff69b4';
+    X.font = 'bold 13px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    X.fillText('🎀 HELLO KITTY SHOWER! 🎀', 0, 2);
+    X.restore();
+  }
   drawSparkFx(); drawTextFx();
   drawHUD();
   X.restore();
@@ -1710,12 +1816,13 @@ function startGame() {
   state = 'playing';
   score=0; combo=0; maxCombo=0; caught=0; missed=0;
   gameTime=0; items=[]; sparkles=[]; texts=[]; trail=[];
-  ROUND = 30;
+  ROUND = 25;
   flyC = {on:false,x:-60,y:120,t:0};
   ninja.active=false; ninja.announced=false; ninja.tt=0;
   P.x=W/2; P.tx=W/2; P.y=P.baseY; P.vy=0; P.jumping=false;
   powerups = {magnet:0,double:0,shield:false,shieldTimer:0}; fever=false; spawnAcc=0;
   comboBurst = {active:false,timer:0,triggered:[]};
+  hkShower = {active:false,timer:0,spawnAcc:0};
   lbSaved = false;
   celebActive = false;
   ensureAudio();
@@ -1824,7 +1931,7 @@ document.addEventListener('gestureend', e => e.preventDefault());
 
 // ====== SHARE ======
 function getURL() { return window.location.origin+window.location.pathname+'?s='+score+'&n='+(playerName||'Player'); }
-function getTxt() { return (playerName||'I')+" scored "+score+" in Aria's Sanrio Star Catcher! 🌟 Can you beat me? 🐰🐶"; }
+function getTxt() { return (playerName||'I')+" scored "+score+" in Aria's Boba Adventure! 🧋 Can you beat me? 🐰🐶"; }
 function shareTW() { trackEvent('share_tw',{score}); window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(getTxt())+'&url='+encodeURIComponent(getURL())); }
 function shareWA() { trackEvent('share_wa',{score}); window.open('https://wa.me/?text='+encodeURIComponent(getTxt()+'\n'+getURL())); }
 function copyLnk() {
