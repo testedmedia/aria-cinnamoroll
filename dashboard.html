@@ -918,7 +918,7 @@ async function loadDashboard() {
     query('game_leaderboard', 'select=name,score,combo,caught,created_at&order=score.desc&limit=10'),
     query('game_events', 'select=event,player_name,created_at&or=(event.eq.share_tw,event.eq.share_wa,event.eq.share_copy,event.eq.share_challenge)'),
     query('game_events', 'select=event,player_name,utm_source,user_agent,created_at'),
-    query('game_events', 'select=event,player_name,score,combo,caught,created_at&order=created_at.desc&limit=20'),
+    query('game_events', 'select=event,player_name,score,combo,caught,created_at&order=created_at.desc&limit=50'),
     query('game_events', 'select=player_name,created_at&event=eq.play_start'),
     query('game_events', 'select=event,player_name&or=(event.eq.challenge_received,event.eq.challenge_beat)'),
     query('game_events', 'select=event,player_name,score&or=(event.eq.bomb_hit,event.eq.bomb_blocked,event.eq.blind_box_opened,event.eq.powerup_collected,event.eq.fever_mode,event.eq.hello_kitty_shower)')
