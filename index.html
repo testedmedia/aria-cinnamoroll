@@ -1779,6 +1779,10 @@ function drawCollection() {
   X.textAlign = 'center';
   X.fillText('Back', W/2, H - 38);
 
+  // Version on collection
+  X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
+  X.textAlign = 'right'; X.fillText('v6.3', W-14, H-12);
+
   drawGround();
 }
 
@@ -2050,6 +2054,10 @@ function drawResults() {
 
   // Backpack icon on results screen
   drawBackpackIcon(14, 64);
+
+  // Version on results
+  X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
+  X.textAlign = 'right'; X.fillText('v6.3', W-8, H-8);
 
   drawTextFx();
 }
