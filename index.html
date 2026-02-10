@@ -428,10 +428,9 @@ function buildTutorialItems() {
     {name:'Capybara',draw:drawCapybara,pts:'+20',bg:'#f5ebe0'},
     {name:'Star',draw:drawStar,pts:'+5',bg:'#fffde7'},
     {name:'Heart',draw:drawHeart,pts:'+8',bg:'#fce4ec'},
-    {name:'Pudding',draw:drawPudding,pts:'+12',bg:'#fff8e1'},
     {name:'Rainbow',draw:drawRainbow,pts:'+30',bg:'#f3e5f5'},
   ];
-  const bad = [{name:'Kuromi',draw:drawBomb,pts:'-20!',bg:'#f3e5f5'}];
+  const bad = [{name:'Bomb',draw:drawBomb,pts:'-20!',bg:'#f3e5f5'}];
   const power = [
     {name:'Magnet',draw:drawMagnet,pts:'Pull!',bg:'#e3f2fd'},
     {name:'2x Points',draw:drawDouble,pts:'Double!',bg:'#fff8e1'},
@@ -670,22 +669,32 @@ function shake(amt) { shakeX = (Math.random()-.5)*amt; shakeY = (Math.random()-.
 // ====== ITEM DRAW FUNCTIONS ======
 function drawDonut(x, y, s) {
   const ctx = window._tutCtx || X;
+  // Outer donut body
   ctx.fillStyle = '#f8bbd0';
   ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#fce4ec';
-  ctx.beginPath(); ctx.arc(x, y, s*0.35, 0, Math.PI*2); ctx.fill();
+  // Icing drizzle on top half
   ctx.fillStyle = '#e91e63';
   ctx.beginPath();
-  ctx.arc(x, y, s*0.85, Math.PI*0.8, Math.PI*2.2);
-  ctx.quadraticCurveTo(x+s*0.5, y+s*0.3, x+s*0.3, y+s*0.1);
+  ctx.arc(x, y, s*0.88, Math.PI*0.85, Math.PI*2.15);
+  ctx.quadraticCurveTo(x+s*0.45, y+s*0.25, x+s*0.2, y+s*0.15);
   ctx.fill();
+  // Sprinkles on icing
   const sprinkles = ['#fff176','#81d4fa','#ce93d8','#ffcc80','#a5d6a7'];
   sprinkles.forEach((c, i) => {
     ctx.fillStyle = c;
     const a = i*1.2+0.3;
-    ctx.save(); ctx.translate(x+Math.cos(a)*s*0.65, y+Math.sin(a)*s*0.65);
+    ctx.save(); ctx.translate(x+Math.cos(a)*s*0.62, y+Math.sin(a)*s*0.62);
     ctx.rotate(a); ctx.fillRect(-1.5, -0.8, 3, 1.6); ctx.restore();
   });
+  // Cute donut hole in center
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.arc(x, y, s*0.32, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+  // Hole inner rim shadow
+  ctx.strokeStyle = 'rgba(200,120,140,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(x, y, s*0.32, 0, Math.PI*2); ctx.stroke();
 }
 
 function drawBoba(x, y, s) {
@@ -1731,21 +1740,25 @@ function drawCollection() {
       X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif';
       X.textAlign = 'center';
       X.fillText(ch.name, cx, cy + 38);
+      const rarPct = {legendary:'2%',rare:'8%',common:'65%'};
+      const rarLabel = {legendary:'LEGENDARY',rare:'RARE',common:'COMMON'};
       X.fillStyle = rarColors[ch.rarity]; X.font = 'bold 9px "Quicksand",sans-serif';
-      X.fillText(ch.rarity.toUpperCase(), cx, cy + 52);
+      X.fillText(rarLabel[ch.rarity]+' '+rarPct[ch.rarity], cx, cy + 52);
       if (col[ch.id].count > 1) {
         X.fillStyle = '#999'; X.font = '9px "Quicksand",sans-serif';
         X.fillText('x'+col[ch.id].count, cx, cy + 62);
       }
     } else {
       // Silhouette / locked
+      const rarPctU = {legendary:'2%',rare:'8%',common:'65%'};
+      const rarLabelU = {legendary:'LEGENDARY',rare:'RARE',common:'COMMON'};
       X.fillStyle = '#ddd'; X.font = 'bold 36px sans-serif';
       X.textAlign = 'center';
       X.fillText('?', cx, cy - 2);
       X.fillStyle = '#bbb'; X.font = 'bold 11px "Quicksand",sans-serif';
       X.fillText('???', cx, cy + 38);
       X.fillStyle = '#ccc'; X.font = 'bold 9px "Quicksand",sans-serif';
-      X.fillText(ch.rarity.toUpperCase(), cx, cy + 52);
+      X.fillText(rarLabelU[ch.rarity]+' '+rarPctU[ch.rarity], cx, cy + 52);
     }
   });
 
@@ -2440,7 +2453,7 @@ function drawGame() {
     X.stroke();
 
     // Rarity label at top
-    const rarityLabels = { legendary: '\u2B50 LEGENDARY \u2B50', rare: '\u{1F48E} RARE', powerup: '\u26A1 POWERUP', common: '\u2728 COMMON' };
+    const rarityLabels = { legendary: '\u2B50 LEGENDARY 2% \u2B50', rare: '\u{1F48E} RARE 8%', powerup: '\u2728 UNCOMMON 25%', common: '\u2728 COMMON 65%' };
     X.fillStyle = glowC;
     X.font = 'bold 11px "Fredoka One",sans-serif';
     X.textAlign = 'center';
