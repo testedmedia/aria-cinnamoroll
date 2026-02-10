@@ -179,7 +179,7 @@ let lang = localStorage.getItem('aria_lang') || 'en';
 const LANG = {
   en: {
     title1: "Aria's", title2: 'Boba Adventure', by: 'Game by Aria Smushkevich 💕',
-    sub: 'Catch boba, treats & open blind boxes!', catchThese: 'Catch these!',
+    sub: 'Catch Sanrio friends, boba & treats!', catchThese: 'Catch these!',
     tapToPlay: 'Tap to Play!', best: 'Best', playingAs: 'Playing as',
     leaderboard: '🏆 Leaderboard', howToPlay: '❓ How to Play',
     challengeFriend: '📲 Challenge a Friend!', tapName: 'Tap name to change',
@@ -214,7 +214,7 @@ const LANG = {
   },
   es: {
     title1: "Aria's", title2: 'Boba Aventura', by: 'Juego por Aria Smushkevich 💕',
-    sub: '¡Atrapa boba, dulces y abre cajas sorpresa!', catchThese: '¡Atrapa estos!',
+    sub: '¡Atrapa amigos Sanrio, boba y dulces!', catchThese: '¡Atrapa estos!',
     tapToPlay: '¡Toca para Jugar!', best: 'Mejor', playingAs: 'Jugando como',
     leaderboard: '🏆 Clasificación', howToPlay: '❓ Cómo Jugar',
     challengeFriend: '📲 ¡Reta a un Amigo!', tapName: 'Toca para cambiar nombre',
@@ -431,6 +431,10 @@ function buildTutorialItems() {
     {name:'Heart',draw:drawHeart,pts:'+8',bg:'#fce4ec'},
     {name:'Pudding',draw:drawPudding,pts:'+12',bg:'#fff8e1'},
     {name:'Rainbow',draw:drawRainbow,pts:'+30',bg:'#f3e5f5'},
+    {name:'Hello Kitty',draw:drawHelloKitty,pts:'+25',bg:'#fce4ec'},
+    {name:'My Melody',draw:drawMyMelody,pts:'+18',bg:'#fff0f5'},
+    {name:'Kuromi',draw:drawKuromi,pts:'+22',bg:'#f3e5f5'},
+    {name:'Keroppi',draw:drawKeroppi,pts:'+20',bg:'#e8f5e9'},
   ];
   const bad = [{name:'Kuromi',draw:drawBomb,pts:'-20!',bg:'#f3e5f5'}];
   const power = [
@@ -1267,6 +1271,15 @@ const ITEMS = [
   { name:'heart', pts:8, color:'#ff6b9d', draw:drawHeart, w:0.8 },
   { name:'pudding', pts:12, color:'#ffd54f', draw:drawPudding, w:1.0 },
   { name:'rainbow', pts:30, color:'#e040fb', draw:drawRainbow, w:1.0 },
+  // Sanrio character drops
+  { name:'hello kitty', pts:25, color:'#e91e63', draw:drawHelloKitty, w:1.3 },
+  { name:'my melody', pts:18, color:'#ffb6c1', draw:drawMyMelody, w:1.3 },
+  { name:'kuromi', pts:22, color:'#9c27b0', draw:drawKuromi, w:1.3 },
+  { name:'pochacco', pts:15, color:'#2196f3', draw:drawPochacco, w:1.2 },
+  { name:'keroppi', pts:20, color:'#4caf50', draw:drawKeroppi, w:1.3 },
+  { name:'badtz-maru', pts:22, color:'#1a1a2e', draw:drawBadtzMaru, w:1.2 },
+  { name:'cinnamoroll', pts:18, color:'#89c4f4', draw:drawCinnaBox, w:1.3 },
+  { name:'pompompurin', pts:16, color:'#fdd835', draw:drawPurinBox, w:1.2 },
 ];
 const POWERUPS = [
   { name:'magnet', pts:0, color:'#2196f3', draw:drawMagnet, w:1.0, isPower:true },
@@ -1316,7 +1329,7 @@ function triggerHelloKittyShower() {
   // Initial burst
   for (let i = 0; i < 8; i++) {
     const x = 30 + Math.random()*(W-60);
-    const t = ITEMS[Math.floor(Math.random()*7)];
+    const t = ITEMS[Math.floor(Math.random()*ITEMS.length)];
     items.push({ x, y:-25-Math.random()*100, type:t, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
   }
 }
@@ -1792,7 +1805,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.4', W-14, H-12);
+  X.fillText('v5.7', W-14, H-12);
 }
 
 function drawResults() {
@@ -1985,7 +1998,7 @@ function update(dt) {
     if (hkShower.spawnAcc >= 0.06) {
       hkShower.spawnAcc = 0;
       const sx = 30 + Math.random()*(W-60);
-      const st = ITEMS[Math.floor(Math.random()*7)];
+      const st = ITEMS[Math.floor(Math.random()*ITEMS.length)];
       items.push({ x:sx, y:-25, type:st, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
     }
     if (hkShower.timer <= 0) hkShower.active = false;
@@ -1995,7 +2008,7 @@ function update(dt) {
   if (combo < 15) fever = false;
   if (fever) feverTimer += dt;
 
-  const rate = fever ? 0.06 : Math.max(0.07, 0.28 - gameTime*0.01);
+  const rate = fever ? 0.08 : Math.max(0.12, 0.35 - gameTime*0.01);
   spawnAcc += dt;
   if (spawnAcc >= rate) { spawnAcc = 0; spawnItem(); }
 
