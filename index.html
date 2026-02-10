@@ -482,6 +482,10 @@ let score = 0, combo = 0, maxCombo = 0, caught = 0, missed = 0;
 let hi = parseInt(localStorage.getItem('aria_hi') || '0');
 let frame = 0, gameTime = 0;
 let ROUND = 25;
+let gameLevel = 1, prevLevel = 1;
+const LEVEL_THRESHOLDS = [0, 50, 150, 300, 500];
+const LEVEL_NAMES = ['Beginner', 'Rising Star', 'Boba Master', 'Sanrio Pro', 'Kawaii Queen'];
+function getLevel(s) { for (let i = LEVEL_THRESHOLDS.length-1; i >= 0; i--) { if (s >= LEVEL_THRESHOLDS[i]) return i+1; } return 1; }
 let sparkles = [], texts = [], items = [];
 let bgHue = 0, shakeX = 0, shakeY = 0;
 let fever = false, feverTimer = 0;
@@ -511,14 +515,14 @@ let bbReveal = null; // Blind box reveal popup: { charDraw, charName, rarity, ti
 
 // ====== SANRIO COLLECTION (Pokemon-style) ======
 const SANRIO_CHARS = [
-  { id:'hello_kitty', name:'Hello Kitty', draw:drawHelloKitty, rarity:'legendary', color:'#e91e63' },
-  { id:'kuromi', name:'Kuromi', draw:drawKuromi, rarity:'rare', color:'#9c27b0' },
-  { id:'badtz_maru', name:'Badtz-Maru', draw:drawBadtzMaru, rarity:'rare', color:'#1a1a2e' },
-  { id:'cinnamoroll', name:'Cinnamoroll', draw:drawCinnaBox, rarity:'powerup', color:'#89c4f4' },
-  { id:'pompompurin', name:'Pompompurin', draw:drawPurinBox, rarity:'powerup', color:'#fdd835' },
-  { id:'my_melody', name:'My Melody', draw:drawMyMelody, rarity:'common', color:'#ffb6c1' },
-  { id:'pochacco', name:'Pochacco', draw:drawPochacco, rarity:'common', color:'#2196f3' },
-  { id:'keroppi', name:'Keroppi', draw:drawKeroppi, rarity:'common', color:'#4caf50' },
+  { id:'hello_kitty', name:'Hello Kitty', imgKey:'hk', rarity:'legendary', color:'#e91e63' },
+  { id:'kuromi', name:'Kuromi', imgKey:'kuromi', rarity:'rare', color:'#9c27b0' },
+  { id:'badtz_maru', name:'Badtz-Maru', imgKey:'badtz', rarity:'rare', color:'#1a1a2e' },
+  { id:'cinnamoroll', name:'Cinnamoroll', imgKey:'cinna', rarity:'powerup', color:'#89c4f4' },
+  { id:'pompompurin', name:'Pompompurin', imgKey:'purin', rarity:'powerup', color:'#fdd835' },
+  { id:'my_melody', name:'My Melody', imgKey:'melody', rarity:'common', color:'#ffb6c1' },
+  { id:'pochacco', name:'Pochacco', imgKey:'pochacco', rarity:'common', color:'#2196f3' },
+  { id:'keroppi', name:'Keroppi', imgKey:'keroppi', rarity:'common', color:'#4caf50' },
 ];
 function getCollection() { try { return JSON.parse(localStorage.getItem('aria_collection') || '{}'); } catch(e) { return {}; } }
 function saveCollection(col) { localStorage.setItem('aria_collection', JSON.stringify(col)); }
@@ -531,6 +535,7 @@ function collectChar(charId) {
 }
 function getCollectionCount() { return Object.keys(getCollection()).length; }
 let showCollection = false;
+let sessionCollected = []; // chars found this game round
 
 // Ninja
 const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 };
@@ -620,7 +625,7 @@ function sndCelebration() {
 
 // ====== IMAGES ======
 const imgs = {};
-let imgsLoaded = 0, imgsTotal = 4;
+let imgsLoaded = 0, imgsTotal = 10;
 function loadI(n, s) {
   const i = new Image(); i.crossOrigin='anonymous'; i.src = s;
   i.onload = () => imgsLoaded++;
@@ -630,6 +635,12 @@ loadI('avatar', 'avatar_big.png');
 loadI('cinna', 'cinnamoroll3.png');
 loadI('cinnaFly', 'cinnamoroll2.png');
 loadI('purin', 'pompompurin.png');
+loadI('hk', 'hellokitty.png');
+loadI('melody', 'mymelody.png');
+loadI('kuromi', 'kuromi.png');
+loadI('pochacco', 'pochacco.png');
+loadI('keroppi', 'keroppi.png');
+loadI('badtz', 'badtzmaru.png');
 
 function drawImg(img, x, y, mw, mh) {
   if (!img?.complete || !img.naturalWidth) return;
@@ -1315,14 +1326,15 @@ function spawnItem() {
   if (r < 0.01+jitter) type = LUCKY;                              // ~1% lucky star
   else if (r < 0.025) type = SHIELD;                              // 1.5% shield
   else if (r < 0.03 && clocksDropped < maxClocks && gameTime > 10) { type = CLOCK; clocksDropped++; } // 1-2 per game, after 10s
-  else if (r < 0.05+jitter) type = BLINDBOX;                      // ~2% blind box
+  else if (r < 0.04+jitter) type = BLINDBOX;                      // ~1% blind box
   else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
   else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
   else if (r < 0.19) type = ITEMS[6];                             // 5% rainbow
   else type = ITEMS[Math.floor(Math.random()*ITEMS.length)];      // all normal items (inc rainbow)
   const x = 20 + Math.random()*(W-40);                            // wider spread
   const speedRng = 0.8 + Math.random()*0.4;                       // 80-120% speed variance
-  const spd = (170 + Math.random()*140 + (gameTime/ROUND)*140) * speedRng;
+  const levelMod = 1 + (gameLevel - 1) * 0.06;
+  const spd = (170 + Math.random()*140 + (gameTime/ROUND)*120) * speedRng * levelMod;
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
 
   // Random Hello Kitty Shower event (~1.5% per spawn, after 10s)
@@ -1524,6 +1536,13 @@ function drawHUD() {
   X.textAlign = 'left'; X.textBaseline = 'middle';
   X.fillText(score, 52, 32);
 
+  // Level badge
+  X.fillStyle = 'rgba(233,30,99,0.85)';
+  rr(W/2, 10, 80, 28, 14);
+  X.fillStyle = '#fff'; X.font = 'bold 11px "Fredoka One",sans-serif';
+  X.textAlign = 'center';
+  X.fillText('Lv.' + gameLevel + ' ' + LEVEL_NAMES[gameLevel-1], W/2, 26);
+
   const tl = Math.max(0, Math.ceil(ROUND - gameTime));
   X.fillStyle = 'rgba(255,255,255,0.85)';
   rr(W-130,10,120,42,21);
@@ -1582,6 +1601,9 @@ function drawHUD() {
     X.fillText(T('tapJump'), W/2, H-28);
     X.globalAlpha = 1;
   }
+  // Version always visible
+  X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
+  X.textAlign = 'right'; X.fillText('v5.9', W-8, H-8);
 }
 
 // ====== CHARACTERS ======
@@ -1721,7 +1743,7 @@ function drawCollection() {
     X.closePath(); X.stroke();
 
     if (owned) {
-      ch.draw(cx, cy - 12, 28);
+      drawImg(imgs[ch.imgKey], cx, cy - 12, 56, 56);
       X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif';
       X.textAlign = 'center';
       X.fillText(ch.name, cx, cy + 38);
@@ -1904,7 +1926,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.8', W-14, H-12);
+  X.fillText('v5.9', W-14, H-12);
 }
 
 function drawResults() {
@@ -1945,27 +1967,60 @@ function drawResults() {
 
   X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
   X.textAlign = 'center';
-  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x', W/2, 298);
-  X.fillText(T('best')+': '+hi, W/2, 316);
+  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x', W/2, 292);
+  X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
+  X.fillText('Level ' + gameLevel + ' - ' + LEVEL_NAMES[gameLevel-1], W/2, 310);
+  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
+  X.fillText(T('best')+': '+hi, W/2, 326);
 
   const stars = score>=300?3:score>=150?2:score>=50?1:0;
   for (let i=0;i<3;i++) {
-    drawStar(W/2-40+i*40, 345, i<stars?15:10);
-    if (i>=stars) { X.fillStyle='rgba(200,200,200,0.5)'; X.beginPath(); X.arc(W/2-40+i*40,345,12,0,Math.PI*2); X.fill(); }
+    drawStar(W/2-40+i*40, 346, i<stars?15:10);
+    if (i>=stars) { X.fillStyle='rgba(200,200,200,0.5)'; X.beginPath(); X.arc(W/2-40+i*40,346,12,0,Math.PI*2); X.fill(); }
+  }
+
+  // Collection stash from this round
+  let stashEndY = 365;
+  if (sessionCollected.length > 0) {
+    X.fillStyle = '#fce4ec';
+    const stashH = 28 + Math.ceil(sessionCollected.length / 4) * 52;
+    rrc(W/2, 365 + stashH/2, 280, stashH, 12);
+    X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    X.fillText('\u2728 Collected This Round', W/2, 378);
+    sessionCollected.forEach((ch, i) => {
+      const col = i % 4;
+      const row = Math.floor(i / 4);
+      const cx = W/2 - 75 + col * 50;
+      const cy = 400 + row * 52;
+      // Mini card
+      X.fillStyle = '#fff';
+      rrc(cx, cy, 42, 46, 8);
+      drawImg(imgs[ch.imgKey], cx, cy - 5, 28, 28);
+      X.fillStyle = '#555'; X.font = 'bold 7px "Quicksand",sans-serif';
+      X.textAlign = 'center';
+      X.fillText(ch.name, cx, cy + 18);
+      if (ch.isNew) {
+        X.fillStyle = '#ff1744'; X.font = 'bold 7px "Fredoka One",sans-serif';
+        X.fillText('NEW!', cx, cy + 26);
+      }
+    });
+    stashEndY = 365 + stashH + 8;
   }
 
   // Top players mini-leaderboard on results
   const lb = getLeaderboard();
+  const lbTop = stashEndY + 4;
   if (lb.length > 0) {
     X.fillStyle = '#fff3e0';
-    rrc(W/2, 390, 260, 56, 12);
+    rrc(W/2, lbTop + 26, 260, 56, 12);
     X.fillStyle = '#e65100'; X.font = 'bold 10px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(T('topPlayers'), W/2, 372);
+    X.fillText(T('topPlayers'), W/2, lbTop + 8);
     const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
     const top3 = lb.slice(0, 3);
     top3.forEach((e, i) => {
-      const ty = 387 + i * 15;
+      const ty = lbTop + 23 + i * 15;
       X.font = 'bold 11px "Quicksand",sans-serif';
       X.textAlign = 'left';
       X.fillStyle = '#888';
@@ -1976,7 +2031,7 @@ function drawResults() {
     });
   }
 
-  const btnY = lb.length > 0 ? 450 : 420;
+  const btnY = lb.length > 0 ? lbTop + 64 : stashEndY + 12;
 
   X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 36, 18);
   X.fillStyle = '#fff'; X.font = 'bold 14px "Quicksand",sans-serif';
@@ -1999,7 +2054,13 @@ function drawResults() {
 // Store button positions for results click handling
 function getResultsBtnY() {
   const lb = getLeaderboard();
-  const btnY = lb.length > 0 ? 450 : 420;
+  let stashEndY = 365;
+  if (sessionCollected.length > 0) {
+    const stashH = 28 + Math.ceil(sessionCollected.length / 4) * 52;
+    stashEndY = 365 + stashH + 8;
+  }
+  const lbTop = stashEndY + 4;
+  const btnY = lb.length > 0 ? lbTop + 64 : stashEndY + 12;
   return { share: btnY, play: btnY + 42, lb: btnY + 84 };
 }
 
@@ -2102,11 +2163,22 @@ function update(dt) {
     if (hkShower.timer <= 0) hkShower.active = false;
   }
 
+  // Level check
+  gameLevel = getLevel(score);
+  if (gameLevel > prevLevel) {
+    prevLevel = gameLevel;
+    addText(W/2, 120, 'Level ' + gameLevel + '! ' + LEVEL_NAMES[gameLevel-1], '#e91e63');
+    addSpark(W/2, 120, '#e91e63', 15);
+    addSpark(W/2, 120, '#ffd700', 10);
+    shake(4);
+    sndCelebration();
+  }
+
   if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, T('feverMode'), '#e040fb'); trackEvent('fever_mode', { score, combo }); }
   if (combo < 15) fever = false;
   if (fever) feverTimer += dt;
 
-  const rate = fever ? 0.08 : Math.max(0.12, 0.35 - gameTime*0.01);
+  const rate = fever ? 0.10 : Math.max(0.20, 0.42 - gameTime*0.008);
   spawnAcc += dt;
   if (spawnAcc >= rate) { spawnAcc = 0; spawnItem(); }
 
@@ -2193,41 +2265,42 @@ function update(dt) {
         const rarity = Math.random();
         const rarityTier = rarity < 0.02 ? 'legendary' : rarity < 0.10 ? 'rare' : rarity < 0.35 ? 'powerup' : 'common';
         trackEvent('blind_box_opened', { score, detail: rarityTier });
-        let popColor, charDraw, charName, charId, revealTime, isNew = false;
+        let popColor, charImgKey, charName, charId, revealTime, isNew = false;
         if (rarity < 0.02) {
           // LEGENDARY - Hello Kitty
           triggerHelloKittyShower();
           score += 100;
           addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ff69b4');
-          popColor = '#ffd700'; charDraw = drawHelloKitty; charName = 'Hello Kitty'; charId = 'hello_kitty'; revealTime = 2.5;
+          popColor = '#ffd700'; charImgKey = 'hk'; charName = 'Hello Kitty'; charId = 'hello_kitty'; revealTime = 2.5;
         } else if (rarity < 0.10) {
           // RARE - Kuromi or Badtz-Maru
           score += 75; if (ROUND < 35) ROUND += 1;
           addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
-          const rareChars = [{d:drawKuromi,n:'Kuromi',id:'kuromi'},{d:drawBadtzMaru,n:'Badtz-Maru',id:'badtz_maru'}];
+          const rareChars = [{ik:'kuromi',n:'Kuromi',id:'kuromi'},{ik:'badtz',n:'Badtz-Maru',id:'badtz_maru'}];
           const pick = rareChars[Math.floor(Math.random()*rareChars.length)];
-          popColor = '#9c27b0'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 2.0;
+          popColor = '#9c27b0'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 2.0;
         } else if (rarity < 0.35) {
           // POWERUP - Cinnamoroll or Pompompurin
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
           if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '\uD83E\uDDF2 '+T('magnet'), '#2196f3'); }
           else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
           else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '\uD83D\uDEE1 '+T('shield'), '#64c8ff'); }
-          const pwChars = [{d:drawCinnaBox,n:'Cinnamoroll',id:'cinnamoroll'},{d:drawPurinBox,n:'Pompompurin',id:'pompompurin'}];
+          const pwChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
           const pick = pwChars[Math.floor(Math.random()*pwChars.length)];
-          popColor = '#ffd700'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 1.5;
+          popColor = '#ffd700'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.5;
         } else {
           // COMMON - My Melody, Pochacco, or Keroppi
           const bp = 15 + Math.floor(Math.random()*20);
           score += bp;
           addText(it.x, it.y-20, '+' + bp, '#ff69b4');
-          const comChars = [{d:drawMyMelody,n:'My Melody',id:'my_melody'},{d:drawPochacco,n:'Pochacco',id:'pochacco'},{d:drawKeroppi,n:'Keroppi',id:'keroppi'}];
+          const comChars = [{ik:'melody',n:'My Melody',id:'my_melody'},{ik:'pochacco',n:'Pochacco',id:'pochacco'},{ik:'keroppi',n:'Keroppi',id:'keroppi'}];
           const pick = comChars[Math.floor(Math.random()*comChars.length)];
-          popColor = '#ff69b4'; charDraw = pick.d; charName = pick.n; charId = pick.id; revealTime = 1.2;
+          popColor = '#ff69b4'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.2;
         }
         // Collect the character!
         isNew = !getCollection()[charId];
         collectChar(charId);
+        sessionCollected.push({ id: charId, name: charName, rarity: rarityTier, isNew, imgKey: charImgKey, color: popColor });
         // Trigger full-screen reveal popup
         const revealSparks = [];
         for (let i = 0; i < 20; i++) {
@@ -2238,9 +2311,9 @@ function update(dt) {
             r: 2+Math.random()*3, color: [popColor,'#ffd700','#fff','#ff69b4'][Math.floor(Math.random()*4)]
           });
         }
-        bbReveal = { charDraw, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0, isNew };
+        bbReveal = { charImgKey, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0, isNew };
         // Also push a small floating pop-out
-        boxPops.push({ x:it.x, y:it.y, drawFn:charDraw, size:36, life:1.2, ml:1.2, vy:-180, scale:0 });
+        boxPops.push({ x:it.x, y:it.y, imgKey:charImgKey, size:36, life:1.2, ml:1.2, vy:-180, scale:0 });
         addSpark(it.x, it.y, '#ffd700', 20);
         addSpark(it.x, it.y, popColor, 12);
         shake(6); sndLuckyStar();
@@ -2364,8 +2437,8 @@ function drawGame() {
     X.beginPath(); X.arc(0, 0, bp.size*0.9, 0, Math.PI*2); X.stroke();
     X.fillStyle = `rgba(255,255,200,${alpha*0.15})`;
     X.beginPath(); X.arc(0, 0, bp.size*0.9, 0, Math.PI*2); X.fill();
-    // Draw the actual Sanrio character
-    bp.drawFn(0, 0, bp.size*0.6);
+    // Draw the actual Sanrio character (PNG)
+    drawImg(imgs[bp.imgKey], 0, 0, bp.size*1.2, bp.size*1.2);
     X.restore();
   });
   X.globalAlpha = 1;
@@ -2427,8 +2500,8 @@ function drawGame() {
     X.textAlign = 'center';
     X.fillText(rarityLabels[rv.rarity] || 'COMMON', 0, -ch/2 + 22);
 
-    // Draw the Sanrio character big
-    rv.charDraw(0, 8, 42);
+    // Draw the Sanrio character big (PNG)
+    drawImg(imgs[rv.charImgKey], 0, 8, 84, 84);
 
     // Character name
     X.fillStyle = '#333';
@@ -2518,7 +2591,7 @@ function startGame() {
   state = 'playing';
   score=0; combo=0; maxCombo=0; caught=0; missed=0;
   gameTime=0; items=[]; sparkles=[]; texts=[]; trail=[];
-  ROUND = 25;
+  ROUND = 25; gameLevel = 1; prevLevel = 1;
   flyC = {on:false,x:-60,y:120,t:0};
   ninja.active=false; ninja.announced=false; ninja.tt=0;
   P.x=W/2; P.tx=W/2; P.y=P.baseY; P.vy=0; P.jumping=false;
@@ -2528,6 +2601,7 @@ function startGame() {
   clocksDropped = 0; maxClocks = 1 + Math.floor(Math.random()*2);
   boxPops = [];
   bbReveal = null;
+  sessionCollected = [];
   lbSaved = false;
   celebActive = false;
   ensureAudio();
