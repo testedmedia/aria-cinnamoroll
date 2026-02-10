@@ -355,8 +355,7 @@ loadGlobalLB();
 // ====== PLAYER NAME + LEADERBOARD ======
 let playerName = localStorage.getItem('aria_player') || '';
 window._pName = playerName;
-trackEvent('page_view', { detail: challScore ? 'challenge_s='+challScore : '' });
-if (challScore) trackEvent('challenge_received', { score: challScore });
+// page_view + challenge tracking moved after challScore declaration (see below)
 
 function getLeaderboard() {
   // Return global leaderboard if available, else local
@@ -520,6 +519,8 @@ const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 }
 // Challenge
 const UP = new URLSearchParams(window.location.search);
 const challScore = UP.get('s') ? parseInt(UP.get('s')) : null;
+trackEvent('page_view', { detail: challScore ? 'challenge_s='+challScore : '' });
+if (challScore) trackEvent('challenge_received', { score: challScore });
 
 // ====== HAPTICS ======
 function haptic(ms) {
