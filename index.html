@@ -794,76 +794,49 @@ function drawBomb(x, y, s) {
   const bounce = Math.sin(frame * 0.06) * 2;
   ctx.save(); ctx.translate(x, y + bounce);
 
-  // Head - round white face like Hello Kitty
-  ctx.fillStyle = '#f5f0ff';
-  ctx.beginPath(); ctx.arc(0, 0, s*0.9, 0, Math.PI*2); ctx.fill();
+  // Fuse on top
+  ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, -s*0.8);
+  ctx.quadraticCurveTo(s*0.3, -s*1.1, s*0.1, -s*1.3);
+  ctx.stroke();
+  // Spark at fuse tip
+  const sparkAlpha = 0.5 + Math.sin(frame*0.3)*0.5;
+  ctx.fillStyle = `rgba(255,165,0,${sparkAlpha})`;
+  ctx.beginPath(); ctx.arc(s*0.1, -s*1.3, s*0.15, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = `rgba(255,255,0,${sparkAlpha})`;
+  ctx.beginPath(); ctx.arc(s*0.1, -s*1.3, s*0.08, 0, Math.PI*2); ctx.fill();
 
-  // Purple hood/hat (Kuromi style)
-  ctx.fillStyle = '#6a1b9a';
-  ctx.beginPath();
-  ctx.arc(0, -s*0.05, s*0.92, Math.PI*0.95, Math.PI*2.05);
-  ctx.quadraticCurveTo(s*0.5, -s*0.2, 0, -s*0.05);
-  ctx.fill();
-  // Pointy ears on hood
-  ctx.beginPath();
-  ctx.moveTo(-s*0.7, -s*0.4);
-  ctx.lineTo(-s*0.5, -s*1.1);
-  ctx.lineTo(-s*0.15, -s*0.5);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(s*0.7, -s*0.4);
-  ctx.lineTo(s*0.5, -s*1.1);
-  ctx.lineTo(s*0.15, -s*0.5);
-  ctx.fill();
-  // Pink inner ears
-  ctx.fillStyle = '#f48fb1';
-  ctx.beginPath();
-  ctx.moveTo(-s*0.55, -s*0.5);
-  ctx.lineTo(-s*0.48, -s*0.9);
-  ctx.lineTo(-s*0.25, -s*0.55);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(s*0.55, -s*0.5);
-  ctx.lineTo(s*0.48, -s*0.9);
-  ctx.lineTo(s*0.25, -s*0.55);
-  ctx.fill();
+  // Round bomb body
+  ctx.fillStyle = '#2d2d2d';
+  ctx.beginPath(); ctx.arc(0, 0, s*0.85, 0, Math.PI*2); ctx.fill();
+  // Slight gradient shine
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.beginPath(); ctx.arc(-s*0.2, -s*0.2, s*0.5, 0, Math.PI*2); ctx.fill();
 
-  // Cute skull on forehead
-  ctx.fillStyle = '#ffb6c1';
-  ctx.beginPath(); ctx.arc(0, -s*0.55, s*0.18, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(-s*0.12, -s*0.42, s*0.08, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*0.12, -s*0.42, s*0.08, 0, Math.PI*2); ctx.fill();
-
-  // Big oval eyes (like Hello Kitty but mischievous)
-  ctx.fillStyle = '#1a1a2e';
-  ctx.beginPath(); ctx.ellipse(-s*0.28, s*0.0, s*0.16, s*0.2, 0, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(s*0.28, s*0.0, s*0.16, s*0.2, 0, 0, Math.PI*2); ctx.fill();
-  // Eye highlights
+  // Kawaii face - big sparkly eyes
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(-s*0.22, -s*0.06, s*0.07, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*0.34, -s*0.06, s*0.07, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(-s*0.32, s*0.08, s*0.04, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(s*0.22, s*0.08, s*0.04, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-s*0.28, -s*0.05, s*0.2, s*0.22, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.28, -s*0.05, s*0.2, s*0.22, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.arc(-s*0.28, s*0.0, s*0.13, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.28, s*0.0, s*0.13, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*0.22, -s*0.06, s*0.06, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.34, -s*0.06, s*0.06, 0, Math.PI*2); ctx.fill();
 
-  // Tiny nose
-  ctx.fillStyle = '#f48fb1';
-  ctx.beginPath(); ctx.ellipse(0, s*0.18, s*0.06, s*0.04, 0, 0, Math.PI*2); ctx.fill();
+  // Cute worried mouth (wavy line)
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-s*0.2, s*0.3);
+  ctx.quadraticCurveTo(-s*0.1, s*0.22, 0, s*0.3);
+  ctx.quadraticCurveTo(s*0.1, s*0.38, s*0.2, s*0.3);
+  ctx.stroke();
 
-  // Mischievous smile
-  ctx.strokeStyle = '#6a1b9a'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(0, s*0.22, s*0.18, 0.15, Math.PI-0.15); ctx.stroke();
-
-  // Whiskers
-  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(-s*0.15, s*0.2); ctx.lineTo(-s*0.65, s*0.1); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-s*0.15, s*0.28); ctx.lineTo(-s*0.65, s*0.32); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s*0.15, s*0.2); ctx.lineTo(s*0.65, s*0.1); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(s*0.15, s*0.28); ctx.lineTo(s*0.65, s*0.32); ctx.stroke();
-
-  // Blush
-  ctx.fillStyle = 'rgba(255,130,170,0.35)';
-  ctx.beginPath(); ctx.ellipse(-s*0.5, s*0.2, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(s*0.5, s*0.2, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  // Pink blush cheeks
+  ctx.fillStyle = 'rgba(255,100,150,0.4)';
+  ctx.beginPath(); ctx.ellipse(-s*0.5, s*0.18, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.5, s*0.18, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
 
   ctx.restore();
 }
@@ -1302,7 +1275,6 @@ const ITEMS = [
   { name:'capybara', pts:20, color:'#b08968', draw:drawCapybara, w:1.5 },
   { name:'star', pts:5, color:'#fff176', draw:drawStar, w:0.8 },
   { name:'heart', pts:8, color:'#ff6b9d', draw:drawHeart, w:0.8 },
-  { name:'pudding', pts:12, color:'#ffd54f', draw:drawPudding, w:1.0 },
   { name:'rainbow', pts:30, color:'#e040fb', draw:drawRainbow, w:1.0 },
 ];
 const POWERUPS = [
@@ -1345,9 +1317,9 @@ function spawnItem() {
   if (r < 0.01+jitter) type = LUCKY;                              // ~1% lucky star
   else if (r < 0.025) type = SHIELD;                              // 1.5% shield
   else if (r < 0.03 && clocksDropped < maxClocks && gameTime > 10) { type = CLOCK; clocksDropped++; } // 1-2 per game, after 10s
-  else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
+  else if (r < 0.11) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 8% powerups (more magnets)
   else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
-  else if (r < 0.19) type = ITEMS[6];                             // 5% rainbow
+  else if (r < 0.19) type = ITEMS[5];                             // 5% rainbow
   else type = ITEMS[Math.floor(Math.random()*ITEMS.length)];      // all normal items (inc rainbow)
   } // end else (non-blindbox)
   const x = 20 + Math.random()*(W-40);                            // wider spread
@@ -1615,7 +1587,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v6.1', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v6.2', W-8, H-8);
 }
 
 // ====== CHARACTERS ======
@@ -1810,28 +1782,14 @@ function drawMenu() {
   drawImg(imgs.avatar, W/2, 208+Math.sin(frame*0.04)*6, 80, 108);
   drawImg(imgs.purin, W/2+80, 230+Math.sin(frame*0.04+1)*8, 75, 68);
 
-  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
-  X.fillText(T('catchThese'), W/2, 305);
-  const show = [
-    {d:drawDonut,l:'Donut'},{d:drawBoba,l:'Boba'},{d:drawCapybara,l:'Capy'},
-    {d:drawStar,l:'Star'},{d:drawPudding,l:'Pudding'},{d:drawHeart,l:'Heart'}
-  ];
-  show.forEach((s,i) => {
-    const ix = 38+i*65;
-    s.d(ix, 340, 12);
-    X.fillStyle = '#999'; X.font = '9px "Quicksand",sans-serif';
-    X.textAlign = 'center';
-    X.fillText(s.l, ix, 362);
-  });
-
   if (challScore) {
-    X.fillStyle = '#fff3e0'; rrc(W/2, 390, 280, 32, 16);
+    X.fillStyle = '#fff3e0'; rrc(W/2, 300, 280, 32, 16);
     X.fillStyle = '#e65100'; X.font = 'bold 13px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText('🎯 '+T('beat')+' '+challScore+'!', W/2, 392);
+    X.fillText('🎯 '+T('beat')+' '+challScore+'!', W/2, 302);
   }
 
-  const by = challScore ? 420 : 395;
+  const by = challScore ? 350 : 310;
   const bp = 1+Math.sin(frame*0.06)*0.03;
   X.save(); X.translate(W/2, by); X.scale(bp, bp);
   X.fillStyle = '#ff8a9e'; rrc(0, 0, 220, 56, 28);
@@ -1861,64 +1819,59 @@ function drawMenu() {
 
   if (playerName) {
     X.fillStyle = 'rgba(255,255,255,0.8)';
-    rrc(W/2, by+80, 180, 26, 13);
-    X.fillStyle = '#e91e63'; X.font = 'bold 12px "Quicksand",sans-serif';
+    rrc(W/2, by+82, 200, 28, 14);
+    X.fillStyle = '#e91e63'; X.font = 'bold 13px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText(T('playingAs')+': '+playerName, W/2, by+82);
+    X.fillText(T('playingAs')+': '+playerName, W/2, by+84);
   }
 
-  // Bottom buttons - better spacing
-  const btnStart = by + (playerName ? 100 : 85);
+  // Bottom buttons - clean spacing
+  const btnStart = by + (playerName ? 114 : 92);
 
   // Leaderboard button
-  X.fillStyle = '#fff3e0'; rrc(W/2, btnStart, 180, 38, 19);
+  X.fillStyle = '#fff3e0'; rrc(W/2, btnStart, 200, 40, 20);
   X.strokeStyle = '#ffd54f'; X.lineWidth = 2;
   X.beginPath();
-  X.moveTo(W/2-68,btnStart-19); X.lineTo(W/2+68,btnStart-19);
-  X.quadraticCurveTo(W/2+90,btnStart-19,W/2+90,btnStart);
-  X.quadraticCurveTo(W/2+90,btnStart+19,W/2+68,btnStart+19);
-  X.lineTo(W/2-68,btnStart+19);
-  X.quadraticCurveTo(W/2-90,btnStart+19,W/2-90,btnStart);
-  X.quadraticCurveTo(W/2-90,btnStart-19,W/2-68,btnStart-19);
+  X.moveTo(W/2-78,btnStart-20); X.lineTo(W/2+78,btnStart-20);
+  X.quadraticCurveTo(W/2+100,btnStart-20,W/2+100,btnStart);
+  X.quadraticCurveTo(W/2+100,btnStart+20,W/2+78,btnStart+20);
+  X.lineTo(W/2-78,btnStart+20);
+  X.quadraticCurveTo(W/2-100,btnStart+20,W/2-100,btnStart);
+  X.quadraticCurveTo(W/2-100,btnStart-20,W/2-78,btnStart-20);
   X.closePath(); X.stroke();
   X.fillStyle = '#e65100'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
   X.fillText(T('leaderboard'), W/2, btnStart+2);
 
   // Collection button
-  const cby = btnStart + 42;
+  const cby = btnStart + 50;
   const collected = getCollectionCount();
-  X.fillStyle = '#fce4ec'; rrc(W/2, cby, 180, 38, 19);
+  X.fillStyle = '#fce4ec'; rrc(W/2, cby, 200, 40, 20);
   X.strokeStyle = '#e91e63'; X.lineWidth = 2;
   X.beginPath();
-  X.moveTo(W/2-68,cby-19); X.lineTo(W/2+68,cby-19);
-  X.quadraticCurveTo(W/2+90,cby-19,W/2+90,cby);
-  X.quadraticCurveTo(W/2+90,cby+19,W/2+68,cby+19);
-  X.lineTo(W/2-68,cby+19);
-  X.quadraticCurveTo(W/2-90,cby+19,W/2-90,cby);
-  X.quadraticCurveTo(W/2-90,cby-19,W/2-68,cby-19);
+  X.moveTo(W/2-78,cby-20); X.lineTo(W/2+78,cby-20);
+  X.quadraticCurveTo(W/2+100,cby-20,W/2+100,cby);
+  X.quadraticCurveTo(W/2+100,cby+20,W/2+78,cby+20);
+  X.lineTo(W/2-78,cby+20);
+  X.quadraticCurveTo(W/2-100,cby+20,W/2-100,cby);
+  X.quadraticCurveTo(W/2-100,cby-20,W/2-78,cby-20);
   X.closePath(); X.stroke();
   X.fillStyle = '#e91e63'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
   X.fillText('\u2728 Collection '+collected+'/9', W/2, cby+2);
 
-  // How to Play + Set Name row
-  const hby = cby + 40;
-  X.fillStyle = '#e3f2fd'; rrc(W/2-55, hby, 100, 30, 15);
-  X.fillStyle = '#1565c0'; X.font = 'bold 11px "Fredoka One",sans-serif';
+  // How to Play button (centered)
+  const hby = cby + 48;
+  X.fillStyle = '#e3f2fd'; rrc(W/2, hby, 160, 36, 18);
+  X.fillStyle = '#1565c0'; X.font = 'bold 12px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('howToPlay'), W/2-55, hby+1);
+  X.fillText(T('howToPlay'), W/2, hby+2);
 
-  X.fillStyle = '#f3e5f5'; rrc(W/2+55, hby, 100, 30, 15);
-  X.fillStyle = '#7c4dff'; X.font = 'bold 11px "Fredoka One",sans-serif';
-  X.fillText(playerName ? T('tapName') : T('setName'), W/2+55, hby+1);
-
-  // Share with friends button
-  const sby = hby + 36;
-  X.fillStyle = '#25d366'; rrc(W/2, sby, 190, 34, 17);
-  X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif';
-  X.textAlign = 'center';
-  X.fillText(T('challengeFriend'), W/2, sby+2);
+  // Settings gear (top-right for name change)
+  X.fillStyle = 'rgba(255,255,255,0.7)';
+  X.beginPath(); X.arc(W-30, 30, 18, 0, Math.PI*2); X.fill();
+  X.fillStyle = '#888'; X.font = '18px sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2699', W-30, 33);
 
   drawImg(imgs.cinna, 50, H-50, 38, 38);
   drawImg(imgs.purin, W-50, H-50, 45, 45);
@@ -1938,7 +1891,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v6.1', W-14, H-12);
+  X.fillText('v6.2', W-14, H-12);
 }
 
 function drawResults() {
@@ -2575,9 +2528,9 @@ function gc(cx, cy) {
 let primaryTouch = null;
 
 function getMenuBtnY() {
-  const by = challScore ? 420 : 395;
-  const btnStart = by + (playerName ? 100 : 85);
-  return { play: by, lb: btnStart, collection: btnStart + 42, howto: btnStart + 82, name: btnStart + 82, share: btnStart + 118 };
+  const by = challScore ? 350 : 310;
+  const btnStart = by + (playerName ? 114 : 92);
+  return { play: by, lb: btnStart, collection: btnStart + 50, howto: btnStart + 98, settings: 30 };
 }
 
 function startGame() {
@@ -2622,11 +2575,10 @@ function handleTap(x, y) {
       return;
     }
     const mb = getMenuBtnY();
-    if (Math.abs(x-W/2)<95 && Math.abs(y-mb.lb)<22) { openLB(); return; }
-    if (Math.abs(x-W/2)<95 && Math.abs(y-mb.collection)<22) { showCollection = true; return; }
-    if (Math.abs(x-(W/2-55))<55 && Math.abs(y-mb.howto)<18) { showTutorial(); return; }
-    if (Math.abs(x-(W/2+55))<55 && Math.abs(y-mb.name)<18) { promptName(); return; }
-    if (Math.abs(x-W/2)<100 && Math.abs(y-mb.share)<20) { shareChallenge(); return; }
+    if (Math.abs(x-W/2)<105 && Math.abs(y-mb.lb)<24) { openLB(); return; }
+    if (Math.abs(x-W/2)<105 && Math.abs(y-mb.collection)<24) { showCollection = true; return; }
+    if (Math.abs(x-W/2)<85 && Math.abs(y-mb.howto)<20) { showTutorial(); return; }
+    if (Math.abs(x-(W-30))<22 && Math.abs(y-mb.settings)<22) { promptName(); return; }
     if (!playerName) { promptNameThenPlay(); return; }
     showTutorialOrStart();
   } else if (state === 'results') {
