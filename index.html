@@ -2152,7 +2152,7 @@ function update(dt) {
     sndCelebration();
   }
 
-  const rate = Math.max(0.25, 0.45 - gameTime*0.006);
+  const rate = Math.max(0.22, 0.40 - gameTime*0.006);
   spawnAcc += dt;
   if (spawnAcc >= rate) { spawnAcc = 0; spawnItem(); }
 
@@ -2471,11 +2471,15 @@ function drawGame() {
     // NEW! badge or Collected
     if (rv.isNew) {
       X.fillStyle = '#ff1744'; X.font = 'bold 11px "Fredoka One",sans-serif';
-      X.fillText('\u2728 NEW! Added to Collection \u2728', 0, ch/2 - 10);
+      X.fillText('\u2728 NEW! Added to Backpack \u2728', 0, ch/2 - 22);
     } else {
       X.fillStyle = '#999'; X.font = '10px "Quicksand",sans-serif';
-      X.fillText('Already collected', 0, ch/2 - 10);
+      X.fillText('Already collected', 0, ch/2 - 22);
     }
+    // Drop rate at bottom
+    const dropPct = {legendary:'2% chance',rare:'8% chance',powerup:'25% chance',common:'65% chance'};
+    X.fillStyle = '#aaa'; X.font = 'bold 10px "Quicksand",sans-serif';
+    X.fillText(dropPct[rv.rarity] || '65% chance', 0, ch/2 - 6);
 
     // Sparkle particles
     rv.sparks.forEach(sp => {
