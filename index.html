@@ -909,8 +909,8 @@ function spawnItem() {
   const spd = (170 + Math.random()*140 + (gameTime/ROUND)*140) * speedRng;
   items.push({ x, y:-25, type, speed:spd, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
 
-  // Random Hello Kitty Shower event (~5% per spawn, after 8s) - DEMO MODE
-  if (!hkShower.active && gameTime > 8 && Math.random() < 0.05) triggerHelloKittyShower();
+  // Random Hello Kitty Shower event (~1.5% per spawn, after 10s)
+  if (!hkShower.active && gameTime > 10 && Math.random() < 0.015) triggerHelloKittyShower();
 }
 
 function triggerHelloKittyShower() {
