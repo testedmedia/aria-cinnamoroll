@@ -889,12 +889,13 @@ const SHURIKEN = { name:'shuriken', pts:50, color:'#ffd700', draw:drawShuriken, 
 
 // ====== SPAWN ======
 let spawnAcc = 0;
+let lastClockSpawn = -999;
 function spawnItem() {
   let type;
   const r = Math.random();
   if (r < 0.01) type = LUCKY;                                    // 1% lucky star
   else if (r < 0.025) type = SHIELD;                              // 1.5% shield
-  else if (r < 0.03) type = CLOCK;                                // 0.5% time extend (rare!)
+  else if (r < 0.03 && (gameTime - lastClockSpawn) > 45) { type = CLOCK; lastClockSpawn = gameTime; } // max 1 per 45s
   else if (r < 0.05) type = BLINDBOX;                             // 2% blind box
   else if (r < 0.09) type = POWERUPS[Math.floor(Math.random()*POWERUPS.length)]; // 4% powerups
   else if (r < 0.14 && gameTime > 5) type = BOMB;                // 5% bomb after 5s
