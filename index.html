@@ -174,6 +174,113 @@ const X = C.getContext('2d');
 const W = 420, H = 750;
 C.width = W; C.height = H;
 
+// ====== i18n ======
+let lang = localStorage.getItem('aria_lang') || 'en';
+const LANG = {
+  en: {
+    title1: "Aria's", title2: 'Boba Adventure', by: 'Game by Aria Smushkevich 💕',
+    sub: 'Catch boba, treats & open blind boxes!', catchThese: 'Catch these!',
+    tapToPlay: 'Tap to Play!', best: 'Best', playingAs: 'Playing as',
+    leaderboard: '🏆 Leaderboard', howToPlay: '❓ How to Play',
+    challengeFriend: '📲 Challenge a Friend!', tapName: 'Tap name to change',
+    setName: 'Tap to set name', beat: 'Beat', loading: 'Loading',
+    newRecord: 'NEW RECORD!', greatJob: 'Great Job!', score: 'Score',
+    caught: 'Caught', combo: 'Combo', topPlayers: '🏆 TOP PLAYERS',
+    shareScore: '📤 Share Score!', playAgain: 'Play Again!',
+    tapJump: 'Tap to jump! Slide to move!',
+    daddyNinja: 'DADDY NINJA!', feverMode: '🔥 FEVER MODE! 🔥',
+    magnetBurst: '💥 MAGNET BURST!', blocked: 'BLOCKED!',
+    seconds: 'SECONDS!', maxTime: 'MAX TIME', shower: '🎀 HELLO KITTY SHOWER! 🎀',
+    rare: 'RARE!', lucky: 'LUCKY!', magnet: 'MAGNET!', shield: 'SHIELD!',
+    pts2x: '2x POINTS!', nice: 'NICE!', great: 'GREAT!', amazing: 'AMAZING!',
+    incredible: 'INCREDIBLE!', unstoppable: 'UNSTOPPABLE!',
+    // HTML overlays
+    whatsName: "What's your name?", nameForLB: 'Enter your name for the leaderboard!',
+    yourName: 'Your name...', letsGo: "Let's Go! 🌟",
+    howToPlayTitle: 'How to Play! 🎮', catchTreats: 'Catch yummy treats for 25 seconds!',
+    catchSection: 'Catch These! 🎉', avoidSection: 'Avoid This! 😱', powerSection: 'Power-ups! ✨',
+    ctrl1: '👆 <strong>Slide finger</strong> to move left & right',
+    ctrl2: '👆 <strong>Tap anywhere</strong> to jump up high',
+    ctrl3: '👆 <strong>Two fingers:</strong> one moves, one jumps!',
+    ctrl4: '🔥 <strong>Combos:</strong> catch many in a row for bonus points!',
+    ctrl5: '⏱️ You have <strong>25 seconds</strong> - go for the high score!',
+    readyGo: "I'm Ready! Let's Go! 🚀",
+    globalLB: 'Global Leaderboard 🏆', topWorldwide: 'Top Players Worldwide',
+    noScores: 'No scores yet! Play to get on the board!', close: 'Close',
+    shareTitle: 'Share Your Score!', challengeBeat: 'Challenge your friends to beat it!',
+    shareX: 'Share on X', shareWA: 'Share on WhatsApp', copyLink: '📋 Copy Challenge Link',
+    shareTxt: (n,s) => `${n||'I'} scored ${s} in Aria's Boba Adventure! 🧋 Can you beat me? 🐰🐶`,
+    challengeTxt: (hi,url) => `Play Aria's Boba Adventure! 🧋🎀 Catch boba & open blind boxes with Cinnamoroll! Can you beat ${hi>0?hi+' points':'my score'}?\n${url}`,
+  },
+  es: {
+    title1: "Aria's", title2: 'Boba Aventura', by: 'Juego por Aria Smushkevich 💕',
+    sub: '¡Atrapa boba, dulces y abre cajas sorpresa!', catchThese: '¡Atrapa estos!',
+    tapToPlay: '¡Toca para Jugar!', best: 'Mejor', playingAs: 'Jugando como',
+    leaderboard: '🏆 Clasificación', howToPlay: '❓ Cómo Jugar',
+    challengeFriend: '📲 ¡Reta a un Amigo!', tapName: 'Toca para cambiar nombre',
+    setName: 'Toca para poner nombre', beat: 'Supera', loading: 'Cargando',
+    newRecord: '¡NUEVO RÉCORD!', greatJob: '¡Buen Trabajo!', score: 'Puntos',
+    caught: 'Atrapados', combo: 'Combo', topPlayers: '🏆 MEJORES',
+    shareScore: '📤 ¡Comparte!', playAgain: '¡Jugar de Nuevo!',
+    tapJump: '¡Toca para saltar! ¡Desliza para mover!',
+    daddyNinja: '¡PAPÁ NINJA!', feverMode: '🔥 ¡MODO FIEBRE! 🔥',
+    magnetBurst: '💥 ¡EXPLOSIÓN IMÁN!', blocked: '¡BLOQUEADO!',
+    seconds: '¡SEGUNDOS!', maxTime: 'TIEMPO MÁX', shower: '🎀 ¡LLUVIA HELLO KITTY! 🎀',
+    rare: '¡RARO!', lucky: '¡SUERTE!', magnet: '¡IMÁN!', shield: '¡ESCUDO!',
+    pts2x: '¡2x PUNTOS!', nice: '¡BIEN!', great: '¡GENIAL!', amazing: '¡INCREÍBLE!',
+    incredible: '¡ASOMBROSO!', unstoppable: '¡IMPARABLE!',
+    whatsName: '¿Cómo te llamas?', nameForLB: '¡Pon tu nombre para la clasificación!',
+    yourName: 'Tu nombre...', letsGo: '¡Vamos! 🌟',
+    howToPlayTitle: '¡Cómo Jugar! 🎮', catchTreats: '¡Atrapa dulces en 25 segundos!',
+    catchSection: '¡Atrapa Estos! 🎉', avoidSection: '¡Evita Esto! 😱', powerSection: '¡Poderes! ✨',
+    ctrl1: '👆 <strong>Desliza el dedo</strong> para moverte',
+    ctrl2: '👆 <strong>Toca</strong> para saltar alto',
+    ctrl3: '👆 <strong>Dos dedos:</strong> uno mueve, otro salta',
+    ctrl4: '🔥 <strong>Combos:</strong> ¡atrapa muchos seguidos para puntos extra!',
+    ctrl5: '⏱️ Tienes <strong>25 segundos</strong> - ¡ve por el récord!',
+    readyGo: '¡Estoy Listo! ¡Vamos! 🚀',
+    globalLB: 'Clasificación Global 🏆', topWorldwide: 'Mejores Jugadores del Mundo',
+    noScores: '¡Sin puntuaciones! ¡Juega para aparecer!', close: 'Cerrar',
+    shareTitle: '¡Comparte tu Puntuación!', challengeBeat: '¡Reta a tus amigos a superarla!',
+    shareX: 'Compartir en X', shareWA: 'Compartir en WhatsApp', copyLink: '📋 Copiar Enlace',
+    shareTxt: (n,s) => `${n||'Yo'} hice ${s} puntos en Aria's Boba Aventura! 🧋 ¿Puedes ganarme? 🐰🐶`,
+    challengeTxt: (hi,url) => `¡Juega Aria's Boba Aventura! 🧋🎀 ¡Atrapa boba y abre cajas con Cinnamoroll! ¿Puedes superar ${hi>0?hi+' puntos':'mi récord'}?\n${url}`,
+  }
+};
+function T(k) { return LANG[lang][k] || LANG.en[k] || k; }
+function setLang(l) {
+  lang = l; localStorage.setItem('aria_lang', l);
+  // Update HTML overlays
+  document.querySelector('#nameOv h2').textContent = T('whatsName');
+  document.querySelector('#nameOv p').textContent = T('nameForLB');
+  document.getElementById('nameIn').placeholder = T('yourName');
+  document.getElementById('goBtn').textContent = T('letsGo');
+  document.querySelector('#tutOv h2').textContent = T('howToPlayTitle');
+  document.querySelector('#tutOv .tut-panel > p').textContent = T('catchTreats');
+  const secs = document.querySelectorAll('.tut-section h3');
+  if(secs[0]) secs[0].innerHTML = T('catchSection');
+  if(secs[1]) secs[1].innerHTML = T('avoidSection');
+  if(secs[2]) secs[2].innerHTML = T('powerSection');
+  const ctrls = document.querySelectorAll('.tut-controls p');
+  if(ctrls[0]) ctrls[0].innerHTML = T('ctrl1');
+  if(ctrls[1]) ctrls[1].innerHTML = T('ctrl2');
+  if(ctrls[2]) ctrls[2].innerHTML = T('ctrl3');
+  if(ctrls[3]) ctrls[3].innerHTML = T('ctrl4');
+  if(ctrls[4]) ctrls[4].innerHTML = T('ctrl5');
+  document.querySelector('.tut-go').textContent = T('readyGo');
+  document.querySelector('#lbOv h2').textContent = T('globalLB');
+  document.querySelector('.lb-sub').textContent = T('topWorldwide');
+  document.querySelectorAll('.close-btn').forEach(b => b.textContent = T('close'));
+  document.querySelector('#shareOv h2').textContent = T('shareTitle');
+  document.querySelector('#shareOv p').textContent = T('challengeBeat');
+  const sBtns = document.querySelectorAll('.sbtn');
+  if(sBtns[0]) sBtns[0].textContent = T('shareX');
+  if(sBtns[1]) sBtns[1].textContent = T('shareWA');
+  if(sBtns[2]) sBtns[2].textContent = T('copyLink');
+}
+// Apply saved language on load
+setTimeout(() => setLang(lang), 100);
+
 // ====== SUPABASE CONFIG ======
 const SB_URL = 'https://wbfdnqgzopupxhntvpct.supabase.co';
 const SB_KEY = 'sb_publishable_SPwu1EsHnKuf3t61kPEyxw_e7-R5jqp';
@@ -405,11 +512,31 @@ function haptic(ms) {
 
 // ====== AUDIO ======
 let AC = null;
+let audioUnlocked = false;
 function ensureAudio() {
   if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
-  if (AC.state === 'suspended') AC.resume();
+  if (AC.state === 'suspended') {
+    AC.resume().then(() => { audioUnlocked = true; }).catch(()=>{});
+  } else if (AC.state === 'running') {
+    audioUnlocked = true;
+  }
   return AC;
 }
+// Unlock audio on first user gesture (critical for iOS)
+function unlockAudio() {
+  ensureAudio();
+  // Play silent buffer to fully unlock on iOS
+  if (AC && !audioUnlocked) {
+    const buf = AC.createBuffer(1, 1, 22050);
+    const src = AC.createBufferSource();
+    src.buffer = buf; src.connect(AC.destination);
+    src.start(0);
+    audioUnlocked = true;
+  }
+}
+['touchstart','click'].forEach(evt => {
+  document.addEventListener(evt, unlockAudio, {once:false,passive:true});
+});
 function playTone(freq, dur, type, vol) {
   try {
     const ac = ensureAudio();
@@ -918,7 +1045,7 @@ function triggerHelloKittyShower() {
   hkShower.active = true;
   hkShower.timer = 3;
   hkShower.spawnAcc = 0;
-  addText(W/2, 120, '🎀 HELLO KITTY SHOWER! 🎀', '#ff69b4');
+  addText(W/2, 120, T('shower'), '#ff69b4');
   shake(8);
   sndFever();
   // Initial burst
@@ -937,11 +1064,11 @@ function addSpark(x, y, color, n) {
 function addText(x, y, txt, color) { texts.push({ x, y, txt, color, life:0.6, ml:0.6 }); }
 
 function getStreak(c) {
-  if (c >= 30) return { t:'UNSTOPPABLE!', c:'#e040fb' };
-  if (c >= 20) return { t:'INCREDIBLE!', c:'#ff6b00' };
-  if (c >= 15) return { t:'AMAZING!', c:'#e91e63' };
-  if (c >= 10) return { t:'GREAT!', c:'#ff8a9e' };
-  if (c >= 5) return { t:'NICE!', c:'#ffd54f' };
+  if (c >= 30) return { t:T('unstoppable'), c:'#e040fb' };
+  if (c >= 20) return { t:T('incredible'), c:'#ff6b00' };
+  if (c >= 15) return { t:T('amazing'), c:'#e91e63' };
+  if (c >= 10) return { t:T('great'), c:'#ff8a9e' };
+  if (c >= 5) return { t:T('nice'), c:'#ffd54f' };
   return null;
 }
 
@@ -1163,7 +1290,7 @@ function drawHUD() {
     X.fillStyle = '#e91e63';
     X.font = 'bold 12px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText('Tap to jump! Slide to move!', W/2, H-28);
+    X.fillText(T('tapJump'), W/2, H-28);
     X.globalAlpha = 1;
   }
 }
@@ -1273,17 +1400,17 @@ function drawMenu() {
   X.fillStyle = '#fff'; X.strokeStyle = '#e91e63'; X.lineWidth = 5;
   X.font = 'bold 34px "Fredoka One",cursive';
   X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.strokeText("Aria's", W/2, 58);
-  X.fillText("Aria's", W/2, 58);
+  X.strokeText(T('title1'), W/2, 58);
+  X.fillText(T('title1'), W/2, 58);
   X.strokeStyle = '#ff8a9e';
-  X.strokeText('Boba Adventure', W/2, 100);
-  X.fillText('Boba Adventure', W/2, 100);
+  X.strokeText(T('title2'), W/2, 100);
+  X.fillText(T('title2'), W/2, 100);
 
   X.font = '14px "Quicksand",sans-serif';
   X.fillStyle = '#e91e63';
-  X.fillText('Game by Aria Smushkevich 💕', W/2, 132);
+  X.fillText(T('by'), W/2, 132);
   X.fillStyle = '#ff8a9e'; X.font = '13px "Quicksand",sans-serif';
-  X.fillText('Catch boba, treats & open blind boxes!', W/2, 154);
+  X.fillText(T('sub'), W/2, 154);
 
   // Version (drawn after ground below)
 
@@ -1293,7 +1420,7 @@ function drawMenu() {
   drawImg(imgs.purin, W/2+80, 230+Math.sin(frame*0.04+1)*8, 75, 68);
 
   X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
-  X.fillText('Catch these!', W/2, 305);
+  X.fillText(T('catchThese'), W/2, 305);
   const show = [
     {d:drawDonut,l:'Donut'},{d:drawBoba,l:'Boba'},{d:drawCapybara,l:'Capy'},
     {d:drawStar,l:'Star'},{d:drawPudding,l:'Pudding'},{d:drawHeart,l:'Heart'}
@@ -1310,7 +1437,7 @@ function drawMenu() {
     X.fillStyle = '#fff3e0'; rrc(W/2, 390, 280, 32, 16);
     X.fillStyle = '#e65100'; X.font = 'bold 13px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText('🎯 Beat '+challScore+'!', W/2, 392);
+    X.fillText('🎯 '+T('beat')+' '+challScore+'!', W/2, 392);
   }
 
   const by = challScore ? 435 : 415;
@@ -1326,7 +1453,7 @@ function drawMenu() {
   X.fillStyle = '#fff';
   X.font = 'bold 22px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('Tap to Play!', 0, 2);
+  X.fillText(T('tapToPlay'), 0, 2);
   X.restore();
 
   const ab = Math.sin(frame*0.08)*5;
@@ -1337,8 +1464,8 @@ function drawMenu() {
     X.fillStyle = '#fff'; X.strokeStyle = '#ffd54f'; X.lineWidth = 2;
     X.font = 'bold 15px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.strokeText('Best: '+hi, W/2, by+60);
-    X.fillText('Best: '+hi, W/2, by+60);
+    X.strokeText(T('best')+': '+hi, W/2, by+60);
+    X.fillText(T('best')+': '+hi, W/2, by+60);
   }
 
   if (playerName) {
@@ -1346,7 +1473,7 @@ function drawMenu() {
     rrc(W/2, by+90, 180, 28, 14);
     X.fillStyle = '#e91e63'; X.font = 'bold 13px "Quicksand",sans-serif';
     X.textAlign = 'center';
-    X.fillText('Playing as: '+playerName, W/2, by+92);
+    X.fillText(T('playingAs')+': '+playerName, W/2, by+92);
   }
 
   const lby = by + 125;
@@ -1362,34 +1489,45 @@ function drawMenu() {
   X.closePath(); X.stroke();
   X.fillStyle = '#e65100'; X.font = 'bold 15px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('🏆 Leaderboard', W/2, lby+2);
+  X.fillText(T('leaderboard'), W/2, lby+2);
 
   // How to Play button
   const hby = lby + 50;
   X.fillStyle = '#e3f2fd'; rrc(W/2, hby, 150, 34, 17);
   X.fillStyle = '#1565c0'; X.font = 'bold 13px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('❓ How to Play', W/2, hby+2);
+  X.fillText(T('howToPlay'), W/2, hby+2);
 
   X.fillStyle = '#bbb'; X.font = '11px "Quicksand",sans-serif';
   X.textAlign = 'center';
-  X.fillText(playerName ? 'Tap name to change' : 'Tap to set name', W/2, hby+24);
+  X.fillText(playerName ? T('tapName') : T('setName'), W/2, hby+24);
 
   // Share with friends button
   const sby = hby + 46;
   X.fillStyle = '#25d366'; rrc(W/2, sby, 200, 38, 19);
   X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('📲 Challenge a Friend!', W/2, sby+2);
+  X.fillText(T('challengeFriend'), W/2, sby+2);
 
   drawImg(imgs.cinna, 50, H-50, 38, 38);
   drawImg(imgs.purin, W-50, H-50, 45, 45);
   drawGround();
 
-  // Version number
+  // Language toggle
+  X.fillStyle = 'rgba(255,255,255,0.7)'; rrc(32, H-14, 44, 20, 10);
+  X.fillStyle = '#e91e63'; X.font = 'bold 10px "Quicksand",sans-serif';
+  X.textAlign = 'center';
+  X.fillText(lang==='en'?'EN 🌐':'ES 🌐', 32, H-12);
+
+  // Sound indicator
+  X.fillStyle = audioUnlocked ? 'rgba(76,175,80,0.7)' : 'rgba(255,152,0,0.7)';
+  rrc(82, H-14, 28, 20, 10);
+  X.fillStyle = '#fff'; X.font = 'bold 11px sans-serif';
+  X.fillText(audioUnlocked?'🔊':'🔇', 82, H-12);
+
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v5.2', W-14, H-12);
+  X.fillText('v5.3', W-14, H-12);
 }
 
 function drawResults() {
@@ -1420,18 +1558,18 @@ function drawResults() {
   X.fillStyle = '#e91e63';
   X.font = 'bold 26px "Fredoka One",cursive';
   X.textAlign = 'center';
-  X.fillText(score>=hi&&score>0?'NEW RECORD!':'Great Job!', W/2, 200);
+  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, 200);
 
   X.fillStyle = '#555'; X.font = '14px "Quicksand",sans-serif';
   X.textAlign = 'center';
-  X.fillText('Score', W/2, 226);
+  X.fillText(T('score'), W/2, 226);
   X.fillStyle = '#e91e63'; X.font = 'bold 44px "Fredoka One",sans-serif';
   X.fillText(score, W/2, 268);
 
   X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
   X.textAlign = 'center';
-  X.fillText('Caught: '+caught+'  |  Combo: '+maxCombo+'x', W/2, 298);
-  X.fillText('Best: '+hi, W/2, 316);
+  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x', W/2, 298);
+  X.fillText(T('best')+': '+hi, W/2, 316);
 
   const stars = score>=300?3:score>=150?2:score>=50?1:0;
   for (let i=0;i<3;i++) {
@@ -1446,7 +1584,7 @@ function drawResults() {
     rrc(W/2, 395, 260, 60, 12);
     X.fillStyle = '#e65100'; X.font = 'bold 10px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText('🏆 TOP PLAYERS', W/2, 375);
+    X.fillText(T('topPlayers'), W/2, 375);
     const medals = ['🥇','🥈','🥉'];
     const top3 = lb.slice(0, 3);
     top3.forEach((e, i) => {
@@ -1466,17 +1604,17 @@ function drawResults() {
   X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 38, 19);
   X.fillStyle = '#fff'; X.font = 'bold 14px "Quicksand",sans-serif';
   X.textAlign = 'center';
-  X.fillText('📤 Share Score!', W/2, btnY+1);
+  X.fillText(T('shareScore'), W/2, btnY+1);
 
   X.fillStyle = '#ff8a9e'; rrc(W/2, btnY+46, 180, 42, 21);
   X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('Play Again!', W/2, btnY+48);
+  X.fillText(T('playAgain'), W/2, btnY+48);
 
   X.fillStyle = '#fff3e0'; rrc(W/2, btnY+92, 160, 34, 17);
   X.fillStyle = '#e65100'; X.font = 'bold 13px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText('🏆 Leaderboard', W/2, btnY+93);
+  X.fillText(T('leaderboard'), W/2, btnY+93);
 
   if (frame%8===0) addSpark(Math.random()*W, Math.random()*200, ['#ff6b9d','#ffd54f','#89c4f4','#e040fb'][Math.floor(Math.random()*4)], 2);
   drawSparkFx(); drawTextFx();
@@ -1497,9 +1635,9 @@ function drawLoading() {
   X.fillStyle = '#e91e63';
   X.font = 'bold 24px "Fredoka One",sans-serif';
   X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('Loading'+'.'.repeat(dots), W/2, H/2-10);
+  X.fillText(T('loading')+'.'.repeat(dots), W/2, H/2-10);
   X.fillStyle = '#ff8a9e'; X.font = '14px "Quicksand",sans-serif';
-  X.fillText("Aria's Boba Adventure", W/2, H/2+25);
+  X.fillText(T('title1')+' '+T('title2'), W/2, H/2+25);
   const prog = imgsLoaded / imgsTotal;
   X.fillStyle = '#ffb3c6';
   rr(W/2-80, H/2+50, 160, 8, 4);
@@ -1561,7 +1699,7 @@ function update(dt) {
     if (hkShower.timer <= 0) hkShower.active = false;
   }
 
-  if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, '🔥 FEVER MODE! 🔥', '#e040fb'); }
+  if (combo >= 15 && !fever) { fever = true; feverTimer = 0; sndFever(); addText(W/2, 150, T('feverMode'), '#e040fb'); }
   if (combo < 15) fever = false;
   if (fever) feverTimer += dt;
 
@@ -1573,7 +1711,7 @@ function update(dt) {
     if (!ninja.active) { ninja.active = true; ninja.announced = false; ninja.tt = 0; }
     if (!ninja.announced) {
       ninja.announced = true;
-      addText(W/2, 140, 'DADDY NINJA!', '#ff3333');
+      addText(W/2, 140, T('daddyNinja'), '#ff3333');
       addSpark(W/2, 80, '#ff3333', 12);
       shake(8);
     }
@@ -1616,7 +1754,7 @@ function update(dt) {
           // Shield absorbs the hit!
           powerups.shield = false;
           addSpark(it.x, it.y, '#64c8ff', 15);
-          addText(it.x, it.y-20, 'BLOCKED!', '#64c8ff');
+          addText(it.x, it.y-20, T('blocked'), '#64c8ff');
           shake(3); sndShieldBreak();
         } else {
           score = Math.max(0, score + it.type.pts);
@@ -1630,17 +1768,17 @@ function update(dt) {
         // Time extension!
         ROUND += 3;
         addSpark(it.x, it.y, '#4caf50', 12);
-        addText(it.x, it.y-20, '+3 SECONDS!', '#4caf50');
+        addText(it.x, it.y-20, '+3 '+T('seconds'), '#4caf50');
         shake(3); sndTimeExtend();
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type === LUCKY) {
         const rewards = ['points','magnet','double','shield'];
         const reward = rewards[Math.floor(Math.random()*rewards.length)];
-        if (reward === 'points') { score += 50; addText(it.x, it.y-20, '+50 LUCKY!', '#ffd700'); }
-        else if (reward === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 MAGNET!', '#2196f3'); }
-        else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '2x POINTS!', '#ffd700'); }
-        else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 SHIELD!', '#64c8ff'); }
+        if (reward === 'points') { score += 50; addText(it.x, it.y-20, '+50 '+T('lucky'), '#ffd700'); }
+        else if (reward === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 '+T('magnet'), '#2196f3'); }
+        else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
+        else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 '+T('shield'), '#64c8ff'); }
         addSpark(it.x, it.y, '#ffd700', 15);
         shake(5); sndLuckyStar();
         combo++; caught++;
@@ -1653,17 +1791,17 @@ function update(dt) {
         if (rarity < 0.02) {
           triggerHelloKittyShower();
           score += 100;
-          addText(it.x, it.y-20, '⭐ SHOWER! +100! ⭐', '#ff69b4');
+          addText(it.x, it.y-20, '⭐ +100! ⭐', '#ff69b4');
           popColor = '#ff69b4'; popSize = 40;
         } else if (rarity < 0.10) {
           score += 75; if (ROUND < 35) ROUND += 1;
-          addText(it.x, it.y-20, 'RARE! +75!', '#9c27b0');
+          addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
           popColor = '#9c27b0'; popSize = 36;
         } else if (rarity < 0.35) {
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
-          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, 'Magnet!', '#2196f3'); }
-          else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, '2x Points!', '#ffd700'); }
-          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, 'Shield!', '#64c8ff'); }
+          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 '+T('magnet'), '#2196f3'); }
+          else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
+          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 '+T('shield'), '#64c8ff'); }
           popColor = '#ffd700'; popSize = 32;
         } else {
           const bp = 15 + Math.floor(Math.random()*20);
@@ -1686,7 +1824,7 @@ function update(dt) {
         else if (it.type.name === 'double') powerups.double = 3.5;
         else if (it.type.name === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; sndShieldUp(); }
         addSpark(it.x, it.y, it.type.color, 10);
-        addText(it.x, it.y-20, it.type.name === 'magnet' ? '🧲 MAGNET!' : it.type.name === 'shield' ? '🛡 SHIELD!' : '2x POINTS!', it.type.color);
+        addText(it.x, it.y-20, it.type.name === 'magnet' ? '🧲 '+T('magnet') : it.type.name === 'shield' ? '🛡 '+T('shield') : T('pts2x'), it.type.color);
         shake(4); sndPowerup();
       } else {
         let pts = it.type.pts * (1 + Math.floor(combo/5)*0.5);
@@ -1704,7 +1842,7 @@ function update(dt) {
           comboBurst.active = true; comboBurst.timer = 1.0;
           comboBurst.triggered.push(combo);
           sndComboBurst();
-          addText(W/2, 180, '💥 MAGNET BURST!', '#ffd700');
+          addText(W/2, 180, T('magnetBurst'), '#ffd700');
         }
         const streak = getStreak(combo);
         if (streak && [5,10,15,20,30].includes(combo)) {
@@ -1780,7 +1918,7 @@ function drawGame() {
     X.fillStyle = '#ff69b4';
     X.font = 'bold 13px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText('🎀 HELLO KITTY SHOWER! 🎀', 0, 2);
+    X.fillText(T('shower'), 0, 2);
     X.restore();
   }
   drawSparkFx(); drawTextFx();
@@ -1880,6 +2018,18 @@ function startGame() {
 
 function handleTap(x, y) {
   if (state === 'menu') {
+    // Language toggle (bottom-left)
+    if (Math.abs(x-32)<28 && Math.abs(y-(H-14))<14) {
+      const nl = lang==='en'?'es':'en';
+      setLang(nl);
+      return;
+    }
+    // Sound toggle (bottom-left, next to lang)
+    if (Math.abs(x-82)<18 && Math.abs(y-(H-14))<14) {
+      unlockAudio();
+      playTone(880, 0.15, 'sine', 0.15);
+      return;
+    }
     const mb = getMenuBtnY();
     if (Math.abs(x-W/2)<95 && Math.abs(y-mb.lb)<24) { openLB(); return; }
     if (Math.abs(x-W/2)<75 && Math.abs(y-mb.howto)<20) { showTutorial(); return; }
@@ -1984,14 +2134,14 @@ document.addEventListener('gestureend', e => e.preventDefault());
 
 // ====== SHARE ======
 function getURL() { return window.location.origin+window.location.pathname+'?s='+score+'&n='+(playerName||'Player'); }
-function getTxt() { return (playerName||'I')+" scored "+score+" in Aria's Boba Adventure! 🧋 Can you beat me? 🐰🐶"; }
+function getTxt() { return T('shareTxt')(playerName, score); }
 function shareTW() { trackEvent('share_tw',{score}); window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(getTxt())+'&url='+encodeURIComponent(getURL())); }
 function shareWA() { trackEvent('share_wa',{score}); window.open('https://wa.me/?text='+encodeURIComponent(getTxt()+'\n'+getURL())); }
 function shareChallenge() {
   trackEvent('share_challenge',{score:hi});
   const url = window.location.origin + window.location.pathname;
-  const txt = "Play Aria's Boba Adventure! 🧋🎀 Catch boba & open blind boxes with Cinnamoroll! Can you beat "+(hi>0?hi+' points':'my score')+"?\n"+url;
-  if (navigator.share) { navigator.share({title:"Aria's Boba Adventure",text:txt,url:url}).catch(()=>{}); }
+  const txt = T('challengeTxt')(hi, url);
+  if (navigator.share) { navigator.share({title:T('title1')+' '+T('title2'),text:txt,url:url}).catch(()=>{}); }
   else { window.open('https://wa.me/?text='+encodeURIComponent(txt)); }
 }
 function copyLnk() {
