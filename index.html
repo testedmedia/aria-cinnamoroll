@@ -439,7 +439,7 @@ function buildTutorialItems() {
     {name:'Shield',draw:drawShieldItem,pts:'Block!',bg:'#e0f7fa'},
     {name:'Clock',draw:drawClock,pts:'+3s!',bg:'#e8f5e9'},
     {name:'Lucky Star',draw:drawLuckyStar,pts:'Mystery!',bg:'#fffde7'},
-    {name:'Blind Box',draw:drawBlindBox,pts:'Open!',bg:'#fce4ec'},
+    {name:'Blind Box',draw:drawBlindBox,pts:'Sanrio!',bg:'#fce4ec'},
   ];
 
   function renderGrid(items, containerId) {
@@ -508,6 +508,7 @@ let trail = [];
 // Hello Kitty Shower event
 let hkShower = { active: false, timer: 0, spawnAcc: 0 };
 let boxPops = []; // Sanrio character pop-out animations from blind boxes
+let bbReveal = null; // Blind box reveal popup: { charDraw, charName, rarity, timer, maxTimer, sparks[] }
 
 // Ninja
 const ninja = { active: false, x: W/2, tx: W/2, y: 75, announced: false, tt: 0 };
@@ -985,6 +986,258 @@ function drawBlindBox(x, y, s) {
     ctx.fillStyle = `rgba(255,215,0,${0.5+sparkle})`;
     ctx.beginPath(); ctx.arc(Math.cos(a)*s*1.2, Math.sin(a)*s*1.2, 2, 0, Math.PI*2); ctx.fill();
   }
+  ctx.restore();
+}
+
+// ====== SANRIO CHARACTERS FOR BLIND BOX REVEALS ======
+function drawHelloKitty(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Head
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, 0, s*0.85, s*0.75, 0, 0, Math.PI*2); ctx.fill();
+  // Left ear
+  ctx.beginPath(); ctx.moveTo(-s*0.55, -s*0.55); ctx.lineTo(-s*0.35, -s*0.9); ctx.lineTo(-s*0.15, -s*0.55); ctx.closePath(); ctx.fill();
+  // Right ear
+  ctx.beginPath(); ctx.moveTo(s*0.15, -s*0.55); ctx.lineTo(s*0.35, -s*0.9); ctx.lineTo(s*0.55, -s*0.55); ctx.closePath(); ctx.fill();
+  // Red bow (left ear)
+  ctx.fillStyle = '#e91e63';
+  ctx.beginPath(); ctx.ellipse(-s*0.55, -s*0.7, s*0.28, s*0.18, -0.4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-s*0.25, -s*0.85, s*0.2, s*0.15, 0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath(); ctx.arc(-s*0.4, -s*0.78, s*0.07, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(-s*0.22, -s*0.05, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.22, -s*0.05, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  // Nose
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath(); ctx.ellipse(0, s*0.12, s*0.06, s*0.05, 0, 0, Math.PI*2); ctx.fill();
+  // Whiskers
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(-s*0.65, s*0.05); ctx.lineTo(-s*0.3, s*0.12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-s*0.6, s*0.2); ctx.lineTo(-s*0.28, s*0.18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*0.3, s*0.12); ctx.lineTo(s*0.65, s*0.05); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*0.28, s*0.18); ctx.lineTo(s*0.6, s*0.2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawMyMelody(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Hood
+  ctx.fillStyle = '#ffb6c1';
+  ctx.beginPath(); ctx.ellipse(0, -s*0.1, s*0.9, s*0.85, 0, 0, Math.PI*2); ctx.fill();
+  // Left ear (inside hood)
+  ctx.beginPath(); ctx.ellipse(-s*0.3, -s*0.9, s*0.2, s*0.45, -0.15, 0, Math.PI*2); ctx.fill();
+  // Right ear
+  ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.9, s*0.2, s*0.45, 0.15, 0, Math.PI*2); ctx.fill();
+  // Inner ear
+  ctx.fillStyle = '#ff69b4';
+  ctx.beginPath(); ctx.ellipse(-s*0.3, -s*0.85, s*0.1, s*0.3, -0.15, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.85, s*0.1, s*0.3, 0.15, 0, Math.PI*2); ctx.fill();
+  // Face
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, s*0.1, s*0.6, s*0.55, 0, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(-s*0.18, s*0.0, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.18, s*0.0, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  // Flower on hood
+  ctx.fillStyle = '#ff1493';
+  for (let i = 0; i < 5; i++) {
+    const a = (i * Math.PI * 2) / 5 - Math.PI/2;
+    ctx.beginPath(); ctx.ellipse(s*0.45 + Math.cos(a)*s*0.1, -s*0.4 + Math.sin(a)*s*0.1, s*0.08, s*0.05, a, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath(); ctx.arc(s*0.45, -s*0.4, s*0.05, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawKuromi(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Black hood
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.ellipse(0, -s*0.1, s*0.9, s*0.85, 0, 0, Math.PI*2); ctx.fill();
+  // Jester points
+  ctx.beginPath(); ctx.moveTo(-s*0.5, -s*0.7); ctx.lineTo(-s*0.8, -s*1.1); ctx.lineTo(-s*0.2, -s*0.8); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*0.2, -s*0.8); ctx.lineTo(s*0.8, -s*1.1); ctx.lineTo(s*0.5, -s*0.7); ctx.closePath(); ctx.fill();
+  // Pink tips
+  ctx.fillStyle = '#ff69b4';
+  ctx.beginPath(); ctx.arc(-s*0.8, -s*1.1, s*0.1, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.8, -s*1.1, s*0.1, 0, Math.PI*2); ctx.fill();
+  // Skull on hood
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, -s*0.55, s*0.18, s*0.15, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ff69b4';
+  ctx.beginPath(); ctx.arc(-s*0.06, -s*0.57, s*0.04, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.06, -s*0.57, s*0.04, 0, Math.PI*2); ctx.fill();
+  // Face
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, s*0.1, s*0.6, s*0.55, 0, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.ellipse(-s*0.18, s*0.0, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.18, s*0.0, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  // Smirk
+  ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, s*0.12, s*0.12, 0.2, Math.PI-0.2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawPochacco(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Head
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, 0, s*0.8, s*0.7, 0, 0, Math.PI*2); ctx.fill();
+  // Floppy ears
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.ellipse(-s*0.65, -s*0.2, s*0.25, s*0.5, -0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.65, -s*0.2, s*0.25, s*0.5, 0.5, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(-s*0.2, -s*0.05, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.05, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  // Eye highlights
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*0.17, -s*0.08, s*0.03, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.23, -s*0.08, s*0.03, 0, Math.PI*2); ctx.fill();
+  // Nose
+  ctx.fillStyle = '#333';
+  ctx.beginPath(); ctx.ellipse(0, s*0.1, s*0.06, s*0.04, 0, 0, Math.PI*2); ctx.fill();
+  // Smile
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, s*0.15, s*0.15, 0.2, Math.PI-0.2); ctx.stroke();
+  // Cap
+  ctx.fillStyle = '#2196f3';
+  ctx.beginPath(); ctx.ellipse(0, -s*0.55, s*0.5, s*0.22, 0, Math.PI, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#1565c0';
+  ctx.beginPath(); ctx.arc(0, -s*0.72, s*0.08, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawKeroppi(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Body
+  ctx.fillStyle = '#4caf50';
+  ctx.beginPath(); ctx.ellipse(0, s*0.15, s*0.7, s*0.6, 0, 0, Math.PI*2); ctx.fill();
+  // Big eyes (on top of head)
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*0.25, -s*0.45, s*0.28, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.25, -s*0.45, s*0.28, 0, Math.PI*2); ctx.fill();
+  // Pupils
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-s*0.22, -s*0.42, s*0.12, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.28, -s*0.42, s*0.12, 0, Math.PI*2); ctx.fill();
+  // Eye highlights
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*0.18, -s*0.46, s*0.05, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.32, -s*0.46, s*0.05, 0, Math.PI*2); ctx.fill();
+  // Mouth
+  ctx.fillStyle = '#e53935';
+  ctx.beginPath(); ctx.arc(0, s*0.2, s*0.2, 0, Math.PI); ctx.fill();
+  // Belly
+  ctx.fillStyle = '#c8e6c9';
+  ctx.beginPath(); ctx.ellipse(0, s*0.3, s*0.35, s*0.25, 0, 0, Math.PI*2); ctx.fill();
+  // Cheeks
+  ctx.fillStyle = 'rgba(255,138,128,0.4)';
+  ctx.beginPath(); ctx.ellipse(-s*0.45, s*0.1, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.45, s*0.1, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawBadtzMaru(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Body
+  ctx.fillStyle = '#1a1a2e';
+  ctx.beginPath(); ctx.ellipse(0, s*0.1, s*0.7, s*0.65, 0, 0, Math.PI*2); ctx.fill();
+  // Spiky hair
+  ctx.beginPath();
+  ctx.moveTo(-s*0.3, -s*0.5); ctx.lineTo(-s*0.2, -s*0.95); ctx.lineTo(-s*0.05, -s*0.55);
+  ctx.lineTo(s*0.1, -s*1.0); ctx.lineTo(s*0.2, -s*0.5);
+  ctx.lineTo(s*0.35, -s*0.85); ctx.lineTo(s*0.4, -s*0.45);
+  ctx.closePath(); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(-s*0.2, -s*0.05, s*0.18, s*0.2, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.05, s*0.18, s*0.2, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(-s*0.2, -s*0.02, s*0.09, s*0.12, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.02, s*0.09, s*0.12, 0, 0, Math.PI*2); ctx.fill();
+  // Angry eyebrows
+  ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(-s*0.35, -s*0.25); ctx.lineTo(-s*0.08, -s*0.2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*0.08, -s*0.2); ctx.lineTo(s*0.35, -s*0.25); ctx.stroke();
+  // Beak
+  ctx.fillStyle = '#ffa000';
+  ctx.beginPath(); ctx.moveTo(-s*0.12, s*0.18); ctx.lineTo(0, s*0.35); ctx.lineTo(s*0.12, s*0.18); ctx.closePath(); ctx.fill();
+  // Belly
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, s*0.35, s*0.35, s*0.25, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// Cinnamoroll (standalone for blind box - uses canvas, not img)
+function drawCinnaBox(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Head
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(0, 0, s*0.8, s*0.7, 0, 0, Math.PI*2); ctx.fill();
+  // Big floppy ears
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(-s*0.7, -s*0.35, s*0.2, s*0.55, -0.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.7, -s*0.35, s*0.2, s*0.55, 0.6, 0, Math.PI*2); ctx.fill();
+  // Inner ears (pink)
+  ctx.fillStyle = '#ffb6c1';
+  ctx.beginPath(); ctx.ellipse(-s*0.7, -s*0.3, s*0.08, s*0.35, -0.6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.7, -s*0.3, s*0.08, s*0.35, 0.6, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#1a237e';
+  ctx.beginPath(); ctx.ellipse(-s*0.22, -s*0.05, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.22, -s*0.05, s*0.08, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+  // Eye highlights
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-s*0.19, -s*0.08, s*0.03, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(s*0.25, -s*0.08, s*0.03, 0, Math.PI*2); ctx.fill();
+  // Cheeks
+  ctx.fillStyle = 'rgba(255,182,193,0.5)';
+  ctx.beginPath(); ctx.ellipse(-s*0.42, s*0.1, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.42, s*0.1, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  // Cinnamon roll tail (forehead curl)
+  ctx.strokeStyle = '#ffb6c1'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(0, -s*0.65, s*0.12, Math.PI*0.5, Math.PI*2.2); ctx.stroke();
+  ctx.restore();
+}
+
+// Pompompurin (standalone canvas draw)
+function drawPurinBox(x, y, s) {
+  const ctx = window._tutCtx || X;
+  ctx.save(); ctx.translate(x, y);
+  // Head
+  ctx.fillStyle = '#fdd835';
+  ctx.beginPath(); ctx.ellipse(0, 0, s*0.85, s*0.7, 0, 0, Math.PI*2); ctx.fill();
+  // Beret
+  ctx.fillStyle = '#795548';
+  ctx.beginPath(); ctx.ellipse(0, -s*0.55, s*0.55, s*0.2, 0, Math.PI, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -s*0.7, s*0.08, 0, Math.PI*2); ctx.fill();
+  // Ears
+  ctx.fillStyle = '#f9a825';
+  ctx.beginPath(); ctx.ellipse(-s*0.6, -s*0.35, s*0.2, s*0.15, -0.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.6, -s*0.35, s*0.2, s*0.15, 0.5, 0, Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(-s*0.22, -s*0.05, s*0.06, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.22, -s*0.05, s*0.06, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  // Blush
+  ctx.fillStyle = 'rgba(255,138,101,0.35)';
+  ctx.beginPath(); ctx.ellipse(-s*0.4, s*0.12, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s*0.4, s*0.12, s*0.12, s*0.08, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 }
 
@@ -1683,6 +1936,33 @@ const JUMP_VEL = -660;
 const LERP_SPEED = 22;
 
 function update(dt) {
+  // Blind box reveal popup - pause game during reveal
+  if (bbReveal) {
+    bbReveal.timer -= dt;
+    bbReveal.scale = Math.min(1, bbReveal.scale + dt * 5);
+    // Update sparkles
+    for (let i = bbReveal.sparks.length-1; i >= 0; i--) {
+      const sp = bbReveal.sparks[i];
+      sp.x += sp.vx * dt; sp.y += sp.vy * dt;
+      sp.vy += 150 * dt;
+      sp.life -= dt;
+      if (sp.life <= 0) bbReveal.sparks.splice(i, 1);
+    }
+    if (bbReveal.timer <= 0) bbReveal = null;
+    // Still update visuals but skip game timer
+    shakeX *= Math.exp(-10 * dt);
+    shakeY *= Math.exp(-10 * dt);
+    for (let i = boxPops.length-1; i >= 0; i--) {
+      const bp = boxPops[i];
+      bp.y += bp.vy * dt; bp.vy += 60 * dt;
+      bp.scale = Math.min(1, bp.scale + dt * 6);
+      bp.life -= dt;
+      if (bp.life <= 0) boxPops.splice(i, 1);
+    }
+    for (let i = sparkles.length-1; i >= 0; i--) { sparkles[i].life -= dt; if (sparkles[i].life <= 0) sparkles.splice(i, 1); }
+    for (let i = texts.length-1; i >= 0; i--) { texts[i].y -= 90*dt; texts[i].life -= dt; if (texts[i].life <= 0) texts.splice(i, 1); }
+    return;
+  }
   gameTime += dt;
 
   P.vy += GRAVITY * dt;
@@ -1798,40 +2078,58 @@ function update(dt) {
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type === BLINDBOX) {
-        // BLIND BOX - rarity tiers with Sanrio character pop-outs!
+        // BLIND BOX - rarity tiers with Sanrio character reveals!
         const rarity = Math.random();
         const rarityTier = rarity < 0.02 ? 'legendary' : rarity < 0.10 ? 'rare' : rarity < 0.35 ? 'powerup' : 'common';
         trackEvent('blind_box_opened', { score, detail: rarityTier });
-        let popColor, popSize;
+        let popColor, charDraw, charName, revealTime;
         if (rarity < 0.02) {
+          // LEGENDARY - Hello Kitty
           triggerHelloKittyShower();
           score += 100;
-          addText(it.x, it.y-20, '⭐ +100! ⭐', '#ff69b4');
-          popColor = '#ff69b4'; popSize = 40;
+          addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ff69b4');
+          popColor = '#ffd700'; charDraw = drawHelloKitty; charName = 'Hello Kitty'; revealTime = 2.5;
         } else if (rarity < 0.10) {
+          // RARE - Kuromi or Badtz-Maru
           score += 75; if (ROUND < 35) ROUND += 1;
           addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
-          popColor = '#9c27b0'; popSize = 36;
+          const rareChars = [{d:drawKuromi,n:'Kuromi'},{d:drawBadtzMaru,n:'Badtz-Maru'}];
+          const pick = rareChars[Math.floor(Math.random()*rareChars.length)];
+          popColor = '#9c27b0'; charDraw = pick.d; charName = pick.n; revealTime = 2.0;
         } else if (rarity < 0.35) {
+          // POWERUP - Cinnamoroll or Pompompurin
           const pw = ['magnet','double','shield'][Math.floor(Math.random()*3)];
-          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 '+T('magnet'), '#2196f3'); }
+          if (pw === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '\uD83E\uDDF2 '+T('magnet'), '#2196f3'); }
           else if (pw === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
-          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 '+T('shield'), '#64c8ff'); }
-          popColor = '#ffd700'; popSize = 32;
+          else { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '\uD83D\uDEE1 '+T('shield'), '#64c8ff'); }
+          const pwChars = [{d:drawCinnaBox,n:'Cinnamoroll'},{d:drawPurinBox,n:'Pompompurin'}];
+          const pick = pwChars[Math.floor(Math.random()*pwChars.length)];
+          popColor = '#ffd700'; charDraw = pick.d; charName = pick.n; revealTime = 1.5;
         } else {
+          // COMMON - My Melody, Pochacco, or Keroppi
           const bp = 15 + Math.floor(Math.random()*20);
           score += bp;
           addText(it.x, it.y-20, '+' + bp, '#ff69b4');
-          popColor = '#ff69b4'; popSize = 28;
+          const comChars = [{d:drawMyMelody,n:'My Melody'},{d:drawPochacco,n:'Pochacco'},{d:drawKeroppi,n:'Keroppi'}];
+          const pick = comChars[Math.floor(Math.random()*comChars.length)];
+          popColor = '#ff69b4'; charDraw = pick.d; charName = pick.n; revealTime = 1.2;
         }
-        // Pop-out Sanrio character animation
-        const popDraws = [drawDonut,drawBoba,drawCapybara,drawStar,drawHeart,drawPudding,drawRainbow];
-        const rarePops = [drawRainbow,drawShieldItem,drawLuckyStar];
-        const popDraw = (rarity < 0.10) ? rarePops[Math.floor(Math.random()*rarePops.length)] : popDraws[Math.floor(Math.random()*popDraws.length)];
-        boxPops.push({ x:it.x, y:it.y, drawFn:popDraw, size:popSize, life:1.2, ml:1.2, vy:-180, scale:0 });
+        // Trigger full-screen reveal popup
+        const revealSparks = [];
+        for (let i = 0; i < 20; i++) {
+          revealSparks.push({
+            x: (Math.random()-0.5)*200, y: (Math.random()-0.5)*200,
+            vx: (Math.random()-0.5)*300, vy: (Math.random()-0.5)*300,
+            life: 0.6+Math.random()*0.8, ml: 0.6+Math.random()*0.8,
+            r: 2+Math.random()*3, color: [popColor,'#ffd700','#fff','#ff69b4'][Math.floor(Math.random()*4)]
+          });
+        }
+        bbReveal = { charDraw, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0 };
+        // Also push a small floating pop-out
+        boxPops.push({ x:it.x, y:it.y, drawFn:charDraw, size:36, life:1.2, ml:1.2, vy:-180, scale:0 });
         addSpark(it.x, it.y, '#ffd700', 20);
         addSpark(it.x, it.y, popColor, 12);
-        shake(5); sndLuckyStar();
+        shake(6); sndLuckyStar();
         combo++; caught++;
         maxCombo = Math.max(maxCombo, combo);
       } else if (it.type.isPower) {
@@ -1959,6 +2257,82 @@ function drawGame() {
   X.globalAlpha = 1;
   drawHUD();
   X.restore();
+
+  // Blind box reveal popup overlay
+  if (bbReveal) {
+    const rv = bbReveal;
+    const progress = 1 - (rv.timer / rv.maxTimer);
+    const fadeIn = Math.min(1, progress * 4);
+    const fadeOut = rv.timer < 0.3 ? rv.timer / 0.3 : 1;
+    const alpha = fadeIn * fadeOut;
+
+    // Dim backdrop
+    X.fillStyle = `rgba(0,0,0,${0.5 * alpha})`;
+    X.fillRect(0, 0, W, H);
+
+    X.save();
+    X.translate(W/2, H*0.4);
+
+    // Rarity glow
+    const glowColors = { legendary: '#ffd700', rare: '#9c27b0', powerup: '#2196f3', common: '#ff69b4' };
+    const glowC = glowColors[rv.rarity] || '#ff69b4';
+    const pulse = 1 + Math.sin(frame * 0.15) * 0.08;
+    const cardScale = rv.scale * pulse;
+    X.scale(cardScale, cardScale);
+
+    // Outer glow
+    const glowR = rv.rarity === 'legendary' ? 120 : rv.rarity === 'rare' ? 100 : 80;
+    const grd = X.createRadialGradient(0, 0, 10, 0, 0, glowR);
+    grd.addColorStop(0, glowC);
+    grd.addColorStop(0.5, `${glowC}44`);
+    grd.addColorStop(1, 'transparent');
+    X.globalAlpha = alpha * 0.6;
+    X.fillStyle = grd;
+    X.fillRect(-glowR, -glowR, glowR*2, glowR*2);
+
+    // Card background
+    X.globalAlpha = alpha;
+    X.fillStyle = 'rgba(255,255,255,0.95)';
+    X.beginPath();
+    const cw = 140, ch = 170, cr = 20;
+    X.moveTo(-cw/2+cr, -ch/2);
+    X.lineTo(cw/2-cr, -ch/2); X.quadraticCurveTo(cw/2, -ch/2, cw/2, -ch/2+cr);
+    X.lineTo(cw/2, ch/2-cr); X.quadraticCurveTo(cw/2, ch/2, cw/2-cr, ch/2);
+    X.lineTo(-cw/2+cr, ch/2); X.quadraticCurveTo(-cw/2, ch/2, -cw/2, ch/2-cr);
+    X.lineTo(-cw/2, -ch/2+cr); X.quadraticCurveTo(-cw/2, -ch/2, -cw/2+cr, -ch/2);
+    X.closePath(); X.fill();
+
+    // Card border (rarity colored)
+    X.strokeStyle = glowC; X.lineWidth = 3;
+    X.stroke();
+
+    // Rarity label at top
+    const rarityLabels = { legendary: '\u2B50 LEGENDARY \u2B50', rare: '\u{1F48E} RARE', powerup: '\u26A1 POWERUP', common: '\u2728 COMMON' };
+    X.fillStyle = glowC;
+    X.font = 'bold 11px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    X.fillText(rarityLabels[rv.rarity] || 'COMMON', 0, -ch/2 + 22);
+
+    // Draw the Sanrio character big
+    rv.charDraw(0, 8, 42);
+
+    // Character name
+    X.fillStyle = '#333';
+    X.font = 'bold 16px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    X.fillText(rv.charName, 0, ch/2 - 22);
+
+    // Sparkle particles
+    rv.sparks.forEach(sp => {
+      const sa = Math.max(0, sp.life / sp.ml);
+      X.globalAlpha = alpha * sa;
+      X.fillStyle = sp.color;
+      X.beginPath(); X.arc(sp.x, sp.y, sp.r * sa, 0, Math.PI*2); X.fill();
+    });
+
+    X.restore();
+    X.globalAlpha = 1;
+  }
 }
 
 // ====== GAME LOOP - rAF primary, visibility fallback ======
@@ -2029,6 +2403,7 @@ function startGame() {
   hkShower = {active:false,timer:0,spawnAcc:0};
   clocksDropped = 0; maxClocks = 1 + Math.floor(Math.random()*2);
   boxPops = [];
+  bbReveal = null;
   lbSaved = false;
   celebActive = false;
   ensureAudio();
