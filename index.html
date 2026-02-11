@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.2', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.3', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2624,7 +2624,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.2', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.3', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2714,6 +2714,12 @@ function drawBlindBoxScreen() {
     if (t > 1.5) { bbState.phase = 'reveal'; bbState.timer = 0; }
 
   } else if (bbState.phase === 'reveal') {
+    // Once fade-in is done, cache to offscreen canvas - zero flicker from 60fps redraw
+    if (bbState.revealCache) {
+      X.drawImage(bbState.revealCache, 0, 0);
+      return;
+    }
+
     bbState.timer += 1/60;
     const r = bbState.result;
     const tier = getRarityTier(r.rarity);
@@ -2812,6 +2818,14 @@ function drawBlindBoxScreen() {
     X.fillStyle = 'rgba(255,255,255,0.3)'; rrc(W/2, btnBase + (r.isNew && milestones.includes(cc) ? 96 : 54), 130, 40, 20);
     X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
     X.fillText('Close', W/2, btnBase + (r.isNew && milestones.includes(cc) ? 98 : 56));
+
+    // Cache this frame once fade-in is complete - prevents 60fps redraw flicker
+    if (fadeIn >= 1) {
+      const cache = document.createElement('canvas');
+      cache.width = W; cache.height = H;
+      cache.getContext('2d').drawImage(X.canvas, 0, 0);
+      bbState.revealCache = cache;
+    }
   }
 }
 
@@ -2938,7 +2952,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.2 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.3 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3626,7 +3640,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.2', W-10, H-8);
+  X.fillText('v10.3', W-10, H-8);
 }
 
 function drawResults() {
@@ -3687,7 +3701,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.2', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.3', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4322,7 +4336,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.2') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.3') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4404,7 +4418,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.2'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.3'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
