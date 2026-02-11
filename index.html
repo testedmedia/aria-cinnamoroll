@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.3', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.4', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2624,7 +2624,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.3', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.4', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2952,7 +2952,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.3 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.4 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3640,7 +3640,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.3', W-10, H-8);
+  X.fillText('v10.4', W-10, H-8);
 }
 
 function drawResults() {
@@ -3701,7 +3701,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.3', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.4', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4197,21 +4197,22 @@ function drawGame() {
     const fadeOut = rv.timer < 0.3 ? rv.timer / 0.3 : 1;
     const alpha = fadeIn * fadeOut;
 
-    // Dim backdrop
-    X.fillStyle = `rgba(0,0,0,${0.5 * alpha})`;
+    // Solid dark backdrop (no animated game bleeding through)
+    X.fillStyle = '#1a1a2e';
+    X.fillRect(0, 0, W, H);
+    X.fillStyle = `rgba(0,0,0,${0.3 * alpha})`;
     X.fillRect(0, 0, W, H);
 
     X.save();
     X.translate(W/2, H*0.4);
 
-    // Rarity glow
-    const glowColors = { legendary: '#ffd700', rare: '#9c27b0', powerup: '#2196f3', common: '#ff69b4' };
-    const glowC = glowColors[rv.rarity] || '#ff69b4';
-    const pulse = 1 + Math.sin(frame * 0.15) * 0.08;
-    const cardScale = rv.scale * pulse;
+    // Static scale - NO pulse animation, NO Math.sin
+    const cardScale = rv.scale;
     X.scale(cardScale, cardScale);
 
-    // Outer glow
+    // Outer glow (static)
+    const glowColors = { legendary: '#ffd700', rare: '#9c27b0', powerup: '#2196f3', common: '#ff69b4' };
+    const glowC = glowColors[rv.rarity] || '#ff69b4';
     const glowR = rv.rarity === 'legendary' ? 120 : rv.rarity === 'rare' ? 100 : 80;
     const grd = X.createRadialGradient(0, 0, 10, 0, 0, glowR);
     grd.addColorStop(0, glowC);
@@ -4221,11 +4222,12 @@ function drawGame() {
     X.fillStyle = grd;
     X.fillRect(-glowR, -glowR, glowR*2, glowR*2);
 
-    // Card background
+    // Card background - bigger, pastel tinted per rarity
     X.globalAlpha = alpha;
-    X.fillStyle = 'rgba(255,255,255,0.95)';
+    const rarityCardBg = {legendary:'#fffcf0',rare:'#faf0ff',powerup:'#f0f8ff',common:'#fff'};
+    X.fillStyle = rarityCardBg[rv.rarity] || '#fff';
     X.beginPath();
-    const cw = 140, ch = 170, cr = 20;
+    const cw = 200, ch = 250, cr = 22;
     X.moveTo(-cw/2+cr, -ch/2);
     X.lineTo(cw/2-cr, -ch/2); X.quadraticCurveTo(cw/2, -ch/2, cw/2, -ch/2+cr);
     X.lineTo(cw/2, ch/2-cr); X.quadraticCurveTo(cw/2, ch/2, cw/2-cr, ch/2);
@@ -4234,36 +4236,41 @@ function drawGame() {
     X.closePath(); X.fill();
 
     // Card border (rarity colored)
-    X.strokeStyle = glowC; X.lineWidth = 3;
+    X.strokeStyle = glowC; X.lineWidth = rv.rarity === 'legendary' ? 4 : 3;
     X.stroke();
 
-    // Rarity label at top
-    const rarityLabels = { legendary: '\u2B50 LEGENDARY 2% \u2B50', rare: '\u{1F48E} RARE 8%', powerup: '\u2728 UNCOMMON 25%', common: '\u2728 COMMON 65%' };
+    // Rarity label pill at top
+    const rarityLabels = { legendary: 'LEGENDARY 2%', rare: 'RARE 8%', powerup: 'UNCOMMON 25%', common: 'COMMON 65%' };
+    X.fillStyle = glowC; X.globalAlpha = alpha * 0.18;
+    rrc(0, -ch/2 + 24, 110, 20, 10);
+    X.globalAlpha = alpha;
     X.fillStyle = glowC;
-    X.font = 'bold 11px "Fredoka One",sans-serif';
+    X.font = 'bold 12px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(rarityLabels[rv.rarity] || 'COMMON', 0, -ch/2 + 22);
+    X.fillText(rarityLabels[rv.rarity] || 'COMMON 65%', 0, -ch/2 + 28);
 
-    // Draw the Sanrio character big (PNG)
-    drawImg(imgs[rv.charImgKey], 0, 8, 84, 84);
+    // Character image - FULL CARD WIDTH for visibility
+    if (rv.charImgKey && imgs[rv.charImgKey]) {
+      drawImg(imgs[rv.charImgKey], 0, 0, cw - 30, 100);
+    }
 
-    // Character name
+    // Character name - bigger
     X.fillStyle = '#333';
-    X.font = 'bold 16px "Fredoka One",sans-serif';
+    X.font = 'bold 20px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(rv.charName, 0, ch/2 - 28);
+    X.fillText(rv.charName, 0, ch/2 - 48);
     // NEW! badge or Collected
     if (rv.isNew) {
-      X.fillStyle = '#ff1744'; X.font = 'bold 11px "Fredoka One",sans-serif';
-      X.fillText('\u2728 NEW! Added to Backpack \u2728', 0, ch/2 - 22);
+      X.fillStyle = '#ff1744'; X.font = 'bold 13px "Fredoka One",sans-serif';
+      X.fillText('\u2728 NEW! Added to Backpack \u2728', 0, ch/2 - 28);
     } else {
-      X.fillStyle = '#999'; X.font = '10px "Quicksand",sans-serif';
-      X.fillText('Already collected', 0, ch/2 - 22);
+      X.fillStyle = '#999'; X.font = '11px "Quicksand",sans-serif';
+      X.fillText('Already collected', 0, ch/2 - 28);
     }
     // Drop rate at bottom
     const dropPct = {legendary:'2% chance',rare:'8% chance',powerup:'25% chance',common:'65% chance'};
     X.fillStyle = '#aaa'; X.font = 'bold 10px "Quicksand",sans-serif';
-    X.fillText(dropPct[rv.rarity] || '65% chance', 0, ch/2 - 6);
+    X.fillText(dropPct[rv.rarity] || '65% chance', 0, ch/2 - 10);
 
     // Sparkle particles
     rv.sparks.forEach(sp => {
@@ -4336,7 +4343,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.3') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.4') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4418,7 +4425,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.3'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.4'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
