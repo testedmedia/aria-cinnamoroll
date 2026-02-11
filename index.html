@@ -533,6 +533,11 @@ function getLevel(s) { for (let i = LEVEL_THRESHOLDS.length-1; i >= 0; i--) { if
 let sparkles = [], texts = [], items = [];
 let bgHue = 0, shakeX = 0, shakeY = 0;
 let fever = false, feverTimer = 0;
+
+// Scarcity Engine: Near-miss mechanic
+let nearMissActive = false;
+let nearMissTimer = 0;
+let nearMissItem = null;
 let lbSaved = false;
 
 // Celebration state
@@ -586,6 +591,57 @@ const RARITY_TIERS = [
   { id: 'secret', label: 'Secret', color: 'rainbow', glowColor: 'rgba(255,105,180,0.7)', dropRate: 2 },
 ];
 
+const EVENTS_CONFIG = [
+  {
+    id: 'valentine_2026',
+    name: "Valentine's Day",
+    emoji: '💝',
+    startDate: '2026-02-10',
+    endDate: '2026-02-16',
+    seasonalTag: 'valentine',
+    bgGradient: ['#ffe0ec','#ffc1d6','#ffd6e7','#ffe8f0'],
+    accentColor: '#ff69b4',
+    bannerText: "VALENTINE'S EVENT",
+    particles: 'hearts'
+  },
+  {
+    id: 'spring_2026',
+    name: 'Cherry Blossom Festival',
+    emoji: '🌸',
+    startDate: '2026-03-01',
+    endDate: '2026-03-14',
+    seasonalTag: 'spring',
+    bgGradient: ['#fff0f5','#ffe4e1','#ffc0cb','#ffb6c1'],
+    accentColor: '#ff69b4',
+    bannerText: 'CHERRY BLOSSOM FESTIVAL',
+    particles: 'petals'
+  },
+  {
+    id: 'summer_2026',
+    name: 'Summer Splash',
+    emoji: '🏖️',
+    startDate: '2026-06-15',
+    endDate: '2026-06-30',
+    seasonalTag: 'summer',
+    bgGradient: ['#e0f7fa','#b2ebf2','#80deea','#4dd0e1'],
+    accentColor: '#00bcd4',
+    bannerText: 'SUMMER SPLASH',
+    particles: 'bubbles'
+  },
+  {
+    id: 'halloween_2026',
+    name: 'Spooky Kawaii',
+    emoji: '🎃',
+    startDate: '2026-10-25',
+    endDate: '2026-11-01',
+    seasonalTag: 'halloween',
+    bgGradient: ['#2d1b69','#4a1a8a','#6b2fa0','#8e44ad'],
+    accentColor: '#ff9800',
+    bannerText: 'SPOOKY KAWAII',
+    particles: 'bats'
+  }
+];
+
 const SEASON_ITEMS = [
   // Common (12)
   { id:'pink-boba', name:'Pink Boba', cat:'boba', rarity:'common', color:'#ff69b4', emoji:'🧋', charKey:null },
@@ -635,6 +691,21 @@ const SEASON_ITEMS = [
   { id:'valentine-cupid-cinna', name:'Cupid Cinnamoroll', cat:'sanrio', rarity:'epic', color:'#89c4f4', emoji:'💘', charKey:'cinna', seasonal:'valentine' },
   { id:'valentine-love-cookie', name:'Love Letter Cookie', cat:'sweet', rarity:'rare', color:'#ff1493', emoji:'💌', charKey:null, seasonal:'valentine' },
   { id:'valentine-purin', name:'Valentine Pompompurin', cat:'sanrio', rarity:'legendary', color:'#fdd835', emoji:'💝', charKey:'purin', seasonal:'valentine' },
+  // Spring Cherry Blossom (Mar 1-14)
+  { id:'spring-sakura-boba', name:'Sakura Boba', cat:'boba', rarity:'rare', color:'#ffb7c5', emoji:'🌸', charKey:null, seasonal:'spring' },
+  { id:'spring-hanami-cake', name:'Hanami Cake', cat:'sweet', rarity:'epic', color:'#ff69b4', emoji:'🎂', charKey:'melody', seasonal:'spring' },
+  { id:'spring-blossom-cinna', name:'Blossom Cinnamoroll', cat:'sanrio', rarity:'legendary', color:'#ffcdd2', emoji:'🌸', charKey:'cinna', seasonal:'spring' },
+  { id:'spring-petal-cookie', name:'Petal Cookie', cat:'sweet', rarity:'rare', color:'#f8bbd0', emoji:'🍪', charKey:null, seasonal:'spring' },
+  // Summer Splash (Jun 15-30)
+  { id:'summer-tropical-boba', name:'Tropical Boba', cat:'boba', rarity:'rare', color:'#00bcd4', emoji:'🏝️', charKey:null, seasonal:'summer' },
+  { id:'summer-beach-cinna', name:'Beach Cinnamoroll', cat:'sanrio', rarity:'epic', color:'#4dd0e1', emoji:'🏖️', charKey:'cinna', seasonal:'summer' },
+  { id:'summer-wave-kitty', name:'Wave Hello Kitty', cat:'sanrio', rarity:'legendary', color:'#80deea', emoji:'🌊', charKey:'hk', seasonal:'summer' },
+  { id:'summer-popsicle', name:'Rainbow Popsicle', cat:'sweet', rarity:'rare', color:'#b2ebf2', emoji:'🍦', charKey:null, seasonal:'summer' },
+  // Halloween Spooky Kawaii (Oct 25-Nov 1)
+  { id:'halloween-ghost-boba', name:'Ghost Boba', cat:'boba', rarity:'rare', color:'#8e44ad', emoji:'👻', charKey:null, seasonal:'halloween' },
+  { id:'halloween-witch-cinna', name:'Witch Cinnamoroll', cat:'sanrio', rarity:'epic', color:'#6b2fa0', emoji:'🧙', charKey:'cinna', seasonal:'halloween' },
+  { id:'halloween-pumpkin-purin', name:'Pumpkin Pompompurin', cat:'sanrio', rarity:'legendary', color:'#ff9800', emoji:'🎃', charKey:'purin', seasonal:'halloween' },
+  { id:'halloween-candy-corn', name:'Candy Corn', cat:'sweet', rarity:'rare', color:'#ff9800', emoji:'🍬', charKey:null, seasonal:'halloween' },
 ];
 
 const ACHIEVEMENTS_DEF = [
@@ -670,6 +741,56 @@ const SHOP_ITEMS = [
   { id:'double_start', name:'2x Start', desc:'Start with 5s double pts', cost:5, icon:'✨', effect:'double' },
   { id:'extra_time', name:'+5 Seconds', desc:'30s round instead of 25s', cost:8, icon:'⏰', effect:'time' },
 ];
+
+// v8.0 Login Calendar Rewards
+const LOGIN_REWARDS = [
+  { day: 1, reward: { type: 'stars', amount: 2 }, label: '2⭐', emoji: '⭐' },
+  { day: 2, reward: { type: 'stars', amount: 3 }, label: '3⭐', emoji: '⭐' },
+  { day: 3, reward: { type: 'pull', rarity: 'random' }, label: 'Free Pull', emoji: '🎁' },
+  { day: 4, reward: { type: 'stars', amount: 5 }, label: '5⭐', emoji: '💫' },
+  { day: 5, reward: { type: 'pull', rarity: 'rare' }, label: 'Rare Pull!', emoji: '💎' },
+  { day: 6, reward: { type: 'stars', amount: 8 }, label: '8⭐', emoji: '🌟' },
+  { day: 7, reward: { type: 'pull', rarity: 'epic' }, label: 'EPIC Pull!!', emoji: '👑' },
+];
+
+// Scarcity Engine: Flash Sale system - rotates every 6 hours
+function getFlashSale() {
+  const now = Date.now();
+  const sixHours = 6 * 60 * 60 * 1000;
+  const cycleIndex = Math.floor(now / sixHours);
+  const seed = cycleIndex * 16807 % 2147483647;
+  const itemIdx = seed % SHOP_ITEMS.length;
+  const discounts = [25, 30, 40, 50];
+  const discountIdx = (seed >> 8) % discounts.length;
+  const cycleStart = cycleIndex * sixHours;
+  const cycleEnd = cycleStart + sixHours;
+  const timeLeft = cycleEnd - now;
+  return {
+    item: SHOP_ITEMS[itemIdx],
+    discount: discounts[discountIdx],
+    timeLeftMs: timeLeft,
+    discountedCost: Math.max(1, Math.ceil(SHOP_ITEMS[itemIdx].cost * (1 - discounts[discountIdx]/100)))
+  };
+}
+
+// Scarcity: Item rarity stock limits per day
+const DAILY_RARITY_LIMITS = {
+  legendary: 2,
+  secret: 1,
+  epic: 5
+};
+
+// Countdown Timer Helper
+function formatCountdown(ms) {
+  if (ms <= 0) return 'EXPIRED';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  if (h > 0) return h + 'h ' + m + 'm';
+  if (m > 0) return m + 'm ' + s + 's';
+  return s + 's';
+}
+
 const DAILY_CHALLENGES_POOL = [
   { id:'catch_boba_3', type:'catch_category', cat:'boba', target:3, desc:'Catch 3 boba drinks', reward:2 },
   { id:'catch_sweet_3', type:'catch_category', cat:'sweet', target:3, desc:'Catch 3 sweets', reward:2 },
@@ -720,6 +841,9 @@ const DEFAULT_SAVE = {
   lastSpinDate: null,
   hasShared: false,
   referredBy: null,
+  flashSale: { itemId: null, discount: 0, expiresAt: null },
+  dailyFinds: { date: null, legendary: 0, secret: 0, epic: 0 },
+  loginCalendar: { week: null, day: 0, claimed: [] },
 };
 
 // ====== SAVE / LOAD SYSTEM ======
@@ -759,6 +883,21 @@ function loadGame() {
 }
 let saveData = loadGame();
 
+// Admin: ?admin=true opens event config panel
+const urlP = new URLSearchParams(window.location.search);
+const isAdmin = urlP.get('admin') === 'true';
+
+// Admin: force event for testing ?forceEvent=valentine
+const forceEventTag = urlP.get('forceEvent');
+if (forceEventTag) {
+  const origGetActiveEvent = getActiveEvent;
+  getActiveEvent = function() {
+    const fakeEvent = EVENTS_CONFIG.find(e => e.seasonalTag === forceEventTag);
+    if (fakeEvent) return fakeEvent;
+    return origGetActiveEvent();
+  };
+}
+
 // ====== v7.0 UTILITY FUNCTIONS ======
 function getSeasonTimeLeft() {
   const now = Date.now();
@@ -782,13 +921,24 @@ function getRarityForDrop() {
   return 'common';
 }
 
-function isValentineActive() {
+function getActiveEvent() {
   const now = new Date();
-  return now >= new Date('2026-02-10') && now <= new Date('2026-02-16');
+  for (const ev of EVENTS_CONFIG) {
+    if (now >= new Date(ev.startDate) && now <= new Date(ev.endDate + 'T23:59:59')) {
+      return ev;
+    }
+  }
+  return null;
+}
+// Backward compatibility
+function isValentineActive() {
+  const ev = getActiveEvent();
+  return ev && ev.seasonalTag === 'valentine';
 }
 function getRandomSeasonItem(rarity) {
-  const isVal = isValentineActive();
-  const pool = SEASON_ITEMS.filter(i => i.rarity === rarity && (!i.seasonal || (i.seasonal === 'valentine' && isVal)));
+  const ev = getActiveEvent();
+  const activeTags = ev ? [ev.seasonalTag] : [];
+  const pool = SEASON_ITEMS.filter(i => i.rarity === rarity && (!i.seasonal || activeTags.includes(i.seasonal)));
   if (pool.length === 0) return SEASON_ITEMS[0];
   return pool[Math.floor(Math.random() * pool.length)];
 }
@@ -797,6 +947,29 @@ function getTodayStr() {
   const d = new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
+
+// Scarcity Engine: Daily find limit checks
+function checkDailyLimit(rarity) {
+  const today = getTodayStr();
+  if (!saveData.dailyFinds || saveData.dailyFinds.date !== today) {
+    saveData.dailyFinds = { date: today, legendary: 0, secret: 0, epic: 0 };
+  }
+  const limit = DAILY_RARITY_LIMITS[rarity];
+  if (!limit) return true;
+  return saveData.dailyFinds[rarity] < limit;
+}
+
+function recordDailyFind(rarity) {
+  const today = getTodayStr();
+  if (!saveData.dailyFinds || saveData.dailyFinds.date !== today) {
+    saveData.dailyFinds = { date: today, legendary: 0, secret: 0, epic: 0 };
+  }
+  if (saveData.dailyFinds[rarity] !== undefined) {
+    saveData.dailyFinds[rarity]++;
+  }
+  saveGame();
+}
+
 function generateDailyChallenges() {
   const ds = getTodayStr();
   let seed = 0;
@@ -827,6 +1000,67 @@ function updateChallengeProgress(evtType, value, item) {
     if (evtType === 'no_bomb' && ch.type === 'no_bomb_hit') saveData.challenges.progress[i] = value;
   });
 }
+
+// v8.0 Login Calendar Functions
+function checkLoginCalendar() {
+  const today = getTodayStr();
+  const weekNum = Math.floor(new Date().getTime() / (7 * 24 * 60 * 60 * 1000));
+
+  if (!saveData.loginCalendar || saveData.loginCalendar.week !== weekNum) {
+    // New week - reset calendar
+    saveData.loginCalendar = { week: weekNum, day: 0, claimed: [] };
+  }
+
+  // Check if already claimed today
+  if (saveData.loginCalendar.claimed.includes(today)) return null;
+
+  // Next unclaimed day
+  const nextDay = saveData.loginCalendar.day;
+  if (nextDay >= 7) return null; // all claimed this week
+
+  return LOGIN_REWARDS[nextDay];
+}
+
+function claimLoginReward() {
+  const today = getTodayStr();
+  const reward = checkLoginCalendar();
+  if (!reward) return null;
+
+  // Apply reward
+  if (reward.reward.type === 'stars') {
+    saveData.stars += reward.reward.amount;
+  }
+  // Pull rewards handled in UI
+
+  saveData.loginCalendar.day++;
+  saveData.loginCalendar.claimed.push(today);
+  saveGame();
+  return reward;
+}
+
+function getNextCollectionMilestone() {
+  const collected = Object.keys(saveData.collection).length;
+  const milestones = [5, 10, 15, 20, 25, 30, 35, 41];
+  for (const m of milestones) {
+    if (collected < m) {
+      const diff = m - collected;
+      if (diff <= 3) {
+        const outfit = OUTFITS.find(o => o.milestone === m);
+        return 'Only ' + diff + ' more to unlock ' + (outfit?.name || 'next reward') + '!';
+      }
+      return collected + '/' + m + ' items collected';
+    }
+  }
+  return 'Master Collector! 🏆';
+}
+
+// Progressive difficulty: items fall slightly faster each consecutive game
+function getDifficultyMultiplier() {
+  const gamesPlayed = saveData.totalRoundsPlayed || 0;
+  // Very gentle curve: 1.0 at start, 1.15 at 10 games, 1.25 at 20 games, caps at 1.3
+  return Math.min(1.3, 1 + (gamesPlayed * 0.015));
+}
+
 function applyShopBoosts() {
   if (!shopSelections || !Object.keys(shopSelections).length) return;
   if (shopSelections.magnet_start) { powerups.magnet = 5; }
@@ -943,7 +1177,16 @@ function getAchievementCount() {
 function pullBlindBox(freeRarity) {
   if (!freeRarity && saveData.stars < 5) return null;
   if (!freeRarity) saveData.stars -= 5;
-  const rarity = freeRarity || getRarityForDrop();
+  let rarity = freeRarity || getRarityForDrop();
+
+  // Check daily limit and downgrade if hit
+  if (!checkDailyLimit(rarity)) {
+    // Downgrade to next available tier
+    if (rarity === 'legendary') rarity = 'epic';
+    if (rarity === 'secret') rarity = 'epic';
+    if (rarity === 'epic' && !checkDailyLimit('epic')) rarity = 'rare';
+  }
+
   const item = getRandomSeasonItem(rarity);
   const isNew = !saveData.collection[item.id];
   if (!saveData.collection[item.id]) {
@@ -954,6 +1197,7 @@ function pullBlindBox(freeRarity) {
     saveData.collection[item.id].isShiny = true;
     checkAchievement('shiny-hunter');
   }
+  recordDailyFind(rarity);
   // Check rarity achievements
   if (rarity === 'rare') checkAchievement('rare-hunter');
   if (rarity === 'epic') checkAchievement('epic-moment');
@@ -988,6 +1232,10 @@ let showDaily = false;
 let showAchievements = false;
 let showShowcase = false;
 let showWhatsNew = false;
+let showLoginCalendar = false;
+let loginCalendarReward = null;
+let loginCalendarClaimed = false;
+let loginCalendarAnim = 0;
 let collectionScrollY = 0;
 let collectionTab = 'all';
 let showcaseEditing = false;
@@ -1812,7 +2060,8 @@ function spawnItem() {
   const x = 20 + Math.random()*(W-40);                            // wider spread
   const speedRng = 0.8 + Math.random()*0.4;                       // 80-120% speed variance
   const levelMod = 1 + (gameLevel - 1) * 0.06;
-  const spd = (170 + Math.random()*140 + (gameTime/ROUND)*120) * speedRng * levelMod;
+  const diffMult = getDifficultyMultiplier();                     // v8.0 Progressive difficulty
+  const spd = (170 + Math.random()*140 + (gameTime/ROUND)*120) * speedRng * levelMod * diffMult;
   // v7.0: Tag with season rarity for glow effect
   const itemRarity = type === BLINDBOX ? null : (type.isBomb || type.isPower || type === CLOCK || type === LUCKY) ? null : getRarityForDrop();
   const raritySlowdown = itemRarity === 'legendary' || itemRarity === 'secret' ? 0.8 : itemRarity === 'epic' ? 0.9 : 1;
@@ -2722,6 +2971,31 @@ function drawShop() {
   X.fillText('\u2B50 Star Shop', W/2, H/2-195);
   X.fillStyle = '#888'; X.font = '12px "Quicksand",sans-serif';
   X.fillText(saveData.stars+' \u2B50 available', W/2, H/2-173);
+
+  // Flash Sale Banner
+  const flash = getFlashSale();
+  const flashY = H/2-130;
+  const flashPulse = 0.85 + Math.sin(Date.now() / 300) * 0.15;
+  X.save();
+  X.globalAlpha = flashPulse;
+  const flashGrad = X.createLinearGradient(20, flashY-35, W-20, flashY+35);
+  flashGrad.addColorStop(0, '#ff6b35');
+  flashGrad.addColorStop(1, '#ff1744');
+  X.fillStyle = flashGrad;
+  rrc(W/2, flashY, W-40, 70, 14);
+  X.fill();
+  X.restore();
+
+  X.textAlign = 'center';
+  X.font = 'bold 14px "Fredoka One",sans-serif';
+  X.fillStyle = '#fff';
+  X.fillText('⚡ FLASH SALE ⚡', W/2, flashY - 12);
+  X.font = '12px "Quicksand",sans-serif';
+  X.fillText(flash.item.icon + ' ' + flash.item.name + ': ' + flash.discountedCost + '⭐ (was ' + flash.item.cost + '⭐)', W/2, flashY + 6);
+  X.fillStyle = '#ffeb3b';
+  X.font = 'bold 11px "Quicksand",sans-serif';
+  X.fillText('⏰ ' + formatCountdown(flash.timeLeftMs) + ' left!', W/2, flashY + 24);
+
   SHOP_ITEMS.forEach((item, i) => {
     const col = i%2, row = Math.floor(i/2);
     const cx = W/2-75+col*150, cy = H/2-110+row*150;
@@ -2738,6 +3012,25 @@ function drawShop() {
 }
 function handleShopTap(x,y) {
   if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-222))<18) { showShop=false; return; }
+
+  // Flash sale tap detection
+  const flash = getFlashSale();
+  const flashY = H/2-130;
+  if (Math.abs(x-W/2)<(W-40)/2 && Math.abs(y-flashY)<35 && !shopSelections[flash.item.id]) {
+    if (saveData.stars>=flash.discountedCost) {
+      saveData.stars-=flash.discountedCost;
+      shopSelections[flash.item.id]=true;
+      saveGame();
+      sndPowerup();
+      shopMsg='Flash sale purchased!';
+      shopMsgTimer=90;
+    } else {
+      shopMsg='Not enough stars!';
+      shopMsgTimer=90;
+    }
+    return;
+  }
+
   SHOP_ITEMS.forEach((item,i) => {
     const col=i%2,row=Math.floor(i/2);
     const cx=W/2-75+col*150, cy=H/2-110+row*150;
@@ -2887,6 +3180,117 @@ function handleOutfitTap(x,y) {
       saveData.equippedOutfit=outfit.id; saveGame(); sndCatch();
     }
   });
+}
+
+// ====== v8.0 LOGIN CALENDAR SCREEN ======
+function drawLoginCalendar() {
+  if (!showLoginCalendar) return;
+  loginCalendarAnim++;
+  X.fillStyle = 'rgba(0,0,0,0.6)';
+  X.fillRect(0, 0, W, H);
+  const py = 120;
+  const pw = W - 40;
+  const ph = 460;
+  rrc(W/2, py + ph/2, pw, ph, 20);
+  const panelGrad = X.createLinearGradient(20, py, 20, py + ph);
+  panelGrad.addColorStop(0, '#fff5f8');
+  panelGrad.addColorStop(1, '#fff');
+  X.fillStyle = panelGrad;
+  X.fill();
+  X.strokeStyle = '#ffb3c6';
+  X.lineWidth = 3;
+  X.stroke();
+  X.textAlign = 'center';
+  X.font = 'bold 22px "Fredoka One",sans-serif';
+  X.fillStyle = '#e91e63';
+  X.fillText('📅 Daily Login Rewards', W/2, py + 35);
+  X.font = '12px "Quicksand",sans-serif';
+  X.fillStyle = '#999';
+  X.fillText('Come back every day for bigger rewards!', W/2, py + 55);
+  const calData = saveData.loginCalendar || { week: null, day: 0, claimed: [] };
+  const currentDay = calData.day;
+  for (let i = 0; i < 7; i++) {
+    const row = i < 4 ? 0 : 1;
+    const col = i < 4 ? i : (i - 4);
+    const bw = 80;
+    const bh = 90;
+    const gap = 8;
+    const startX = i < 4 ? (W/2 - (4 * (bw+gap) - gap)/2 + col * (bw+gap) + bw/2) : (W/2 - (3 * (bw+gap) - gap)/2 + col * (bw+gap) + bw/2);
+    const startY = py + 85 + row * (bh + gap) + bh/2;
+    const isClaimed = i < currentDay;
+    const isCurrent = i === currentDay && !loginCalendarClaimed;
+    const isLocked = i > currentDay;
+    rrc(startX, startY, bw, bh, 12);
+    if (isClaimed) {
+      X.fillStyle = '#e8f5e9';
+      X.fill();
+      X.strokeStyle = '#66bb6a';
+    } else if (isCurrent) {
+      const pulse = 0.9 + Math.sin(loginCalendarAnim * 0.08) * 0.1;
+      X.save();
+      X.translate(startX, startY);
+      X.scale(pulse, pulse);
+      rrc(0, 0, bw, bh, 12);
+      X.fillStyle = '#fff3e0';
+      X.fill();
+      X.restore();
+      rrc(startX, startY, bw, bh, 12);
+      X.strokeStyle = '#ff9800';
+    } else {
+      X.fillStyle = '#f5f5f5';
+      X.fill();
+      X.strokeStyle = '#e0e0e0';
+    }
+    X.lineWidth = 2;
+    X.stroke();
+    X.textAlign = 'center';
+    X.font = 'bold 11px "Quicksand",sans-serif';
+    X.fillStyle = isClaimed ? '#66bb6a' : (isCurrent ? '#ff9800' : '#bbb');
+    X.fillText('Day ' + (i+1), startX, startY - 22);
+    X.font = '24px sans-serif';
+    X.fillText(LOGIN_REWARDS[i].emoji, startX, startY + 5);
+    X.font = 'bold 10px "Quicksand",sans-serif';
+    X.fillStyle = isClaimed ? '#66bb6a' : (isCurrent ? '#ff6b00' : '#999');
+    X.fillText(LOGIN_REWARDS[i].label, startX, startY + 25);
+    if (isClaimed) {
+      X.font = '18px sans-serif';
+      X.fillText('✅', startX, startY + 5);
+    }
+    if (isLocked) {
+      X.globalAlpha = 0.5;
+      X.font = '18px sans-serif';
+      X.fillText('🔒', startX, startY + 5);
+      X.globalAlpha = 1;
+    }
+  }
+  if (!loginCalendarClaimed && checkLoginCalendar()) {
+    const btnY = py + ph - 80;
+    const btnPulse = 1 + Math.sin(loginCalendarAnim * 0.1) * 0.03;
+    X.save();
+    X.translate(W/2, btnY);
+    X.scale(btnPulse, btnPulse);
+    rrc(0, 0, 200, 50, 16);
+    const btnGrad = X.createLinearGradient(-100, -25, 100, 25);
+    btnGrad.addColorStop(0, '#ff8a9e');
+    btnGrad.addColorStop(1, '#e91e63');
+    X.fillStyle = btnGrad;
+    X.fill();
+    X.restore();
+    X.textAlign = 'center';
+    X.font = 'bold 18px "Fredoka One",sans-serif';
+    X.fillStyle = '#fff';
+    X.fillText('🎁 Claim Reward!', W/2, btnY + 6);
+  } else if (loginCalendarClaimed) {
+    const btnY = py + ph - 80;
+    X.textAlign = 'center';
+    X.font = 'bold 16px "Fredoka One",sans-serif';
+    X.fillStyle = '#66bb6a';
+    X.fillText('✅ Claimed! See you tomorrow!', W/2, btnY + 6);
+  }
+  const closeY = py + ph - 30;
+  X.font = '14px "Quicksand",sans-serif';
+  X.fillStyle = '#bbb';
+  X.fillText('tap anywhere to close', W/2, closeY);
 }
 
 // ====== v8.0 OUTFIT DRAW ON PLAYER ======
@@ -3240,10 +3644,28 @@ function drawResults() {
   // === BUTTONS (clean, well-spaced) ===
   const btnStart = Math.max(nextY + 10, 385);
 
-  // Play Again (biggest, most prominent)
-  X.fillStyle = '#ff8a9e'; rrc(W/2, btnStart, 200, 42, 21);
-  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('playAgain'), W/2, btnStart + 2);
+  // Play Again (biggest, most prominent) with motivation
+  const nearMilestone = getNextCollectionMilestone();
+  const againPulse = 1 + Math.sin(frame*0.08)*0.02;
+  X.save();
+  X.translate(W/2, btnStart);
+  X.scale(againPulse, againPulse);
+  rrc(0, 0, 240, 52, 21);
+  const agGrad = X.createLinearGradient(-120, 0, 120, 0);
+  agGrad.addColorStop(0, '#ff6b9d');
+  agGrad.addColorStop(1, '#e91e63');
+  X.fillStyle = agGrad;
+  X.fill();
+  X.restore();
+  X.textAlign = 'center';
+  X.font = 'bold 18px "Fredoka One",sans-serif';
+  X.fillStyle = '#fff';
+  X.fillText('🎮 One More Game!', W/2, btnStart + 2);
+  if (nearMilestone) {
+    X.font = '11px "Quicksand",sans-serif';
+    X.fillStyle = '#ff6b9d';
+    X.fillText(nearMilestone, W/2, btnStart + 24);
+  }
 
   // Share + Leaderboard side by side
   X.fillStyle = '#1da1f2'; rrc(W/2-58, btnStart+42, 106, 30, 15);
@@ -3572,6 +3994,16 @@ function update(dt) {
           });
         }
         bbReveal = { charImgKey, charName, rarity: rarityTier, timer: revealTime, maxTimer: revealTime, popColor, sparks: revealSparks, scale: 0, isNew };
+
+        // Near-miss: 20% chance when getting powerup/common to show "almost legendary"
+        if ((rarityTier === 'powerup' || rarityTier === 'common') && Math.random() < 0.2) {
+          nearMissActive = true;
+          nearMissTimer = 120;
+          const legChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
+          const legPick = legChars[Math.floor(Math.random()*legChars.length)];
+          nearMissItem = { emoji: '👑', name: legPick.n };
+        }
+
         // Also push a small floating pop-out
         boxPops.push({ x:it.x, y:it.y, imgKey:charImgKey, size:36, life:1.2, ml:1.2, vy:-180, scale:0 });
         addSpark(it.x, it.y, '#ffd700', 20);
@@ -3599,18 +4031,25 @@ function update(dt) {
         sndCatch();
         // v7.0: Collection from regular catches (rarity-based)
         if (it.rarity && it.rarity !== 'common') {
-          const si = getRandomSeasonItem(it.rarity);
-          const isNew = !saveData.collection[si.id];
-          if (!saveData.collection[si.id]) saveData.collection[si.id] = { count:0, firstCaught:Date.now(), isShiny:false };
-          saveData.collection[si.id].count++;
-          if (saveData.collection[si.id].count >= 10) { saveData.collection[si.id].isShiny = true; checkAchievement('shiny-hunter'); }
-          sessionCollected.push({ id:si.id, name:si.name, rarity:it.rarity, isNew, imgKey:si.charKey, emoji:si.emoji });
-          // Rarity banner
-          const banners = {rare:'RARE CATCH!',epic:'EPIC CATCH!',legendary:'LEGENDARY!!!',secret:'SECRET FOUND!'};
-          if (banners[it.rarity]) {
-            const tier = getRarityTier(it.rarity);
-            addText(W/2, 140, banners[it.rarity], tier.color === 'rainbow' ? '#ff69b4' : tier.color);
-            if (it.rarity === 'legendary' || it.rarity === 'secret') { screenFlash = { color: tier.color === 'rainbow' ? '#ff69b4' : tier.color, timer: 0.3 }; shake(8); }
+          // Check daily limit for rare items
+          if (checkDailyLimit(it.rarity)) {
+            const si = getRandomSeasonItem(it.rarity);
+            const isNew = !saveData.collection[si.id];
+            if (!saveData.collection[si.id]) saveData.collection[si.id] = { count:0, firstCaught:Date.now(), isShiny:false };
+            saveData.collection[si.id].count++;
+            if (saveData.collection[si.id].count >= 10) { saveData.collection[si.id].isShiny = true; checkAchievement('shiny-hunter'); }
+            sessionCollected.push({ id:si.id, name:si.name, rarity:it.rarity, isNew, imgKey:si.charKey, emoji:si.emoji });
+            recordDailyFind(it.rarity);
+            // Rarity banner
+            const banners = {rare:'RARE CATCH!',epic:'EPIC CATCH!',legendary:'LEGENDARY!!!',secret:'SECRET FOUND!'};
+            if (banners[it.rarity]) {
+              const tier = getRarityTier(it.rarity);
+              addText(W/2, 140, banners[it.rarity], tier.color === 'rainbow' ? '#ff69b4' : tier.color);
+              if (it.rarity === 'legendary' || it.rarity === 'secret') { screenFlash = { color: tier.color === 'rainbow' ? '#ff69b4' : tier.color, timer: 0.3 }; shake(8); }
+            }
+          } else {
+            // Hit daily limit - show message
+            addText(it.x, it.y-20, 'Daily limit reached!', '#ff9800');
           }
           if (it.rarity === 'rare') checkAchievement('rare-hunter');
           if (it.rarity === 'epic') checkAchievement('epic-moment');
@@ -3870,6 +4309,22 @@ function drawGame() {
     X.restore();
     X.globalAlpha = 1;
   }
+
+  // Near-miss display
+  if (nearMissActive && nearMissTimer > 0) {
+    nearMissTimer--;
+    const nmAlpha = Math.min(1, nearMissTimer / 30);
+    X.save();
+    X.globalAlpha = nmAlpha * (0.7 + Math.sin(Date.now()/100) * 0.3);
+    X.textAlign = 'center';
+    X.font = 'bold 16px "Fredoka One",sans-serif';
+    X.fillStyle = '#ffd700';
+    X.shadowColor = '#ffd700';
+    X.shadowBlur = 20;
+    X.fillText('SO CLOSE to ' + (nearMissItem ? nearMissItem.emoji + ' ' + nearMissItem.name : '👑 Legendary') + '!', W/2, 500);
+    X.restore();
+    if (nearMissTimer <= 0) nearMissActive = false;
+  }
 }
 
 // ====== GAME LOOP - rAF primary, visibility fallback ======
@@ -3897,6 +4352,7 @@ function loop(timestamp) {
     else if (showChallenges) { drawChallengesScreen(); }
     else if (showSpin) { drawLuckySpin(); }
     else if (showOutfits) { drawOutfitSelector(); }
+    else if (showLoginCalendar) { drawLoginCalendar(); }
     else if (state === 'menu') drawMenu();
     else if (state === 'playing') {
       if (!gamePaused) update(dt);
@@ -3919,6 +4375,15 @@ else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
 }
+
+// v8.0 Show login calendar on first load if reward available
+setTimeout(() => {
+  const pendingReward = checkLoginCalendar();
+  if (pendingReward && state === 'menu' && !showDaily && !showWhatsNew) {
+    showLoginCalendar = true;
+    loginCalendarClaimed = false;
+  }
+}, 800);
 
 loopId = requestAnimationFrame(loop);
 
@@ -3963,6 +4428,9 @@ function startGame() {
   blindBoxesDropped = 0; maxBlindBoxes = 3 + Math.floor(Math.random()*2); initBlindBoxTimes();
   boxPops = [];
   bbReveal = null;
+  nearMissActive = false;
+  nearMissTimer = 0;
+  nearMissItem = null;
   sessionCollected = [];
   lbSaved = false;
   gamePaused = false;
@@ -4088,6 +4556,37 @@ function handleTap(x, y) {
   if (showChallenges) { handleChallengeTap(x,y); return; }
   if (showSpin) { handleSpinTap(x,y); return; }
   if (showOutfits) { handleOutfitTap(x,y); return; }
+  if (showLoginCalendar) {
+    const calData = saveData.loginCalendar || { week: null, day: 0, claimed: [] };
+    const py = 120;
+    const ph = 460;
+    const btnY = py + ph - 80;
+    // Claim button
+    if (!loginCalendarClaimed && checkLoginCalendar() && y > btnY - 25 && y < btnY + 25 && x > W/2 - 100 && x < W/2 + 100) {
+      loginCalendarReward = claimLoginReward();
+      loginCalendarClaimed = true;
+      // If reward is stars, they're already applied
+      // If reward is a pull, trigger blind box
+      if (loginCalendarReward && loginCalendarReward.reward.type === 'pull') {
+        // Schedule a blind box pull after calendar closes
+        setTimeout(() => {
+          const pullRarity = loginCalendarReward.reward.rarity;
+          const item = pullRarity === 'random' ? getRandomSeasonItem(['common','rare','epic'][Math.floor(Math.random()*3)]) : getRandomSeasonItem(pullRarity);
+          // Add to collection
+          if (!saveData.collection[item.id]) saveData.collection[item.id] = { count: 0, firstCaught: Date.now() };
+          saveData.collection[item.id].count++;
+          saveGame();
+        }, 1500);
+      }
+      return;
+    }
+    // Close calendar on any other tap (after claimed or if tapping outside)
+    if (loginCalendarClaimed || y > py + ph || y < py) {
+      showLoginCalendar = false;
+      return;
+    }
+    return;
+  }
   if (showCollection) {
     // Close X
     if (Math.abs(x-(W-24))<18 && Math.abs(y-34)<18) { showCollection = false; gamePausedForBP = false; return; }
