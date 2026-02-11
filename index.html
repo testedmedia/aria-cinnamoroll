@@ -348,7 +348,7 @@ async function sbFetch(path, opts = {}) {
     if (!res.ok) throw new Error(res.status);
     if (opts.method === 'POST') return true;
     return await res.json();
-  } catch(e) { console.warn('Supabase:', e.message); return null; }
+  } catch(e) { return null; }
 }
 
 let globalLB = [];
@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.1', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.3', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2608,7 +2608,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.1', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v9.3', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2896,7 +2896,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v9.1 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v9.3 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -4260,15 +4260,14 @@ function loop(timestamp) {
     else if (state === 'results') {
       updateCelebration(dt);
       drawResults();
-      // first share prompt removed
     }
-  } catch(e) { console.error('Loop:', e.message); }
+  } catch(e) {}
 
   if (useRAF) loopId = requestAnimationFrame(loop);
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v9.1') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v9.3') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4350,7 +4349,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v9.1'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v9.3'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
