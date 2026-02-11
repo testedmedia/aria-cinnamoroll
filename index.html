@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.7', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.8', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2538,8 +2538,9 @@ function drawCollectionItem(cx, cy, si, owned, data) {
 }
 
 function drawCollection() {
-  drawBg();
-  X.fillStyle = 'rgba(255,255,255,0.95)';
+  X.fillStyle = '#fff';
+  X.fillRect(0, 0, W, H);
+  X.fillStyle = '#fff';
   rrc(W/2, H/2, W-16, H-30, 20);
 
   // Close X
@@ -2608,7 +2609,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.7', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v9.8', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2892,7 +2893,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v9.7 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v9.8 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3508,20 +3509,17 @@ function drawMenu() {
   X.strokeText(T('title2'), W/2, 80);
   X.fillText(T('title2'), W/2, 80);
 
-  // Valentine's Event hero banner (if active) - RIGHT BELOW TITLE
-  let nextY = 110;
+  // Valentine's Event banner (below title with breathing room)
+  let nextY = 108;
   if (vMenu) {
     const vEnd = new Date('2026-02-16T00:00:00');
     const vNow = new Date();
     const vDays = Math.max(0, Math.ceil((vEnd - vNow) / 86400000));
-    const vg = X.createLinearGradient(W/2-150, 0, W/2+150, 0);
-    vg.addColorStop(0, '#ff1493'); vg.addColorStop(0.5, '#ff69b4'); vg.addColorStop(1, '#ff1493');
-    X.fillStyle = vg; rrc(W/2, nextY, 300, 44, 22);
-    X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('\uD83D\uDC98 VALENTINE\'S EVENT \uD83D\uDC98', W/2, nextY-4);
-    X.font = 'bold 10px "Quicksand",sans-serif';
-    X.fillText('4 Exclusive Items \u2022 ' + vDays + ' days left!', W/2, nextY+14);
-    nextY += 50;
+    nextY = 120;
+    X.fillStyle = 'rgba(255,20,147,0.15)'; rrc(W/2, nextY, 260, 32, 16);
+    X.fillStyle = '#ff1493'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDC98 Valentine\'s Event \u2022 ' + vDays + ' days left', W/2, nextY + 1);
+    nextY += 38;
   }
 
   // Characters
@@ -3583,7 +3581,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v9.7', W-10, H-8);
+  X.fillText('v9.8', W-10, H-8);
 }
 
 function drawResults() {
@@ -3644,7 +3642,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.7', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v9.8', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4279,7 +4277,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v9.7') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v9.8') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4361,7 +4359,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v9.7'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v9.8'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
