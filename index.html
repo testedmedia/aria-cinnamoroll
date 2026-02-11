@@ -523,6 +523,9 @@ const SANRIO_CHARS = [
   { id:'my_melody', name:'My Melody', imgKey:'melody', rarity:'common', color:'#ffb6c1' },
   { id:'pochacco', name:'Pochacco', imgKey:'pochacco', rarity:'common', color:'#2196f3' },
   { id:'keroppi', name:'Keroppi', imgKey:'keroppi', rarity:'common', color:'#4caf50' },
+  { id:'gudetama', name:'Gudetama', imgKey:'gudetama', rarity:'epic', color:'#fff9c4' },
+  { id:'tuxedo_sam', name:'Tuxedo Sam', imgKey:'tuxedosam', rarity:'rare', color:'#5c9ce6' },
+  { id:'little_twin_stars', name:'Little Twin Stars', imgKey:'twinstars', rarity:'epic', color:'#c4b5e0' },
 ];
 // ====== v7.0 SEASON CONFIG ======
 const SEASON = {
@@ -572,8 +575,21 @@ const SEASON_ITEMS = [
   { id:'golden-pompompurin', name:'Golden Pompompurin', cat:'sanrio', rarity:'legendary', color:'#ffd700', emoji:'⭐', charKey:'purin' },
   { id:'hello-kitty-diamond-boba', name:'Hello Kitty Diamond Boba', cat:'boba', rarity:'legendary', color:'#e0f7fa', emoji:'💎', charKey:'hk' },
   // Secret (2)
-  { id:'gudetama-sleeping', name:'Gudetama Sleeping', cat:'secret', rarity:'secret', color:'#fff9c4', emoji:'🥚', charKey:null },
+  { id:'gudetama-sleeping', name:'Gudetama Sleeping', cat:'secret', rarity:'secret', color:'#fff9c4', emoji:'🥚', charKey:'gudetama' },
   { id:'badtz-maru-disguise', name:'Badtz-Maru in Disguise', cat:'secret', rarity:'secret', color:'#333', emoji:'🎭', charKey:'badtz' },
+  // v8.0 New items
+  { id:'tuxedosam-tea', name:'Tuxedo Sam Tea', cat:'sanrio', rarity:'rare', color:'#5c9ce6', emoji:'🍵', charKey:'tuxedosam' },
+  { id:'twinstars-wish', name:'Twin Stars Wish', cat:'sanrio', rarity:'epic', color:'#c4b5e0', emoji:'🌟', charKey:'twinstars' },
+  { id:'gudetama-latte', name:'Gudetama Lazy Latte', cat:'boba', rarity:'epic', color:'#fff9c4', emoji:'☕', charKey:'gudetama' },
+  { id:'tuxedosam-icecream', name:'Tuxedo Sam Ice Cream', cat:'sweet', rarity:'common', color:'#5c9ce6', emoji:'🍦', charKey:'tuxedosam' },
+  { id:'twinstars-boba', name:'Twin Stars Boba', cat:'boba', rarity:'rare', color:'#c4b5e0', emoji:'🧋', charKey:'twinstars' },
+  { id:'gudetama-pudding', name:'Gudetama Pudding', cat:'sweet', rarity:'rare', color:'#fff9c4', emoji:'🍮', charKey:'gudetama' },
+  { id:'golden-hangyodon', name:'Golden Hangyodon', cat:'sanrio', rarity:'legendary', color:'#ffd700', emoji:'✨', charKey:'hangyodon' },
+  // Valentine (Feb 10-15)
+  { id:'valentine-heart-boba', name:'Heart Boba', cat:'boba', rarity:'rare', color:'#ff69b4', emoji:'💕', charKey:null, seasonal:'valentine' },
+  { id:'valentine-cupid-cinna', name:'Cupid Cinnamoroll', cat:'sanrio', rarity:'epic', color:'#89c4f4', emoji:'💘', charKey:'cinna', seasonal:'valentine' },
+  { id:'valentine-love-cookie', name:'Love Letter Cookie', cat:'sweet', rarity:'rare', color:'#ff1493', emoji:'💌', charKey:null, seasonal:'valentine' },
+  { id:'valentine-purin', name:'Valentine Pompompurin', cat:'sanrio', rarity:'legendary', color:'#fdd835', emoji:'💝', charKey:'purin', seasonal:'valentine' },
 ];
 
 const ACHIEVEMENTS_DEF = [
@@ -586,7 +602,7 @@ const ACHIEVEMENTS_DEF = [
   { id:'streak-master', name:'Streak Master', desc:'Complete a 7-day streak', badge:'🔥' },
   { id:'score-crusher', name:'Score Crusher', desc:'Score over 50,000', badge:'⚡' },
   { id:'full-set', name:'Full Set', desc:'Complete an entire category', badge:'🖼️' },
-  { id:'master-collector', name:'Master Collector', desc:'Collect all 30 items', badge:'🏆' },
+  { id:'master-collector', name:'Master Collector', desc:'Collect all items', badge:'🏆' },
   { id:'shiny-hunter', name:'Shiny Hunter', desc:'Get first Shiny (10 dupes)', badge:'✨' },
   { id:'social-butterfly', name:'Social Butterfly', desc:'Share score 5 times', badge:'💕' },
   { id:'dedicated-fan', name:'Dedicated Fan', desc:'Complete 3 seven-day streaks', badge:'💎' },
@@ -599,7 +615,48 @@ const ITEM_CATEGORIES = {
   sweet: { label: 'Treats', filter: i => i.cat === 'sweet' },
   sanrio: { label: 'Sanrio', filter: i => i.cat === 'sanrio' },
   secret: { label: 'Secret', filter: i => i.cat === 'secret' },
+  valentine: { label: '💝', filter: i => i.seasonal === 'valentine' },
 };
+
+// v8.0 Star Shop
+const SHOP_ITEMS = [
+  { id:'magnet_start', name:'Magnet Start', desc:'Start with 5s magnet', cost:3, icon:'🧲', effect:'magnet' },
+  { id:'shield_start', name:'Shield Start', desc:'Start with shield', cost:3, icon:'🛡️', effect:'shield' },
+  { id:'double_start', name:'2x Start', desc:'Start with 5s double pts', cost:5, icon:'✨', effect:'double' },
+  { id:'extra_time', name:'+5 Seconds', desc:'30s round instead of 25s', cost:8, icon:'⏰', effect:'time' },
+];
+const DAILY_CHALLENGES_POOL = [
+  { id:'catch_boba_3', type:'catch_category', cat:'boba', target:3, desc:'Catch 3 boba drinks', reward:2 },
+  { id:'catch_sweet_3', type:'catch_category', cat:'sweet', target:3, desc:'Catch 3 sweets', reward:2 },
+  { id:'catch_sanrio_5', type:'catch_category', cat:'sanrio', target:5, desc:'Catch 5 Sanrio items', reward:3 },
+  { id:'catch_count_15', type:'catch_count', target:15, desc:'Catch 15 items total', reward:2 },
+  { id:'catch_count_25', type:'catch_count', target:25, desc:'Catch 25 items total', reward:4 },
+  { id:'score_500', type:'score_target', target:500, desc:'Score 500 points', reward:3 },
+  { id:'score_1000', type:'score_target', target:1000, desc:'Score 1000 points', reward:5 },
+  { id:'combo_10', type:'max_combo', target:10, desc:'Get a 10x combo', reward:3 },
+  { id:'combo_20', type:'max_combo', target:20, desc:'Get a 20x combo', reward:5 },
+  { id:'no_bomb', type:'no_bomb_hit', target:1, desc:'No bombs for a round', reward:3 },
+  { id:'catch_rare_2', type:'catch_rarity', rarity:'rare', target:2, desc:'Catch 2 rare items', reward:3 },
+  { id:'catch_epic_1', type:'catch_rarity', rarity:'epic', target:1, desc:'Catch 1 epic item', reward:4 },
+];
+const OUTFITS = [
+  { id:'default', name:'Default', milestone:0, desc:'Starting outfit' },
+  { id:'hk_bow', name:'Hello Kitty Bow', milestone:5, desc:'Collect 5 items', drawFn:'drawBow' },
+  { id:'melody_hood', name:'My Melody Hood', milestone:10, desc:'Collect 10 items', drawFn:'drawMelodyHood' },
+  { id:'cinna_ears', name:'Cinnamoroll Ears', milestone:15, desc:'Collect 15 items', drawFn:'drawCinnaEars' },
+  { id:'kuromi_hat', name:'Kuromi Hat', milestone:20, desc:'Collect 20 items', drawFn:'drawKuromiHat' },
+  { id:'full_costume', name:'Kawaii Queen', milestone:30, desc:'Collect 30 items', drawFn:'drawFullCostume' },
+];
+const SPIN_SEGMENTS = [
+  { label:'1\u2B50', reward:{type:'stars',amount:1}, color:'#ffcdd2', weight:30 },
+  { label:'2\u2B50', reward:{type:'stars',amount:2}, color:'#fff9c4', weight:25 },
+  { label:'3\u2B50', reward:{type:'stars',amount:3}, color:'#c8e6c9', weight:20 },
+  { label:'5\u2B50', reward:{type:'stars',amount:5}, color:'#bbdefb', weight:10 },
+  { label:'Free Pull', reward:{type:'pull',rarity:'random'}, color:'#e1bee7', weight:10 },
+  { label:'Rare Pull', reward:{type:'pull',rarity:'rare'}, color:'#b3e5fc', weight:5 },
+];
+
+const TOTAL_ITEMS = SEASON_ITEMS.length;
 
 const DEFAULT_SAVE = {
   stars: 0,
@@ -612,6 +669,10 @@ const DEFAULT_SAVE = {
   bestScore: 0,
   shareCount: 0,
   lastVersion: null,
+  shopPurchases: {},
+  challenges: { date: null, list: [], progress: [0, 0, 0] },
+  equippedOutfit: 'default',
+  lastSpinDate: null,
 };
 
 // ====== SAVE / LOAD SYSTEM ======
@@ -674,10 +735,87 @@ function getRarityForDrop() {
   return 'common';
 }
 
+function isValentineActive() {
+  const now = new Date();
+  return now >= new Date('2026-02-10') && now <= new Date('2026-02-16');
+}
 function getRandomSeasonItem(rarity) {
-  const pool = SEASON_ITEMS.filter(i => i.rarity === rarity);
+  const isVal = isValentineActive();
+  const pool = SEASON_ITEMS.filter(i => i.rarity === rarity && (!i.seasonal || (i.seasonal === 'valentine' && isVal)));
   if (pool.length === 0) return SEASON_ITEMS[0];
   return pool[Math.floor(Math.random() * pool.length)];
+}
+// v8.0 Helpers
+function getTodayStr() {
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function generateDailyChallenges() {
+  const ds = getTodayStr();
+  let seed = 0;
+  for (let i = 0; i < ds.length; i++) seed = ((seed << 5) - seed + ds.charCodeAt(i)) | 0;
+  const sr = () => { seed = (seed * 16807) % 2147483647; return (seed & 0x7fffffff) / 2147483647; };
+  const pool = DAILY_CHALLENGES_POOL.slice();
+  const picked = [];
+  for (let i = 0; i < 3 && pool.length; i++) {
+    const idx = Math.floor(sr() * pool.length);
+    picked.push({ ...pool[idx], claimed: false });
+    pool.splice(idx, 1);
+  }
+  return picked;
+}
+function updateChallengeProgress(evtType, value, item) {
+  if (!saveData.challenges || saveData.challenges.date !== getTodayStr()) return;
+  const list = saveData.challenges.list;
+  if (!list) return;
+  list.forEach((ch, i) => {
+    if (ch.claimed) return;
+    if (evtType === 'catch') {
+      if (ch.type === 'catch_count') saveData.challenges.progress[i] = (saveData.challenges.progress[i]||0) + 1;
+      if (ch.type === 'catch_category' && item && item.cat === ch.cat) saveData.challenges.progress[i] = (saveData.challenges.progress[i]||0) + 1;
+      if (ch.type === 'catch_rarity' && item && item.rarity === ch.rarity) saveData.challenges.progress[i] = (saveData.challenges.progress[i]||0) + 1;
+    }
+    if (evtType === 'combo' && ch.type === 'max_combo') saveData.challenges.progress[i] = Math.max(saveData.challenges.progress[i]||0, value);
+    if (evtType === 'score' && ch.type === 'score_target') saveData.challenges.progress[i] = Math.max(saveData.challenges.progress[i]||0, value);
+    if (evtType === 'no_bomb' && ch.type === 'no_bomb_hit') saveData.challenges.progress[i] = value;
+  });
+}
+function applyShopBoosts() {
+  if (!shopSelections || !Object.keys(shopSelections).length) return;
+  if (shopSelections.magnet_start) { powerups.magnet = 5; }
+  if (shopSelections.shield_start) { powerups.shield = true; powerups.shieldTimer = 5; }
+  if (shopSelections.double_start) { powerups.double = 5; }
+  if (shopSelections.extra_time) { ROUND = 30; }
+  shopSelections = {};
+  saveData.shopPurchases = {};
+  saveGame();
+}
+function updateSpinWheel() {
+  if (spinState.phase !== 'spinning') return;
+  spinState.angle += spinState.speed * (Math.PI / 180);
+  spinState.speed *= 0.985;
+  if (spinState.speed < 0.1) {
+    spinState.speed = 0;
+    spinState.phase = 'result';
+    const segCount = SPIN_SEGMENTS.length;
+    const segAngle = (2 * Math.PI) / segCount;
+    const normAngle = ((spinState.angle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+    const pointerOff = (3*Math.PI/2 - normAngle + 4*Math.PI) % (2*Math.PI);
+    const segIdx = Math.floor(pointerOff / segAngle) % segCount;
+    const prize = SPIN_SEGMENTS[segIdx];
+    spinState.result = prize;
+    if (prize.reward.type === 'stars') { saveData.stars += prize.reward.amount; }
+    else if (prize.reward.type === 'pull') {
+      const result = pullBlindBox(prize.reward.rarity === 'rare' ? 'rare' : null);
+      if (result) spinState.pullResult = result;
+    }
+    saveGame();
+    sndLuckyStar();
+  }
+}
+function getUnlockedOutfits() {
+  const cc = getCollectedCount();
+  return OUTFITS.filter(o => cc >= o.milestone);
 }
 
 function getRarityTier(rarityId) {
@@ -775,7 +913,7 @@ function pullBlindBox(freeRarity) {
   if (rarity === 'legendary') checkAchievement('legendary-status');
   if (rarity === 'secret') checkAchievement('secret-keeper');
   if (getCollectedCount() >= 10) checkAchievement('collector');
-  if (getCollectedCount() >= 30) checkAchievement('master-collector');
+  if (getCollectedCount() >= TOTAL_ITEMS) checkAchievement('master-collector');
   saveGame();
   return { item, rarity, isNew, count: saveData.collection[item.id].count };
 }
@@ -813,6 +951,17 @@ let starsEarned = 0;
 let sessionRarities = {};
 let bbState = null;
 let dailyPopupShown = false;
+
+// v8.0 new overlay states
+let showShop = false;
+let showChallenges = false;
+let showSpin = false;
+let showOutfits = false;
+let spinState = { phase: 'idle', angle: 0, speed: 0, result: null };
+let shopSelections = saveData.shopPurchases || {};
+let shopMsg = '';
+let shopMsgTimer = 0;
+let bombHitThisRound = false;
 
 function drawBackpackIcon(x, y) {
   X.fillStyle = 'rgba(255,255,255,0.7)';
@@ -910,7 +1059,7 @@ function sndCelebration() {
 
 // ====== IMAGES ======
 const imgs = {};
-let imgsLoaded = 0, imgsTotal = 11;
+let imgsLoaded = 0, imgsTotal = 14;
 function loadI(n, s) {
   const i = new Image(); i.crossOrigin='anonymous'; i.src = s;
   i.onload = () => imgsLoaded++;
@@ -927,6 +1076,9 @@ loadI('pochacco', 'pochacco.png');
 loadI('keroppi', 'keroppi.png');
 loadI('badtz', 'badtzmaru.png');
 loadI('hangyodon', 'hangyodon.png');
+loadI('gudetama', 'gudetama.png');
+loadI('tuxedosam', 'tuxedosam.png');
+loadI('twinstars', 'littletwinstars.png');
 
 function drawImg(img, x, y, mw, mh) {
   if (!img?.complete || !img.naturalWidth) return;
@@ -1867,7 +2019,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.1', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v8.0', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -1943,6 +2095,7 @@ function drawPlayer() {
   X.fillStyle = 'rgba(255,200,220,0.3)';
   X.beginPath(); X.ellipse(px, P.baseY+35, 40, 8, 0, 0, Math.PI*2); X.fill();
   drawImg(imgs.avatar, px, py, 65, 88);
+  drawOutfitOnPlayer(px, py);
   // Magnet aura
   if (powerups.magnet > 0) {
     X.strokeStyle = 'rgba(33,150,243,0.4)'; X.lineWidth = 2;
@@ -2077,10 +2230,10 @@ function drawCollection() {
   X.fillText('✨ Collection ✨', W/2, 50);
   const cc = getCollectedCount();
   X.fillStyle = '#999'; X.font = 'bold 12px "Quicksand",sans-serif';
-  X.fillText(cc+'/30 Collected ('+Math.round(cc/30*100)+'%)', W/2, 70);
+  X.fillText(cc+'/'+TOTAL_ITEMS+' Collected ('+Math.round(cc/TOTAL_ITEMS*100)+'%)', W/2, 70);
   // Progress bar
   X.fillStyle = '#eee'; rr(W/2-120, 76, 240, 6, 3);
-  X.fillStyle = '#e91e63'; rr(W/2-120, 76, Math.max(6, 240*(cc/30)), 6, 3);
+  X.fillStyle = '#e91e63'; rr(W/2-120, 76, Math.max(6, 240*(cc/TOTAL_ITEMS)), 6, 3);
 
   // Tab bar
   const tabs = Object.keys(ITEM_CATEGORIES);
@@ -2132,7 +2285,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.1', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v8.0', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2403,17 +2556,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v7.1 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v8.0 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
-    '✨ 30 collectible items with rarities!',
-    '🎁 Blind Box pulls with star currency',
-    '🔥 Daily streak rewards (7-day cycle)',
-    '🏆 14 achievements to unlock',
-    '⭐ Earn stars every round',
-    '🖼️ Showcase your rarest finds',
-    '📅 Season 1 with countdown timer',
-    '✨ Shiny items at 10 duplicates',
+    '\u2B50 Star Shop - buy power-up boosts!',
+    '\uD83C\uDFB0 Lucky Spin - free daily spin!',
+    '\uD83C\uDFAF Daily Challenges - 3 new tasks/day',
+    '\uD83D\uDC57 Outfits - unlock avatar costumes!',
+    '\uD83E\uDD5A Gudetama, Tuxedo Sam & Twin Stars!',
+    '\uD83D\uDC9D Valentine\'s Day limited items!',
+    '\u2728 41 collectible items total',
+    '\uD83C\uDFB5 New Sanrio characters to discover',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -2468,6 +2621,219 @@ function drawShowcaseEditor() {
   X.fillText('Done', W/2, H/2 + 237);
 }
 
+// ====== v8.0 STAR SHOP SCREEN ======
+function drawShop() {
+  drawBg();
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0, 0, W, H);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 480, 24);
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155, H/2-222, 16, 0, Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715', W/2+155, H/2-222); X.textBaseline = 'alphabetic';
+  X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2B50 Star Shop', W/2, H/2-195);
+  X.fillStyle = '#888'; X.font = '12px "Quicksand",sans-serif';
+  X.fillText(saveData.stars+' \u2B50 available', W/2, H/2-173);
+  SHOP_ITEMS.forEach((item, i) => {
+    const col = i%2, row = Math.floor(i/2);
+    const cx = W/2-75+col*150, cy = H/2-110+row*150;
+    const bought = shopSelections[item.id];
+    const canBuy = saveData.stars >= item.cost && !bought;
+    X.fillStyle = bought?'#e8f5e9':'#f5f5f5'; rrc(cx,cy,130,125,14);
+    X.font = '28px sans-serif'; X.textAlign = 'center'; X.fillText(item.icon,cx,cy-25);
+    X.fillStyle = '#333'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.fillText(item.name,cx,cy+5);
+    X.fillStyle = '#888'; X.font = '9px "Quicksand",sans-serif'; X.fillText(item.desc,cx,cy+20);
+    if (bought) { X.fillStyle='#66bb6a'; X.font='bold 10px "Fredoka One",sans-serif'; X.fillText('\u2713 Ready',cx,cy+42); }
+    else { X.fillStyle=canBuy?'#ff8a9e':'#ccc'; rrc(cx,cy+42,80,24,12); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.fillText(item.cost+' \u2B50',cx,cy+44); }
+  });
+  if (shopMsgTimer>0) { shopMsgTimer--; X.fillStyle='#e91e63'; X.font='bold 12px "Quicksand",sans-serif'; X.textAlign='center'; X.fillText(shopMsg,W/2,H/2+215); }
+}
+function handleShopTap(x,y) {
+  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-222))<18) { showShop=false; return; }
+  SHOP_ITEMS.forEach((item,i) => {
+    const col=i%2,row=Math.floor(i/2);
+    const cx=W/2-75+col*150, cy=H/2-110+row*150;
+    if (Math.abs(x-cx)<40 && Math.abs(y-(cy+42))<14 && !shopSelections[item.id]) {
+      if (saveData.stars>=item.cost) { saveData.stars-=item.cost; shopSelections[item.id]=true; saveGame(); sndPowerup(); }
+      else { shopMsg='Not enough stars!'; shopMsgTimer=90; }
+    }
+  });
+}
+
+// ====== v8.0 DAILY CHALLENGES SCREEN ======
+function drawChallengesScreen() {
+  drawBg();
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,440,24);
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-200,16,0,Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715',W/2+155,H/2-200); X.textBaseline = 'alphabetic';
+  X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83C\uDFAF Daily Challenges',W/2,H/2-172);
+  if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) {
+    saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]};
+    saveGame();
+  }
+  const list = saveData.challenges.list;
+  list.forEach((ch,i) => {
+    const cy = H/2-100+i*110;
+    X.fillStyle = ch.claimed?'#e8f5e9':'#f9f9f9'; rrc(W/2,cy,290,90,14);
+    X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'left';
+    X.fillText(ch.desc,W/2-130,cy-16);
+    const prog = saveData.challenges.progress[i]||0;
+    const pct = Math.min(1,prog/ch.target);
+    X.fillStyle = '#eee'; rr(W/2-130,cy+2,180,8,4);
+    X.fillStyle = pct>=1?'#66bb6a':'#ff8a9e'; rr(W/2-130,cy+2,Math.max(4,180*pct),8,4);
+    X.fillStyle = '#888'; X.font = '10px "Quicksand",sans-serif'; X.textAlign = 'left';
+    X.fillText(Math.min(prog,ch.target)+'/'+ch.target,W/2-128,cy+24);
+    X.fillStyle = '#ff8f00'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'right';
+    X.fillText('+'+ch.reward+' \u2B50',W/2+130,cy-16);
+    if (ch.claimed) { X.fillStyle='#66bb6a'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='right'; X.fillText('\u2713 Claimed',W/2+130,cy+24); }
+    else if (pct>=1) { X.fillStyle='#9c27b0'; rrc(W/2+100,cy+18,70,24,12); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('Claim!',W/2+100,cy+20); }
+  });
+}
+function handleChallengeTap(x,y) {
+  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-200))<18) { showChallenges=false; return; }
+  const list = saveData.challenges?.list||[];
+  list.forEach((ch,i) => {
+    const cy=H/2-100+i*110;
+    if (Math.abs(x-(W/2+100))<40 && Math.abs(y-(cy+18))<14) {
+      const prog=saveData.challenges.progress[i]||0;
+      if (prog>=ch.target && !ch.claimed) { saveData.stars+=ch.reward; saveData.challenges.list[i].claimed=true; saveGame(); sndLuckyStar(); }
+    }
+  });
+}
+
+// ====== v8.0 LUCKY SPIN SCREEN ======
+function drawLuckySpin() {
+  drawBg();
+  X.fillStyle = 'rgba(0,0,0,0.6)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,540,24);
+  if (spinState.phase!=='spinning') {
+    X.fillStyle='#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-250,16,0,Math.PI*2); X.fill();
+    X.fillStyle='#fff'; X.font='bold 18px sans-serif'; X.textAlign='center'; X.textBaseline='middle';
+    X.fillText('\u2715',W/2+155,H/2-250); X.textBaseline='alphabetic';
+  }
+  X.fillStyle = '#9c27b0'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83C\uDFB0 Lucky Spin!',W/2,H/2-222);
+  const wcx=W/2, wcy=H/2-50, wr=110;
+  const segCount=SPIN_SEGMENTS.length, segAngle=(2*Math.PI)/segCount;
+  X.save(); X.translate(wcx,wcy); X.rotate(spinState.angle);
+  SPIN_SEGMENTS.forEach((seg,i) => {
+    const sa=i*segAngle-Math.PI/2, ea=sa+segAngle;
+    X.fillStyle=seg.color; X.beginPath(); X.moveTo(0,0); X.arc(0,0,wr,sa,ea); X.closePath(); X.fill();
+    X.strokeStyle='#fff'; X.lineWidth=2; X.stroke();
+    const ma=sa+segAngle/2;
+    X.save(); X.rotate(ma); X.fillStyle='#333'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='center';
+    X.fillText(seg.label,wr*0.65,4); X.restore();
+  });
+  X.restore();
+  X.fillStyle='#e91e63'; X.beginPath(); X.moveTo(wcx,wcy-wr-12); X.lineTo(wcx-10,wcy-wr-28); X.lineTo(wcx+10,wcy-wr-28); X.closePath(); X.fill();
+  X.fillStyle='#fff'; X.beginPath(); X.arc(wcx,wcy,18,0,Math.PI*2); X.fill();
+  X.fillStyle='#e91e63'; X.font='bold 14px sans-serif'; X.textAlign='center'; X.textBaseline='middle';
+  X.fillText('\uD83C\uDFB0',wcx,wcy); X.textBaseline='alphabetic';
+  if (spinState.phase==='idle') {
+    X.fillStyle='#9c27b0'; rrc(W/2,H/2+150,160,44,22);
+    X.fillStyle='#fff'; X.font='bold 16px "Fredoka One",sans-serif'; X.textAlign='center';
+    X.fillText('SPIN!',W/2,H/2+152);
+    X.fillStyle='#888'; X.font='11px "Quicksand",sans-serif'; X.fillText('Free daily spin!',W/2,H/2+180);
+  } else if (spinState.phase==='spinning') {
+    updateSpinWheel();
+    X.fillStyle='#9c27b0'; X.font='bold 16px "Fredoka One",sans-serif'; X.textAlign='center';
+    X.fillText('Spinning...',W/2,H/2+152);
+  } else if (spinState.phase==='result'&&spinState.result) {
+    const prize=spinState.result;
+    X.fillStyle='#333'; X.font='bold 16px "Fredoka One",sans-serif'; X.textAlign='center';
+    X.fillText('You won:',W/2,H/2+115);
+    X.fillStyle='#9c27b0'; X.font='bold 24px "Fredoka One",sans-serif';
+    X.fillText(prize.label,W/2,H/2+150);
+    X.fillStyle=prize.reward.type==='stars'?'#ff8f00':'#e91e63'; X.font='bold 13px "Quicksand",sans-serif';
+    X.fillText(prize.reward.type==='stars'?'+'+prize.reward.amount+' stars!':'Blind box pull earned!',W/2,H/2+175);
+    X.fillStyle='#ff8a9e'; rrc(W/2,H/2+215,120,36,18);
+    X.fillStyle='#fff'; X.font='bold 14px "Fredoka One",sans-serif';
+    X.fillText('Collect!',W/2,H/2+217);
+  }
+}
+function handleSpinTap(x,y) {
+  if (spinState.phase!=='spinning'&&Math.abs(x-(W/2+155))<18&&Math.abs(y-(H/2-250))<18) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
+  if (spinState.phase==='idle'&&Math.abs(x-W/2)<80&&Math.abs(y-(H/2+150))<24) {
+    spinState.phase='spinning'; spinState.speed=15+Math.random()*5; spinState.result=null;
+    saveData.lastSpinDate=getTodayStr(); saveGame(); sndFever(); return;
+  }
+  if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
+}
+
+// ====== v8.0 OUTFIT SELECTOR SCREEN ======
+function drawOutfitSelector() {
+  drawBg();
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,480,24);
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-222,16,0,Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715',W/2+155,H/2-222); X.textBaseline = 'alphabetic';
+  X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83D\uDC57 Outfits',W/2,H/2-195);
+  const cc=getCollectedCount();
+  X.fillStyle='#888'; X.font='12px "Quicksand",sans-serif';
+  X.fillText(cc+' items collected',W/2,H/2-173);
+  OUTFITS.forEach((outfit,i) => {
+    const cy=H/2-130+i*62;
+    const unlocked=cc>=outfit.milestone;
+    const equipped=(saveData.equippedOutfit||'default')===outfit.id;
+    X.fillStyle=equipped?'#fce4ec':(unlocked?'#f9f9f9':'#eee'); rrc(W/2,cy,290,50,14);
+    X.fillStyle=unlocked?'#333':'#bbb'; X.font='bold 12px "Fredoka One",sans-serif'; X.textAlign='left';
+    X.fillText(outfit.name,W/2-130,cy-4);
+    X.fillStyle=unlocked?'#888':'#ccc'; X.font='10px "Quicksand",sans-serif';
+    X.fillText(outfit.desc,W/2-130,cy+12);
+    if (equipped) { X.fillStyle='#e91e63'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='right'; X.fillText('\u2713 Equipped',W/2+130,cy+2); }
+    else if (unlocked) { X.fillStyle='#ff8a9e'; rrc(W/2+100,cy,60,24,12); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('Equip',W/2+100,cy+2); }
+    else { X.fillStyle='#ccc'; X.font='bold 10px "Quicksand",sans-serif'; X.textAlign='right'; X.fillText('\uD83D\uDD12 '+outfit.milestone+' items',W/2+130,cy+2); }
+  });
+}
+function handleOutfitTap(x,y) {
+  if (Math.abs(x-(W/2+155))<18&&Math.abs(y-(H/2-222))<18) { showOutfits=false; return; }
+  const cc=getCollectedCount();
+  OUTFITS.forEach((outfit,i) => {
+    const cy=H/2-130+i*62;
+    if (cc>=outfit.milestone&&Math.abs(x-(W/2+100))<35&&Math.abs(y-cy)<14) {
+      saveData.equippedOutfit=outfit.id; saveGame(); sndCatch();
+    }
+  });
+}
+
+// ====== v8.0 OUTFIT DRAW ON PLAYER ======
+function drawOutfitOnPlayer(px, py) {
+  const outfit = saveData.equippedOutfit || 'default';
+  if (outfit === 'default') return;
+  X.save();
+  if (outfit === 'hk_bow') {
+    X.fillStyle = '#ff1744'; X.beginPath();
+    X.moveTo(px,py-28); X.lineTo(px-12,py-38); X.lineTo(px-4,py-30);
+    X.moveTo(px,py-28); X.lineTo(px+12,py-38); X.lineTo(px+4,py-30);
+    X.fill(); X.fillStyle='#fff'; X.beginPath(); X.arc(px,py-28,3,0,Math.PI*2); X.fill();
+  } else if (outfit === 'melody_hood') {
+    X.fillStyle = '#ffb7c5'; X.beginPath(); X.ellipse(px,py-32,16,10,0,Math.PI,0); X.fill();
+    X.fillStyle = '#ff8a9e'; X.beginPath(); X.ellipse(px-8,py-38,5,8,-.3,0,Math.PI*2); X.fill();
+    X.beginPath(); X.ellipse(px+8,py-38,5,8,.3,0,Math.PI*2); X.fill();
+  } else if (outfit === 'cinna_ears') {
+    X.fillStyle = '#89c4f4'; X.beginPath(); X.ellipse(px-10,py-34,6,12,-.2,0,Math.PI*2); X.fill();
+    X.beginPath(); X.ellipse(px+10,py-34,6,12,.2,0,Math.PI*2); X.fill();
+    X.fillStyle = '#fff'; X.beginPath(); X.ellipse(px-10,py-34,3,8,-.2,0,Math.PI*2); X.fill();
+    X.beginPath(); X.ellipse(px+10,py-34,3,8,.2,0,Math.PI*2); X.fill();
+  } else if (outfit === 'kuromi_hat') {
+    X.fillStyle = '#1a1a2e'; X.beginPath(); X.ellipse(px,py-30,18,8,0,Math.PI,0); X.fill();
+    X.fillStyle = '#9c27b0'; X.beginPath(); X.moveTo(px,py-46); X.lineTo(px-6,py-30); X.lineTo(px+6,py-30); X.fill();
+    X.fillStyle = '#ffd700'; X.beginPath(); X.arc(px,py-36,3,0,Math.PI*2); X.fill();
+  } else if (outfit === 'full_costume') {
+    X.fillStyle = 'rgba(255,215,0,0.3)'; X.beginPath(); X.arc(px,py-10,32,0,Math.PI*2); X.fill();
+    X.font = '10px sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDC51',px,py-34); // crown
+    X.fillStyle = '#ffd700'; X.globalAlpha = 0.4+Math.sin(frame*0.08)*0.2;
+    for (let s=0;s<6;s++) { const a=s*Math.PI/3+frame*0.02; X.fillText('\u2728',px+Math.cos(a)*28,py-10+Math.sin(a)*28); }
+    X.globalAlpha = 1;
+  }
+  X.restore();
+}
+
 function drawMenu() {
   drawBg();
   // Title
@@ -2498,6 +2864,7 @@ function drawMenu() {
   const cb = Math.sin(frame*0.04)*6;
   drawImg(imgs.cinnaFly, W/2-75, 175+cb, 70, 45);
   drawImg(imgs.avatar, W/2, 165+Math.sin(frame*0.04)*5, 70, 95);
+  drawOutfitOnPlayer(W/2, 165+Math.sin(frame*0.04)*5);
   drawImg(imgs.purin, W/2+75, 185+Math.sin(frame*0.04+1)*6, 65, 58);
 
   // Tap to Play
@@ -2570,7 +2937,7 @@ function drawMenu() {
   // Collection
   X.fillStyle = '#fce4ec'; rrc(W/2, bry, 110, 34, 17);
   X.fillStyle = '#e91e63'; X.font = 'bold 11px "Fredoka One",sans-serif';
-  X.fillText('✨ '+getCollectedCount()+'/30', W/2, bry+2);
+  X.fillText('\u2728 '+getCollectedCount()+'/'+TOTAL_ITEMS, W/2, bry+2);
   // Trophies
   X.fillStyle = '#e8f5e9'; rrc(W-70, bry, 110, 34, 17);
   X.fillStyle = '#2e7d32'; X.font = 'bold 11px "Fredoka One",sans-serif';
@@ -2592,11 +2959,31 @@ function drawMenu() {
   X.textAlign = 'center';
   X.fillText(T('howToPlay'), W/2, hby+2);
 
+  // v8.0 Shop button
+  X.fillStyle = '#fff3e0'; rrc(W/2, 548, 160, 28, 14);
+  X.fillStyle = '#ff8f00'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2B50 Star Shop', W/2, 550);
+
+  // v8.0 Challenges + Outfits row
+  X.fillStyle = '#f3e5f5'; rrc(W/2-90, 580, 90, 26, 13);
+  X.fillStyle = '#9c27b0'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83C\uDFAF Challenges', W/2-90, 582);
+  X.fillStyle = '#fce4ec'; rrc(W/2+90, 580, 80, 26, 13);
+  X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif';
+  X.fillText('\uD83D\uDC57 Outfits', W/2+90, 582);
+
   // Settings gear
   X.fillStyle = 'rgba(255,255,255,0.7)';
   X.beginPath(); X.arc(W-30, 30, 18, 0, Math.PI*2); X.fill();
   X.fillStyle = '#888'; X.font = '18px sans-serif'; X.textAlign = 'center';
   X.fillText('\u2699', W-30, 33);
+
+  // Valentine banner
+  if (isValentineActive()) {
+    X.fillStyle = '#fce4ec'; rrc(W/2, 610, 220, 24, 12);
+    X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDC9D Valentine\'s Event! Limited items!', W/2, 612);
+  }
 
   // Challenge banner
   if (challScore) {
@@ -2624,7 +3011,7 @@ function drawMenu() {
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v7.1', W-14, H-12);
+  X.fillText('v8.0', W-14, H-12);
 }
 
 function drawResults() {
@@ -2714,11 +3101,11 @@ function drawResults() {
 
   // Collection link (subtle)
   X.fillStyle = '#e91e63'; X.font = 'bold 11px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText('✨ Collection '+getCollectedCount()+'/30', W/2, btnStart+72);
+  X.fillText('\u2728 Collection '+getCollectedCount()+'/'+TOTAL_ITEMS, W/2, btnStart+72);
 
   // Version
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.1', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v8.0', W-8, H-8);
 }
 
 // Store button positions for results click handling
@@ -2903,7 +3290,7 @@ function update(dt) {
           comboBurst.triggered = [];
           addSpark(it.x, it.y, '#6a1b9a', 8);
           addText(it.x, it.y-20, '-20 & -2s!', '#e74c3c');
-          shake(10); sndBomb();
+          shake(10); sndBomb(); bombHitThisRound = true;
           trackEvent('bomb_hit', { score, detail: 'combo_lost_time_lost' });
         }
       } else if (it.type === CLOCK) {
@@ -3024,7 +3411,7 @@ function update(dt) {
           if (it.rarity === 'legendary') checkAchievement('legendary-status');
           if (it.rarity === 'secret') checkAchievement('secret-keeper');
           if (getCollectedCount() >= 10) checkAchievement('collector');
-          if (getCollectedCount() >= 30) checkAchievement('master-collector');
+          if (getCollectedCount() >= TOTAL_ITEMS) checkAchievement('master-collector');
           saveGame();
         }
         // Combo burst at milestones
@@ -3075,6 +3462,23 @@ function update(dt) {
   if (gameTime >= ROUND) {
     state = 'results';
     texts = []; sparkles = []; // Clear gameplay text/spark effects
+    // v8.0 Challenge evaluation
+    if (saveData.challenges && saveData.challenges.date === getTodayStr()) {
+      const list = saveData.challenges.list;
+      if (list) list.forEach((ch,ci) => {
+        if (ch.claimed) return;
+        let rv = 0;
+        if (ch.type==='catch_count') rv = caught;
+        else if (ch.type==='score_target') rv = score;
+        else if (ch.type==='max_combo') rv = maxCombo;
+        else if (ch.type==='no_bomb_hit') rv = bombHitThisRound ? 0 : 1;
+        else if (ch.type==='catch_rarity') rv = sessionCollected.filter(s=>s.rarity===ch.rarity).length;
+        else if (ch.type==='catch_category') rv = sessionCollected.filter(s=>{const si=SEASON_ITEMS.find(it=>it.id===s.id);return si&&si.cat===ch.cat;}).length;
+        if (['catch_count','catch_category','catch_rarity'].includes(ch.type)) saveData.challenges.progress[ci]=(saveData.challenges.progress[ci]||0)+rv;
+        else saveData.challenges.progress[ci]=Math.max(saveData.challenges.progress[ci]||0,rv);
+      });
+      saveGame();
+    }
     const isNewRecord = score > hi;
     if (isNewRecord) { hi = score; localStorage.setItem('aria_hi', hi); }
     if (!lbSaved) {
@@ -3281,6 +3685,10 @@ function loop(timestamp) {
     else if (showAchievements) { drawAchievements(); }
     else if (showShowcase) { drawShowcaseEditor(); }
     else if (showCollection) { drawCollection(); }
+    else if (showShop) { drawShop(); }
+    else if (showChallenges) { drawChallengesScreen(); }
+    else if (showSpin) { drawLuckySpin(); }
+    else if (showOutfits) { drawOutfitSelector(); }
     else if (state === 'menu') drawMenu();
     else if (state === 'playing') {
       if (!gamePaused) update(dt);
@@ -3297,7 +3705,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v7.1') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v8.0') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -3351,6 +3759,9 @@ function startGame() {
   gamePaused = false;
   celebActive = false;
   starsEarned = 0; sessionRarities = {}; rarityBanner = null; screenFlash = null;
+  bombHitThisRound = false;
+  applyShopBoosts();
+  if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) { saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]}; }
   ensureAudio();
   checkStreak();
   saveData.totalRoundsPlayed++;
@@ -3363,7 +3774,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v7.1'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v8.0'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -3439,6 +3850,10 @@ function handleTap(x, y) {
     if (Math.abs(x-W/2)<60 && Math.abs(y-(H/2+235))<20) { showShowcase = false; return; }
     return;
   }
+  if (showShop) { handleShopTap(x,y); return; }
+  if (showChallenges) { handleChallengeTap(x,y); return; }
+  if (showSpin) { handleSpinTap(x,y); return; }
+  if (showOutfits) { handleOutfitTap(x,y); return; }
   if (showCollection) {
     // Close X
     if (Math.abs(x-(W-24))<18 && Math.abs(y-34)<18) { showCollection = false; gamePausedForBP = false; return; }
@@ -3476,6 +3891,15 @@ function handleTap(x, y) {
     }
     // How to Play
     if (Math.abs(x-W/2)<70 && Math.abs(y-510)<18) { showTutorial(); return; }
+    // v8.0 Shop button (below blind box)
+    if (Math.abs(x-W/2)<90 && Math.abs(y-548)<16) { showShop=true; return; }
+    // v8.0 Challenges button
+    if (Math.abs(x-(W/2-90))<50 && Math.abs(y-580)<16) {
+      if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) { saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]}; saveGame(); }
+      showChallenges=true; return;
+    }
+    // v8.0 Outfits button
+    if (Math.abs(x-(W/2+90))<50 && Math.abs(y-580)<16) { showOutfits=true; return; }
     // Streak display -> daily rewards
     if (Math.abs(x-W/2)<100 && Math.abs(y-336)<14) { showDaily = true; return; }
     // Stars display -> show star count (no action, just visual)
@@ -3484,8 +3908,12 @@ function handleTap(x, y) {
     showTutorialOrStart();
   } else if (state === 'results') {
     const rb = getResultsBtnY();
-    // Play Again (big button)
-    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.play)<24) { state = 'menu'; return; }
+    // Play Again -> menu (trigger spin if available)
+    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.play)<24) {
+      if (saveData.lastSpinDate !== getTodayStr()) { showSpin=true; spinState={phase:'idle',angle:0,speed:0,result:null}; }
+      else { state = 'menu'; }
+      return;
+    }
     // Share (left button)
     if (Math.abs(x-(W/2-58))<55 && Math.abs(y-rb.share)<18) { openShare(); saveData.shareCount++; saveGame(); if (saveData.shareCount >= 5) checkAchievement('social-butterfly'); return; }
     // Leaderboard (right button)
