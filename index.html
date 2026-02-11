@@ -4333,7 +4333,7 @@ function update(dt) {
       if (isNewRecord) trackEvent('new_record', { score, combo: maxCombo, caught });
       if (challScore && score > challScore) trackEvent('challenge_beat', { score, detail: 'target='+challScore });
       // First-game share prompt
-      if (saveData.totalRoundsPlayed === 1) { showFirstSharePrompt = true; }
+      // removed first-game share prompt
     }
   }
 }
@@ -4543,7 +4543,7 @@ function loop(timestamp) {
     else if (state === 'results') {
       updateCelebration(dt);
       drawResults();
-      if (showFirstSharePrompt) drawFirstSharePrompt();
+      // first share prompt removed
     }
   } catch(e) { console.error('Loop:', e.message); }
 
@@ -4629,21 +4629,7 @@ function startGame() {
 }
 
 function handleTap(x, y) {
-  // First-game share prompt (highest priority overlay)
-  if (showFirstSharePrompt) {
-    // Share button
-    if (Math.abs(x-W/2)<110 && Math.abs(y-(H/2+50))<24) {
-      openShare();
-      showFirstSharePrompt = false;
-      return;
-    }
-    // Maybe later
-    if (Math.abs(x-W/2)<60 && Math.abs(y-(H/2+100))<16) {
-      showFirstSharePrompt = false;
-      return;
-    }
-    return;
-  }
+  // first share prompt removed
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
