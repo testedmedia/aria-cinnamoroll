@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.5', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.6', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2608,7 +2608,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.5', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v9.6', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2629,9 +2629,8 @@ function drawBlindBoxScreen() {
     // 5 boxes
     for (let i = 0; i < 5; i++) {
       const bx = 55 + i * 78;
-      const by = 260 + Math.sin(frame * 0.05 + i * 1.2) * 12;
-      const sc = 1 + Math.sin(frame * 0.03 + i) * 0.04;
-      X.save(); X.translate(bx, by); X.scale(sc, sc);
+      const by = 260;
+      X.save(); X.translate(bx, by);
       // Box body
       const g = X.createLinearGradient(-30, -30, 30, 30);
       g.addColorStop(0, '#e8eaf6'); g.addColorStop(1, '#c5cae9');
@@ -2646,7 +2645,7 @@ function drawBlindBoxScreen() {
       X.beginPath(); X.arc(8, -8, 8, 0, Math.PI*2); X.fill();
       // Sparkle
       X.fillStyle = '#ffd700'; X.font = '12px sans-serif'; X.textAlign = 'center';
-      X.fillText('✨', 18 + Math.sin(frame*0.1+i)*4, -20);
+      X.fillText('\u2728', 20, -20);
       X.restore();
     }
 
@@ -2731,8 +2730,7 @@ function drawBlindBoxScreen() {
     X.fillText(banners[r.rarity] || 'COMMON', W/2, H*0.35 - 84);
 
     // Item visual
-    const sc = 1 + Math.sin(bbState.timer * 2) * 0.05;
-    X.save(); X.translate(W/2, H*0.35 - 10); X.scale(sc, sc);
+    X.save(); X.translate(W/2, H*0.35 - 10);
     if (si.charKey && imgs[si.charKey]) { drawImg(imgs[si.charKey], 0, 0, 72, 72); }
     else { X.font = '48px sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, 0, 16); }
     X.restore();
@@ -2753,11 +2751,10 @@ function drawBlindBoxScreen() {
     const cc = getCollectedCount();
     const milestones = [5, 10, 20, 30];
     if (r.isNew && milestones.includes(cc)) {
-      const mileBounce = Math.sin(frame*0.12)*3;
       X.fillStyle = '#ff6b00'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-      X.fillText('\uD83C\uDF89 ' + cc + ' items collected!', W/2, H*0.35 + 102 + mileBounce);
+      X.fillText('\uD83C\uDF89 ' + cc + ' items collected!', W/2, H*0.35 + 102);
       X.fillStyle = '#25d366'; X.font = 'bold 11px "Quicksand",sans-serif';
-      X.fillText('\uD83D\uDCF2 Tell your friends!', W/2, H*0.35 + 118 + mileBounce);
+      X.fillText('\uD83D\uDCF2 Tell your friends!', W/2, H*0.35 + 118);
     }
 
     X.globalAlpha = 1;
@@ -2895,7 +2892,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v9.5 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v9.6 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3586,7 +3583,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v9.5', W-10, H-8);
+  X.fillText('v9.6', W-10, H-8);
 }
 
 function drawResults() {
@@ -3647,7 +3644,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.5', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v9.6', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4282,7 +4279,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v9.5') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v9.6') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4364,7 +4361,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v9.5'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v9.6'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
