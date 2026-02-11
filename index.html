@@ -518,7 +518,7 @@ const SANRIO_CHARS = [
   { id:'pompompurin', name:'Pompompurin', imgKey:'purin', rarity:'legendary', color:'#fdd835' },
   { id:'kuromi', name:'Kuromi', imgKey:'kuromi', rarity:'rare', color:'#9c27b0' },
   { id:'badtz_maru', name:'Badtz-Maru', imgKey:'badtz', rarity:'rare', color:'#1a1a2e' },
-  { id:'hangyodon', name:'Hangyodon', imgKey:'hangyodon', rarity:'rare', color:'#4a90d9' },
+  { id:'hangyodon', name:'Hangyodon', imgKey:'hangyodon', rarity:'legendary', color:'#4a90d9' },
   { id:'hello_kitty', name:'Hello Kitty', imgKey:'hk', rarity:'common', color:'#e91e63' },
   { id:'my_melody', name:'My Melody', imgKey:'melody', rarity:'common', color:'#ffb6c1' },
   { id:'pochacco', name:'Pochacco', imgKey:'pochacco', rarity:'common', color:'#2196f3' },
@@ -917,7 +917,7 @@ function loadI(n, s) {
   imgs[n] = i;
 }
 loadI('avatar', 'avatar_big.png');
-loadI('cinna', 'cinnamoroll3.png');
+loadI('cinna', 'cinnamoroll2.png');
 loadI('cinnaFly', 'cinnamoroll2.png');
 loadI('purin', 'pompompurin.png');
 loadI('hk', 'hellokitty.png');
@@ -1867,7 +1867,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.0', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v7.1', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2009,15 +2009,43 @@ function drawCollectionItem(cx, cy, si, owned, data) {
     // Draw item visual
     if (si.charKey && imgs[si.charKey]) {
       drawImg(imgs[si.charKey], cx, cy - 14, 42, 42);
+      // Legendary/Epic: add colored overlay to distinguish variants
+      if (si.rarity === 'legendary') {
+        X.save(); X.globalAlpha = 0.18; X.fillStyle = '#ffd700';
+        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.restore();
+        // Gold star badge
+        X.font = '10px sans-serif'; X.textAlign = 'center'; X.fillText('⭐', cx + 18, cy - 28);
+      } else if (si.rarity === 'epic') {
+        X.save(); X.globalAlpha = 0.15; X.fillStyle = '#ab47bc';
+        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.restore();
+      } else if (si.rarity === 'secret') {
+        X.save(); X.globalAlpha = 0.15;
+        X.fillStyle = `hsl(${(frame*2)%360},70%,60%)`;
+        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.restore();
+      }
     } else {
+      // Emoji items: show emoji bigger for legendary, add glow
+      if (si.rarity === 'legendary' || si.rarity === 'secret') {
+        X.save(); X.globalAlpha = 0.2; X.fillStyle = si.rarity === 'secret' ? '#ff69b4' : '#ffd700';
+        X.beginPath(); X.arc(cx, cy - 6, 20, 0, Math.PI*2); X.fill();
+        X.restore();
+      }
       X.font = '28px sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, cx, cy - 6);
     }
-    // Name
-    X.fillStyle = '#333'; X.font = 'bold 9px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText(si.name.length > 14 ? si.name.slice(0,13)+'..' : si.name, cx, cy + 30);
-    // Rarity badge
-    X.fillStyle = bc; X.font = 'bold 8px "Quicksand",sans-serif';
-    X.fillText(tier.label.toUpperCase(), cx, cy + 41);
+    // Name (auto-size to fit card width)
+    X.fillStyle = '#333'; X.textAlign = 'center';
+    const nameMaxW = cw - 10;
+    let nameSize = 9;
+    X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif';
+    if (X.measureText(si.name).width > nameMaxW) { nameSize = 7; X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif'; }
+    X.fillText(si.name, cx, cy + 30);
+    // Rarity badge + drop rate
+    const dropPct = RARITY_TIERS.find(r => r.id === si.rarity);
+    X.fillStyle = bc; X.font = 'bold 7px "Quicksand",sans-serif';
+    X.fillText(tier.label.toUpperCase() + (dropPct ? ' '+dropPct.dropRate+'%' : ''), cx, cy + 40);
     // Count
     if (data && data.count > 1) {
       X.fillStyle = '#999'; X.font = 'bold 8px "Quicksand",sans-serif';
@@ -2104,7 +2132,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.0', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v7.1', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2289,26 +2317,24 @@ function drawDailyRewards() {
     X.fillText(completed ? '✓' : d, dx, dy + 4);
   }
 
-  // Rewards list
+  // Rewards list (compact)
   for (let d = 1; d <= 7; d++) {
-    const ry = H/2 - 60 + (d-1) * 36;
+    const ry = H/2 - 60 + (d-1) * 32;
     const reward = getDailyReward(d);
     const isToday = d === Math.max(1, streak);
-    X.fillStyle = isToday ? '#fff3e0' : '#f9f9f9'; rrc(W/2, ry, 280, 30, 10);
-    if (isToday) { X.strokeStyle = '#ff6b00'; X.lineWidth = 1.5;
-      X.beginPath(); X.arc(W/2, ry, 1, 0, 0); X.stroke(); // just trigger
-    }
+    X.fillStyle = isToday ? '#fff3e0' : '#f9f9f9'; rrc(W/2, ry, 280, 26, 10);
     X.fillStyle = isToday ? '#e65100' : '#666'; X.font = (isToday ? 'bold ' : '') + '11px "Quicksand",sans-serif';
     X.textAlign = 'center';
     X.fillText('Day '+d+': '+reward.desc + (isToday ? ' ⬅' : ''), W/2, ry + 3);
   }
 
-  // Claim button
+  // Claim button (more space from list)
+  const claimY = H/2 - 60 + 7 * 32 + 18;
   const today = new Date().toISOString().slice(0,10);
   const canClaim = saveData.streak.lastClaimDate !== today;
-  X.fillStyle = canClaim ? '#ff6b00' : '#ccc'; rrc(W/2, H/2 + 170, 180, 42, 21);
+  X.fillStyle = canClaim ? '#ff6b00' : '#ccc'; rrc(W/2, claimY, 180, 42, 21);
   X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(canClaim ? 'Claim!' : 'Claimed ✓', W/2, H/2 + 172);
+  X.fillText(canClaim ? 'Claim!' : 'Claimed ✓', W/2, claimY + 2);
 
   // Close
   X.fillStyle = '#ff8a9e';
@@ -2377,7 +2403,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v7.0 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v7.1 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '✨ 30 collectible items with rarities!',
@@ -2603,14 +2629,13 @@ function drawMenu() {
 
 function drawResults() {
   drawBg(); drawGround();
-
-  // Draw celebration effects behind panel
   drawCelebration();
 
+  // Clean white card
   X.fillStyle = 'rgba(255,255,255,0.95)';
-  rrc(W/2, H/2-10, 320, 480, 24);
-  X.strokeStyle = '#ffb3c6'; X.lineWidth = 3;
-  const pw=160,ph=240,cy=H/2-10;
+  rrc(W/2, H/2, 320, 440, 24);
+  X.strokeStyle = '#ffb3c6'; X.lineWidth = 2;
+  const pw=160,ph=220,cy=H/2;
   X.beginPath();
   X.moveTo(W/2-pw+24,cy-ph); X.lineTo(W/2+pw-24,cy-ph);
   X.quadraticCurveTo(W/2+pw,cy-ph,W/2+pw,cy-ph+24);
@@ -2622,109 +2647,86 @@ function drawResults() {
   X.quadraticCurveTo(W/2-pw,cy-ph,W/2-pw+24,cy-ph);
   X.closePath(); X.stroke();
 
+  // Characters
   const cb2 = Math.sin(frame*0.06)*4;
-  drawImg(imgs.cinna, W/2-50, 148+cb2, 45, 45);
-  drawImg(imgs.purin, W/2+50, 153+cb2, 50, 50);
+  drawImg(imgs.cinna, W/2-55, 170+cb2, 42, 42);
+  drawImg(imgs.purin, W/2+55, 175+cb2, 46, 46);
 
+  // Title
   X.fillStyle = '#e91e63';
-  X.font = 'bold 26px "Fredoka One",cursive';
+  X.font = 'bold 24px "Fredoka One",cursive';
   X.textAlign = 'center';
-  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, 200);
+  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, 218);
 
-  X.fillStyle = '#555'; X.font = '14px "Quicksand",sans-serif';
-  X.textAlign = 'center';
-  X.fillText(T('score'), W/2, 226);
-  X.fillStyle = '#e91e63'; X.font = 'bold 44px "Fredoka One",sans-serif';
-  X.fillText(score, W/2, 268);
+  // Score
+  X.fillStyle = '#e91e63'; X.font = 'bold 48px "Fredoka One",sans-serif';
+  X.fillText(score, W/2, 274);
 
-  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
-  X.textAlign = 'center';
-  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x', W/2, 292);
-  X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
-  X.fillText('Level ' + gameLevel + ' - ' + LEVEL_NAMES[gameLevel-1], W/2, 310);
-  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#888';
-  X.fillText(T('best')+': '+hi, W/2, 326);
+  // Stats line
+  X.font = '11px "Quicksand",sans-serif'; X.fillStyle = '#888';
+  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x  |  '+T('best')+': '+hi, W/2, 298);
 
-  // Stars earned this round
+  // Stars earned pill
   if (!starsEarned) starsEarned = calculateStarsEarned(score).total;
   const starsInfo = calculateStarsEarned(score);
-  X.fillStyle = '#fff8e1'; rrc(W/2, 344, 200, 28, 14);
-  X.fillStyle = '#ff8f00'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('+'+starsInfo.total+' ⭐ earned' + (starsInfo.bonus > 0 ? ' (+'+starsInfo.bonus+' bonus!)' : ''), W/2, 346);
+  X.fillStyle = '#fff8e1'; rrc(W/2, 322, 180, 26, 13);
+  X.fillStyle = '#ff8f00'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('+'+starsInfo.total+' ⭐' + (starsInfo.bonus > 0 ? ' (+'+starsInfo.bonus+' bonus)' : ''), W/2, 324);
 
-  // Streak status
-  const streakD = saveData.streak.current || 0;
-  X.fillStyle = '#fff3e0'; rrc(W/2, 370, 180, 22, 11);
-  X.fillStyle = streakD > 0 ? '#ff6b00' : '#999'; X.font = 'bold 10px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText(streakD > 0 ? '🔥 Day '+streakD+'/7 Streak!' : 'Play daily for streaks!', W/2, 372);
-
-  // Items caught this round (horizontal scroll)
-  let nextY = 395;
+  // Collected items (compact)
+  let nextY = 348;
   if (sessionCollected.length > 0) {
-    X.fillStyle = '#fce4ec'; rrc(W/2, nextY, 300, 62, 12);
-    X.fillStyle = '#e91e63'; X.font = 'bold 9px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('✨ Collected This Round', W/2, nextY - 20);
-    const maxShow = Math.min(sessionCollected.length, 5);
+    const maxShow = Math.min(sessionCollected.length, 6);
     for (let i = 0; i < maxShow; i++) {
       const ch = sessionCollected[i];
-      const ix = W/2 - (maxShow * 28)/2 + i * 28 + 14;
-      const iy = nextY + 6;
+      const ix = W/2 - (maxShow * 26)/2 + i * 26 + 13;
       const tier = getRarityTier(ch.rarity || 'common');
       const rc = tier.color === 'rainbow' ? '#ff69b4' : tier.color;
       X.strokeStyle = rc; X.lineWidth = 1.5;
-      X.beginPath(); X.arc(ix, iy, 12, 0, Math.PI*2); X.stroke();
-      X.fillStyle = '#fff'; X.beginPath(); X.arc(ix, iy, 11, 0, Math.PI*2); X.fill();
-      if (ch.imgKey && imgs[ch.imgKey]) { drawImg(imgs[ch.imgKey], ix, iy, 18, 18); }
-      else { X.font = '12px sans-serif'; X.textAlign = 'center'; X.fillText(ch.emoji || '✨', ix, iy + 4); }
-      if (ch.isNew) { X.fillStyle = '#ff1744'; X.font = 'bold 6px "Fredoka One",sans-serif'; X.fillText('NEW', ix, iy + 18); }
+      X.beginPath(); X.arc(ix, nextY, 11, 0, Math.PI*2); X.stroke();
+      X.fillStyle = '#fff'; X.beginPath(); X.arc(ix, nextY, 10, 0, Math.PI*2); X.fill();
+      if (ch.imgKey && imgs[ch.imgKey]) { drawImg(imgs[ch.imgKey], ix, nextY, 16, 16); }
+      else { X.font = '11px sans-serif'; X.textAlign = 'center'; X.fillText(ch.emoji || '✨', ix, nextY + 4); }
     }
-    if (sessionCollected.length > 5) {
+    if (sessionCollected.length > 6) {
       X.fillStyle = '#999'; X.font = '9px "Quicksand",sans-serif'; X.textAlign = 'center';
-      X.fillText('+'+(sessionCollected.length-5)+' more', W/2 + 90, nextY + 8);
+      X.fillText('+'+(sessionCollected.length-6), W/2 + (maxShow*26)/2 + 14, nextY + 3);
     }
-    nextY += 42;
+    nextY += 30;
   }
 
-  // Buttons
-  const btnY = nextY + 8;
+  // === BUTTONS (clean, well-spaced) ===
+  const btnStart = Math.max(nextY + 10, 385);
 
-  X.fillStyle = '#1da1f2'; rrc(W/2, btnY, 200, 34, 17);
-  X.fillStyle = '#fff'; X.font = 'bold 13px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('shareScore'), W/2, btnY+1);
+  // Play Again (biggest, most prominent)
+  X.fillStyle = '#ff8a9e'; rrc(W/2, btnStart, 200, 42, 21);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText(T('playAgain'), W/2, btnStart + 2);
 
-  X.fillStyle = '#ff8a9e'; rrc(W/2, btnY+38, 180, 38, 19);
-  X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('playAgain'), W/2, btnY+40);
+  // Share + Leaderboard side by side
+  X.fillStyle = '#1da1f2'; rrc(W/2-58, btnStart+42, 106, 30, 15);
+  X.fillStyle = '#fff'; X.font = 'bold 11px "Quicksand",sans-serif'; X.textAlign = 'center';
+  X.fillText(T('shareScore'), W/2-58, btnStart+43);
 
-  X.fillStyle = '#fff3e0'; rrc(W/2, btnY+76, 160, 30, 15);
-  X.fillStyle = '#e65100'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('leaderboard'), W/2, btnY+77);
+  X.fillStyle = '#fff3e0'; rrc(W/2+58, btnStart+42, 106, 30, 15);
+  X.fillStyle = '#e65100'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText(T('leaderboard'), W/2+58, btnStart+43);
 
-  // Open Blind Box button
-  if (saveData.stars >= 5) {
-    X.fillStyle = '#e8eaf6'; rrc(W/2, btnY+110, 200, 34, 17);
-    X.fillStyle = '#3f51b5'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('🎁 Open Blind Box (5⭐)', W/2, btnY+112);
-  }
+  // Collection link (subtle)
+  X.fillStyle = '#e91e63'; X.font = 'bold 11px "Quicksand",sans-serif'; X.textAlign = 'center';
+  X.fillText('✨ Collection '+getCollectedCount()+'/30', W/2, btnStart+72);
 
-  // Collection button
-  X.fillStyle = '#ffe0ec'; rrc(W/2, btnY+144, 160, 30, 15);
-  X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('✨ Collection '+getCollectedCount()+'/30', W/2, btnY+145);
-
-  // Version on results
+  // Version
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v7.0', W-8, H-8);
-
-  drawTextFx();
+  X.textAlign = 'right'; X.fillText('v7.1', W-8, H-8);
 }
 
 // Store button positions for results click handling
 function getResultsBtnY() {
-  let nextY = 395;
-  if (sessionCollected.length > 0) nextY += 42;
-  const btnY = nextY + 8;
-  return { share: btnY, play: btnY + 38, lb: btnY + 76, blindbox: btnY + 110, collection: btnY + 144 };
+  let nextY = 348;
+  if (sessionCollected.length > 0) nextY += 30;
+  const btnStart = Math.max(nextY + 10, 385);
+  return { play: btnStart, share: btnStart + 42, lb: btnStart + 42, collection: btnStart + 72 };
 }
 
 function drawLoading() {
@@ -3072,6 +3074,7 @@ function update(dt) {
 
   if (gameTime >= ROUND) {
     state = 'results';
+    texts = []; sparkles = []; // Clear gameplay text/spark effects
     const isNewRecord = score > hi;
     if (isNewRecord) { hi = score; localStorage.setItem('aria_hi', hi); }
     if (!lbSaved) {
@@ -3294,7 +3297,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v7.0') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v7.1') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -3360,7 +3363,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v7.0'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v7.1'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -3368,9 +3371,10 @@ function handleTap(x, y) {
     return;
   }
   if (showDaily) {
-    // Claim button
+    // Claim button (positioned dynamically)
+    const claimY = H/2 - 60 + 7 * 32 + 18;
     const today = new Date().toISOString().slice(0,10);
-    if (Math.abs(x-W/2)<90 && Math.abs(y-(H/2+170))<22) {
+    if (Math.abs(x-W/2)<90 && Math.abs(y-claimY)<24) {
       if (saveData.streak.lastClaimDate !== today) {
         const reward = claimDailyReward();
         if (reward && reward.pull) {
@@ -3480,11 +3484,14 @@ function handleTap(x, y) {
     showTutorialOrStart();
   } else if (state === 'results') {
     const rb = getResultsBtnY();
-    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.share)<20) { openShare(); saveData.shareCount++; saveGame(); if (saveData.shareCount >= 5) checkAchievement('social-butterfly'); return; }
-    if (Math.abs(x-W/2)<80 && Math.abs(y-rb.lb)<18) { openLB(); return; }
-    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.blindbox)<20 && saveData.stars >= 5) { bbState = { phase:'select' }; showBlindBox = true; return; }
-    if (Math.abs(x-W/2)<80 && Math.abs(y-rb.collection)<18) { showCollection = true; collectionScrollY = 0; return; }
-    if (Math.abs(x-W/2)<90 && Math.abs(y-rb.play)<22) state = 'menu';
+    // Play Again (big button)
+    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.play)<24) { state = 'menu'; return; }
+    // Share (left button)
+    if (Math.abs(x-(W/2-58))<55 && Math.abs(y-rb.share)<18) { openShare(); saveData.shareCount++; saveGame(); if (saveData.shareCount >= 5) checkAchievement('social-butterfly'); return; }
+    // Leaderboard (right button)
+    if (Math.abs(x-(W/2+58))<55 && Math.abs(y-rb.lb)<18) { openLB(); return; }
+    // Collection link
+    if (Math.abs(x-W/2)<80 && Math.abs(y-rb.collection)<14) { showCollection = true; collectionScrollY = 0; return; }
   }
 }
 
