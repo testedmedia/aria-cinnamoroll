@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.0', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.1', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2457,15 +2457,16 @@ function drawPlayer() {
 function drawCollectionItem(cx, cy, si, owned, data) {
   const tier = getRarityTier(si.rarity);
   const cw = 118, ch = 100, cr = 12;
-  // Card bg
-  X.fillStyle = owned ? '#fff' : '#f0f0f0';
+  const bc = si.rarity === 'secret' ? '#ff69b4' : (tier.color === 'rainbow' ? '#ff69b4' : tier.color);
+  // Card bg - pastel tint per rarity
+  const rarityBg = {common:'#fff',rare:'#f0f8ff',epic:'#faf0ff',legendary:'#fffcf0',secret:'#fff0f5'};
+  X.fillStyle = owned ? (rarityBg[si.rarity]||'#fff') : '#f0f0f0';
   rrc(cx, cy, cw, ch, cr);
   // Rarity border
-  const bc = si.rarity === 'secret' ? '#ff69b4' : (tier.color === 'rainbow' ? '#ff69b4' : tier.color);
   X.strokeStyle = owned ? bc : '#ddd';
-  X.lineWidth = owned ? 2.5 : 1;
-  X.beginPath();
+  X.lineWidth = owned ? (si.rarity==='legendary'||si.rarity==='secret' ? 3 : 2.5) : 1;
   const hw=cw/2, hh=ch/2;
+  X.beginPath();
   X.moveTo(cx-hw+cr,cy-hh); X.lineTo(cx+hw-cr,cy-hh);
   X.quadraticCurveTo(cx+hw,cy-hh,cx+hw,cy-hh+cr); X.lineTo(cx+hw,cy+hh-cr);
   X.quadraticCurveTo(cx+hw,cy+hh,cx+hw-cr,cy+hh); X.lineTo(cx-hw+cr,cy+hh);
@@ -2481,59 +2482,58 @@ function drawCollectionItem(cx, cy, si, owned, data) {
     X.restore();
   }
   if (owned) {
-    // Draw item visual
+    // Character images: use FULL card width so wide chars (gudetama, tuxedosam) are visible
     if (si.charKey && imgs[si.charKey]) {
-      const imgSz = (si.rarity==='legendary'||si.rarity==='secret') ? 58 : 52;
-      drawImg(imgs[si.charKey], cx, cy - 12, imgSz, imgSz);
-      // Rarity glow ring
+      drawImg(imgs[si.charKey], cx, cy - 10, cw - 16, 54);
+      // Rarity glow behind image
+      if (si.rarity === 'legendary' || si.rarity === 'secret' || si.rarity === 'epic') {
+        X.save();
+        X.globalAlpha = si.rarity === 'legendary' ? 0.18 : si.rarity === 'secret' ? 0.16 : 0.12;
+        X.fillStyle = si.rarity === 'legendary' ? '#ffd700' : si.rarity === 'secret' ? '#ff69b4' : '#ab47bc';
+        X.beginPath(); X.arc(cx, cy - 10, 30, 0, Math.PI*2); X.fill();
+        X.restore();
+      }
       if (si.rarity === 'legendary') {
-        X.save(); X.globalAlpha = 0.2; X.fillStyle = '#ffd700';
-        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
-        X.restore();
-        X.font = '11px sans-serif'; X.textAlign = 'center'; X.fillText('\u2B50', cx + 22, cy - 30);
-      } else if (si.rarity === 'epic') {
-        X.save(); X.globalAlpha = 0.15; X.fillStyle = '#ab47bc';
-        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
-        X.restore();
-      } else if (si.rarity === 'secret') {
-        X.save(); X.globalAlpha = 0.18;
-        X.fillStyle = '#ff69b4';
-        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
-        X.restore();
+        X.font = '10px sans-serif'; X.textAlign = 'center'; X.fillText('\u2B50', cx + hw - 14, cy - hh + 14);
       }
     } else {
       // Emoji items
-      const eSz = (si.rarity==='legendary'||si.rarity==='secret') ? '36px' : '32px';
+      const eSz = (si.rarity==='legendary'||si.rarity==='secret') ? '38px' : '34px';
       if (si.rarity === 'legendary' || si.rarity === 'secret') {
-        X.save(); X.globalAlpha = 0.2; X.fillStyle = si.rarity === 'secret' ? '#ff69b4' : '#ffd700';
-        X.beginPath(); X.arc(cx, cy - 6, 22, 0, Math.PI*2); X.fill();
+        X.save(); X.globalAlpha = 0.18; X.fillStyle = si.rarity === 'secret' ? '#ff69b4' : '#ffd700';
+        X.beginPath(); X.arc(cx, cy - 8, 24, 0, Math.PI*2); X.fill();
         X.restore();
       }
-      X.font = eSz+' sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, cx, cy - 4);
+      X.font = eSz+' sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, cx, cy - 2);
     }
-    // Name (auto-size to fit card width)
+    // Name
     X.fillStyle = '#333'; X.textAlign = 'center';
-    const nameMaxW = cw - 10;
-    let nameSize = 9;
+    let nameSize = 10;
     X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif';
-    if (X.measureText(si.name).width > nameMaxW) { nameSize = 7; X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif'; }
-    X.fillText(si.name, cx, cy + 30);
-    // Rarity badge + drop rate
+    if (X.measureText(si.name).width > cw - 8) { nameSize = 8; X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif'; }
+    if (X.measureText(si.name).width > cw - 8) { nameSize = 7; X.font = 'bold '+nameSize+'px "Fredoka One",sans-serif'; }
+    X.fillText(si.name, cx, cy + 28);
+    // Rarity pill
     const dropPct = RARITY_TIERS.find(r => r.id === si.rarity);
-    X.fillStyle = bc; X.font = 'bold 7px "Quicksand",sans-serif';
-    X.fillText(tier.label.toUpperCase() + (dropPct ? ' '+dropPct.dropRate+'%' : ''), cx, cy + 40);
+    const rlabel = tier.label.toUpperCase() + (dropPct ? ' '+dropPct.dropRate+'%' : '');
+    X.fillStyle = bc; X.globalAlpha = 0.15; rrc(cx, cy + 40, 70, 14, 7); X.globalAlpha = 1;
+    X.fillStyle = bc; X.font = 'bold 8px "Quicksand",sans-serif'; X.textAlign = 'center';
+    X.fillText(rlabel, cx, cy + 42);
     // Count
     if (data && data.count > 1) {
       X.fillStyle = '#999'; X.font = 'bold 8px "Quicksand",sans-serif';
-      X.fillText('x'+data.count + (data.isShiny ? ' ✨' : ''), cx, cy + 49);
+      X.fillText('x'+data.count + (data.isShiny ? ' \u2728' : ''), cx, cy + 49);
     }
   } else {
-    X.fillStyle = '#ccc'; X.font = 'bold 30px sans-serif'; X.textAlign = 'center';
-    X.fillText('?', cx, cy - 4);
+    // Unowned - cute question mark
+    X.fillStyle = '#ddd'; X.font = 'bold 34px sans-serif'; X.textAlign = 'center';
+    X.fillText('?', cx, cy - 2);
     X.fillStyle = '#bbb'; X.font = 'bold 9px "Quicksand",sans-serif';
-    X.fillText('???', cx, cy + 30);
-    X.fillStyle = '#ddd'; X.font = 'bold 8px "Quicksand",sans-serif';
-    X.fillText(tier.label.toUpperCase(), cx, cy + 41);
+    X.fillText('???', cx, cy + 28);
+    // Rarity hint pill
+    X.fillStyle = '#eee'; rrc(cx, cy + 40, 70, 14, 7);
+    X.fillStyle = '#ccc'; X.font = 'bold 8px "Quicksand",sans-serif';
+    X.fillText(tier.label.toUpperCase(), cx, cy + 42);
   }
 }
 
@@ -2624,7 +2624,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.0', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.1', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2907,7 +2907,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.0 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.1 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3595,7 +3595,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.0', W-10, H-8);
+  X.fillText('v10.1', W-10, H-8);
 }
 
 function drawResults() {
@@ -3656,7 +3656,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.0', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.1', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4291,7 +4291,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.0') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.1') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4373,7 +4373,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.0'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.1'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
