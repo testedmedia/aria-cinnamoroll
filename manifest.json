@@ -1,0 +1,24 @@
+{
+  "name": "Aria's Sanrio Adventure",
+  "short_name": "Sanrio Game",
+  "description": "Free kawaii catching game with 41 collectible Sanrio characters!",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffe0ec",
+  "theme_color": "#ff69b4",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Aria's Sanrio Adventure - Valentine's Event"
+    }
+  ]
+}

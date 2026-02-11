@@ -3,16 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Aria's Sanrio Adventure</title>
-<meta name="description" content="Aria's Sanrio Adventure - Catch boba, donuts & more with Cinnamoroll & Pompompurin!">
-<meta property="og:title" content="Aria's Sanrio Adventure">
-<meta property="og:description" content="Can you beat my score? Catch treats with Cinnamoroll & Pompompurin!">
+<title>Aria's Sanrio Adventure - Free Kawaii Catching Game</title>
+<meta name="description" content="Free kawaii catching game! Catch boba, treats & collect 41 Sanrio characters including Cinnamoroll, Hello Kitty & Pompompurin. Valentine's Day event LIVE!">
+<meta name="keywords" content="sanrio game, cinnamoroll game, hello kitty game, kawaii game, free browser game, catching game, pompompurin, my melody, kuromi, valentine game">
+<meta name="theme-color" content="#ff69b4">
+<!-- Open Graph -->
+<meta property="og:title" content="Aria's Sanrio Adventure - Valentine's Event LIVE!">
+<meta property="og:description" content="Free kawaii catching game with 41 collectible Sanrio characters! Valentine's Day event with 4 exclusive items. Can you catch them all?">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Aria's Sanrio Adventure">
+<meta property="og:url" content="https://flappy-cinnamoroll.vercel.app">
+<meta property="og:image" content="https://flappy-cinnamoroll.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Aria's Sanrio Adventure">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Aria's Sanrio Adventure - Valentine's Event LIVE!">
+<meta name="twitter:description" content="Free kawaii catching game! 41 collectible Sanrio characters + Valentine's Day exclusive items. Play free in your browser!">
+<meta name="twitter:image" content="https://flappy-cinnamoroll.vercel.app/og-image.png">
+<!-- PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sanrio Adventure">
 <meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
@@ -158,11 +173,11 @@
   <div class="panel">
     <h2>Share Your Score!</h2>
     <div class="score-big" id="shareScore">0</div>
-    <p>Challenge your friends to beat it!</p>
+    <pre id="shareCard" style="font-size:14px;line-height:1.4;text-align:center;padding:8px;background:#fce4ec;border-radius:12px;margin:8px 0;white-space:pre-wrap;word-break:break-word"></pre>
     <div class="share-btns">
       <button class="sbtn tw" onclick="shareTW()">Share on X</button>
       <button class="sbtn wa" onclick="shareWA()">Share on WhatsApp</button>
-      <button class="sbtn cp" id="cpBtn" onclick="copyLnk()">📋 Copy Challenge Link</button>
+      <button class="sbtn cp" id="cpBtn" onclick="copyLnk()">📋 Copy Score Card</button>
     </div>
     <button class="close-btn" onclick="closeShare()">Close</button>
   </div>
@@ -4128,9 +4143,23 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
 document.addEventListener('gestureend', e => e.preventDefault());
 
-// ====== SHARE ======
+// ====== SHARE (Wordle-style viral card) ======
 function getURL() { return window.location.origin+window.location.pathname+'?s='+score+'&n='+(playerName||'Player'); }
-function getTxt() { return T('shareTxt')(playerName, score); }
+function buildShareCard() {
+  // Build Wordle-style emoji grid from session items
+  const rarityEmoji = {common:'\u2B1C',rare:'\uD83D\uDFE6',epic:'\uD83D\uDFEA',legendary:'\uD83D\uDFE8',secret:'\u2B50'};
+  const itemGrid = (sessionCollected||[]).slice(0,15).map(id => {
+    const it = SEASON_ITEMS.find(s=>s.id===id);
+    return it ? (rarityEmoji[it.rarity]||'\u2B1C') : '\u2B1C';
+  }).join('');
+  const gridRows = [];
+  for(let i=0; i<itemGrid.length; i+=5) gridRows.push(itemGrid.slice(i,i+5));
+  const grid = gridRows.join('\n') || '\u2B1C\u2B1C\u2B1C';
+  const valTag = isValentineActive() ? ' \uD83D\uDC98' : '';
+  const name = playerName || 'Someone';
+  return `\uD83C\uDF38 ${name} scored ${score} in Aria's Sanrio Adventure!${valTag}\n\n${grid}\n\n\uD83C\uDFAF ${caught} caught | \uD83D\uDD25 ${maxCombo}x combo | \u2728 ${getCollectedCount()}/${TOTAL_ITEMS}\n\nCan you beat me? \uD83D\uDC49`;
+}
+function getTxt() { return buildShareCard(); }
 function shareTW() { trackEvent('share_tw',{score}); window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(getTxt())+'&url='+encodeURIComponent(getURL())); }
 function shareWA() { trackEvent('share_wa',{score}); window.open('https://wa.me/?text='+encodeURIComponent(getTxt()+'\n'+getURL())); }
 function shareChallenge() {
@@ -4148,7 +4177,7 @@ function copyLnk() {
     setTimeout(()=>{b.textContent='📋 Copy Challenge Link';b.classList.remove('ok');},2000);
   });
 }
-function openShare() { document.getElementById('shareScore').textContent=score; document.getElementById('shareOv').classList.add('active'); }
+function openShare() { document.getElementById('shareScore').textContent=score; document.getElementById('shareCard').textContent=buildShareCard(); document.getElementById('shareOv').classList.add('active'); }
 function closeShare() { document.getElementById('shareOv').classList.remove('active'); }
 document.getElementById('shareOv').addEventListener('click', e => { if(e.target===e.currentTarget) closeShare(); });
 </script>
