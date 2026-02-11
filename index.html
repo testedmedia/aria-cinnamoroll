@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.3', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.4', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2608,7 +2608,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.3', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v9.4', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2787,53 +2787,53 @@ function drawDailyRewards() {
   X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0, 0, W, H);
 
   // Panel
-  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 420, 24);
-
-  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('🔥 Daily Streak! 🔥', W/2, H/2 - 180);
-
-  const streak = saveData.streak.current || 0;
-  X.fillStyle = '#ff6b00'; X.font = 'bold 16px "Fredoka One",sans-serif';
-  X.fillText('Day ' + Math.max(1, streak) + ' / 7', W/2, H/2 - 150);
-
-  // 7-day track
-  for (let d = 1; d <= 7; d++) {
-    const dx = W/2 - 140 + (d-1) * 46;
-    const dy = H/2 - 108;
-    const completed = d < streak || (d === streak && saveData.streak.claimedToday);
-    const today = d === Math.max(1, streak) && !saveData.streak.claimedToday;
-    X.fillStyle = completed ? '#4caf50' : today ? '#ff6b00' : '#eee';
-    X.beginPath(); X.arc(dx, dy, 18, 0, Math.PI*2); X.fill();
-    if (today) { X.strokeStyle = '#ffd700'; X.lineWidth = 2; X.stroke(); }
-    X.fillStyle = completed ? '#fff' : today ? '#fff' : '#999';
-    X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText(completed ? '✓' : d, dx, dy + 4);
-  }
-
-  // Rewards list (compact)
-  for (let d = 1; d <= 7; d++) {
-    const ry = H/2 - 60 + (d-1) * 32;
-    const reward = getDailyReward(d);
-    const isToday = d === Math.max(1, streak);
-    X.fillStyle = isToday ? '#fff3e0' : '#f9f9f9'; rrc(W/2, ry, 280, 26, 10);
-    X.fillStyle = isToday ? '#e65100' : '#666'; X.font = (isToday ? 'bold ' : '') + '11px "Quicksand",sans-serif';
-    X.textAlign = 'center';
-    X.fillText('Day '+d+': '+reward.desc + (isToday ? ' ⬅' : ''), W/2, ry + 3);
-  }
-
-  // Claim button (more space from list)
-  const claimY = H/2 - 60 + 7 * 32 + 18;
-  const today = new Date().toISOString().slice(0,10);
-  const canClaim = saveData.streak.lastClaimDate !== today;
-  X.fillStyle = canClaim ? '#ff6b00' : '#ccc'; rrc(W/2, claimY, 180, 42, 21);
-  X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(canClaim ? 'Claim!' : 'Claimed ✓', W/2, claimY + 2);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 480, 24);
 
   // Close
   X.fillStyle = '#ff8a9e';
-  X.beginPath(); X.arc(W/2 + 150, H/2 - 195, 16, 0, Math.PI*2); X.fill();
-  X.fillStyle = '#fff'; X.font = 'bold 16px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('✕', W/2 + 150, H/2 - 195); X.textBaseline = 'alphabetic';
+  X.beginPath(); X.arc(W/2 + 155, H/2 - 222, 16, 0, Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715', W/2 + 155, H/2 - 222); X.textBaseline = 'alphabetic';
+
+  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83D\uDD25 Daily Streak! \uD83D\uDD25', W/2, H/2 - 198);
+
+  const streak = saveData.streak.current || 0;
+  X.fillStyle = '#ff6b00'; X.font = 'bold 16px "Fredoka One",sans-serif';
+  X.fillText('Day ' + Math.max(1, streak) + ' / 7', W/2, H/2 - 170);
+
+  // 7-day track (bigger circles, more spacing)
+  for (let d = 1; d <= 7; d++) {
+    const dx = W/2 - 138 + (d-1) * 46;
+    const dy = H/2 - 128;
+    const completed = d < streak || (d === streak && saveData.streak.claimedToday);
+    const today = d === Math.max(1, streak) && !saveData.streak.claimedToday;
+    X.fillStyle = completed ? '#4caf50' : today ? '#ff6b00' : '#eee';
+    X.beginPath(); X.arc(dx, dy, 19, 0, Math.PI*2); X.fill();
+    if (today) { X.strokeStyle = '#ffd700'; X.lineWidth = 2.5; X.stroke(); }
+    X.fillStyle = completed ? '#fff' : today ? '#fff' : '#999';
+    X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText(completed ? '\u2713' : d, dx, dy + 4);
+  }
+
+  // Rewards list (spaced out)
+  for (let d = 1; d <= 7; d++) {
+    const ry = H/2 - 80 + (d-1) * 38;
+    const reward = getDailyReward(d);
+    const isToday = d === Math.max(1, streak);
+    X.fillStyle = isToday ? '#fff3e0' : '#f9f9f9'; rrc(W/2, ry, 290, 30, 12);
+    X.fillStyle = isToday ? '#e65100' : '#666'; X.font = (isToday ? 'bold ' : '') + '12px "Quicksand",sans-serif';
+    X.textAlign = 'center';
+    X.fillText('Day '+d+': '+reward.desc + (isToday ? ' \u2B05' : ''), W/2, ry + 3);
+  }
+
+  // Claim button (generous spacing below list)
+  const claimY = H/2 - 80 + 7 * 38 + 24;
+  const today = new Date().toISOString().slice(0,10);
+  const canClaim = saveData.streak.lastClaimDate !== today;
+  X.fillStyle = canClaim ? '#ff6b00' : '#ccc'; rrc(W/2, claimY, 190, 46, 23);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText(canClaim ? 'Claim!' : 'Claimed \u2713', W/2, claimY + 2);
 }
 
 function drawAchievements() {
@@ -2896,7 +2896,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v9.3 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v9.4 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -2965,18 +2965,18 @@ function drawShowcaseEditor() {
 function drawShop() {
   drawBg();
   X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0, 0, W, H);
-  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 480, 24);
-  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155, H/2-222, 16, 0, Math.PI*2); X.fill();
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 520, 24);
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155, H/2-242, 16, 0, Math.PI*2); X.fill();
   X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('\u2715', W/2+155, H/2-222); X.textBaseline = 'alphabetic';
+  X.fillText('\u2715', W/2+155, H/2-242); X.textBaseline = 'alphabetic';
   X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\u2B50 Star Shop', W/2, H/2-195);
-  X.fillStyle = '#888'; X.font = '12px "Quicksand",sans-serif';
-  X.fillText(saveData.stars+' \u2B50 available', W/2, H/2-173);
+  X.fillText('\u2B50 Star Shop', W/2, H/2-215);
+  X.fillStyle = '#888'; X.font = '13px "Quicksand",sans-serif';
+  X.fillText(saveData.stars+' \u2B50 available', W/2, H/2-192);
 
   // Flash Sale Banner
   const flash = getFlashSale();
-  const flashY = H/2-130;
+  const flashY = H/2-148;
   const flashPulse = 0.85 + Math.sin(Date.now() / 300) * 0.15;
   X.save();
   X.globalAlpha = flashPulse;
@@ -2984,41 +2984,41 @@ function drawShop() {
   flashGrad.addColorStop(0, '#ff6b35');
   flashGrad.addColorStop(1, '#ff1744');
   X.fillStyle = flashGrad;
-  rrc(W/2, flashY, W-40, 70, 14);
+  rrc(W/2, flashY, W-50, 70, 14);
   X.fill();
   X.restore();
 
   X.textAlign = 'center';
   X.font = 'bold 14px "Fredoka One",sans-serif';
   X.fillStyle = '#fff';
-  X.fillText('⚡ FLASH SALE ⚡', W/2, flashY - 12);
+  X.fillText('\u26A1 FLASH SALE \u26A1', W/2, flashY - 12);
   X.font = '12px "Quicksand",sans-serif';
-  X.fillText(flash.item.icon + ' ' + flash.item.name + ': ' + flash.discountedCost + '⭐ (was ' + flash.item.cost + '⭐)', W/2, flashY + 6);
+  X.fillText(flash.item.icon + ' ' + flash.item.name + ': ' + flash.discountedCost + '\u2B50 (was ' + flash.item.cost + '\u2B50)', W/2, flashY + 6);
   X.fillStyle = '#ffeb3b';
   X.font = 'bold 11px "Quicksand",sans-serif';
-  X.fillText('⏰ ' + formatCountdown(flash.timeLeftMs) + ' left!', W/2, flashY + 24);
+  X.fillText('\u23F0 ' + formatCountdown(flash.timeLeftMs) + ' left!', W/2, flashY + 24);
 
   SHOP_ITEMS.forEach((item, i) => {
     const col = i%2, row = Math.floor(i/2);
-    const cx = W/2-75+col*150, cy = H/2-110+row*150;
+    const cx = W/2-78+col*156, cy = H/2-68+row*160;
     const bought = shopSelections[item.id];
     const canBuy = saveData.stars >= item.cost && !bought;
-    X.fillStyle = bought?'#e8f5e9':'#f5f5f5'; rrc(cx,cy,130,125,14);
-    X.font = '28px sans-serif'; X.textAlign = 'center'; X.fillText(item.icon,cx,cy-25);
-    X.fillStyle = '#333'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.fillText(item.name,cx,cy+5);
-    X.fillStyle = '#888'; X.font = '9px "Quicksand",sans-serif'; X.fillText(item.desc,cx,cy+20);
-    if (bought) { X.fillStyle='#66bb6a'; X.font='bold 10px "Fredoka One",sans-serif'; X.fillText('\u2713 Ready',cx,cy+42); }
-    else { X.fillStyle=canBuy?'#ff8a9e':'#ccc'; rrc(cx,cy+42,80,24,12); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.fillText(item.cost+' \u2B50',cx,cy+44); }
+    X.fillStyle = bought?'#e8f5e9':'#f5f5f5'; rrc(cx,cy,136,140,16);
+    X.font = '32px sans-serif'; X.textAlign = 'center'; X.fillText(item.icon,cx,cy-30);
+    X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.fillText(item.name,cx,cy+6);
+    X.fillStyle = '#888'; X.font = '10px "Quicksand",sans-serif'; X.fillText(item.desc,cx,cy+24);
+    if (bought) { X.fillStyle='#66bb6a'; X.font='bold 11px "Fredoka One",sans-serif'; X.fillText('\u2713 Ready',cx,cy+48); }
+    else { X.fillStyle=canBuy?'#ff8a9e':'#ccc'; rrc(cx,cy+48,86,28,14); X.fillStyle='#fff'; X.font='bold 11px "Fredoka One",sans-serif'; X.fillText(item.cost+' \u2B50',cx,cy+50); }
   });
-  if (shopMsgTimer>0) { shopMsgTimer--; X.fillStyle='#e91e63'; X.font='bold 12px "Quicksand",sans-serif'; X.textAlign='center'; X.fillText(shopMsg,W/2,H/2+215); }
+  if (shopMsgTimer>0) { shopMsgTimer--; X.fillStyle='#e91e63'; X.font='bold 12px "Quicksand",sans-serif'; X.textAlign='center'; X.fillText(shopMsg,W/2,H/2+240); }
 }
 function handleShopTap(x,y) {
-  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-222))<18) { showShop=false; return; }
+  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-242))<18) { showShop=false; return; }
 
   // Flash sale tap detection
   const flash = getFlashSale();
-  const flashY = H/2-130;
-  if (Math.abs(x-W/2)<(W-40)/2 && Math.abs(y-flashY)<35 && !shopSelections[flash.item.id]) {
+  const flashY = H/2-148;
+  if (Math.abs(x-W/2)<(W-50)/2 && Math.abs(y-flashY)<35 && !shopSelections[flash.item.id]) {
     if (saveData.stars>=flash.discountedCost) {
       saveData.stars-=flash.discountedCost;
       shopSelections[flash.item.id]=true;
@@ -3035,8 +3035,8 @@ function handleShopTap(x,y) {
 
   SHOP_ITEMS.forEach((item,i) => {
     const col=i%2,row=Math.floor(i/2);
-    const cx=W/2-75+col*150, cy=H/2-110+row*150;
-    if (Math.abs(x-cx)<40 && Math.abs(y-(cy+42))<14 && !shopSelections[item.id]) {
+    const cx=W/2-78+col*156, cy=H/2-68+row*160;
+    if (Math.abs(x-cx)<45 && Math.abs(y-(cy+48))<16 && !shopSelections[item.id]) {
       if (saveData.stars>=item.cost) { saveData.stars-=item.cost; shopSelections[item.id]=true; saveGame(); sndPowerup(); }
       else { shopMsg='Not enough stars!'; shopMsgTimer=90; }
     }
@@ -3047,40 +3047,40 @@ function handleShopTap(x,y) {
 function drawChallengesScreen() {
   drawBg();
   X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
-  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,440,24);
-  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-200,16,0,Math.PI*2); X.fill();
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,480,24);
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-220,16,0,Math.PI*2); X.fill();
   X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('\u2715',W/2+155,H/2-200); X.textBaseline = 'alphabetic';
+  X.fillText('\u2715',W/2+155,H/2-220); X.textBaseline = 'alphabetic';
   X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83C\uDFAF Daily Challenges',W/2,H/2-172);
+  X.fillText('\uD83C\uDFAF Daily Challenges',W/2,H/2-190);
   if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) {
     saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]};
     saveGame();
   }
   const list = saveData.challenges.list;
   list.forEach((ch,i) => {
-    const cy = H/2-100+i*110;
-    X.fillStyle = ch.claimed?'#e8f5e9':'#f9f9f9'; rrc(W/2,cy,290,90,14);
-    X.fillStyle = '#333'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'left';
-    X.fillText(ch.desc,W/2-130,cy-16);
+    const cy = H/2-110+i*130;
+    X.fillStyle = ch.claimed?'#e8f5e9':'#f9f9f9'; rrc(W/2,cy,300,100,16);
+    X.fillStyle = '#333'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText(ch.desc,W/2,cy-22);
+    X.fillStyle = '#ff8f00'; X.font = 'bold 11px "Fredoka One",sans-serif';
+    X.fillText('+'+ch.reward+' \u2B50',W/2,cy-4);
     const prog = saveData.challenges.progress[i]||0;
     const pct = Math.min(1,prog/ch.target);
-    X.fillStyle = '#eee'; rr(W/2-130,cy+2,180,8,4);
-    X.fillStyle = pct>=1?'#66bb6a':'#ff8a9e'; rr(W/2-130,cy+2,Math.max(4,180*pct),8,4);
-    X.fillStyle = '#888'; X.font = '10px "Quicksand",sans-serif'; X.textAlign = 'left';
-    X.fillText(Math.min(prog,ch.target)+'/'+ch.target,W/2-128,cy+24);
-    X.fillStyle = '#ff8f00'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'right';
-    X.fillText('+'+ch.reward+' \u2B50',W/2+130,cy-16);
-    if (ch.claimed) { X.fillStyle='#66bb6a'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='right'; X.fillText('\u2713 Claimed',W/2+130,cy+24); }
-    else if (pct>=1) { X.fillStyle='#9c27b0'; rrc(W/2+100,cy+18,70,24,12); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('Claim!',W/2+100,cy+20); }
+    X.fillStyle = '#eee'; rr(W/2-100,cy+14,200,10,5);
+    X.fillStyle = pct>=1?'#66bb6a':'#ff8a9e'; rr(W/2-100,cy+14,Math.max(5,200*pct),10,5);
+    X.fillStyle = '#888'; X.font = '11px "Quicksand",sans-serif'; X.textAlign = 'center';
+    X.fillText(Math.min(prog,ch.target)+'/'+ch.target,W/2,cy+40);
+    if (ch.claimed) { X.fillStyle='#66bb6a'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('\u2713 Claimed',W/2,cy+40); }
+    else if (pct>=1) { X.fillStyle='#9c27b0'; rrc(W/2,cy+40,90,28,14); X.fillStyle='#fff'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('Claim!',W/2,cy+42); }
   });
 }
 function handleChallengeTap(x,y) {
-  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-200))<18) { showChallenges=false; return; }
+  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-220))<18) { showChallenges=false; return; }
   const list = saveData.challenges?.list||[];
   list.forEach((ch,i) => {
-    const cy=H/2-100+i*110;
-    if (Math.abs(x-(W/2+100))<40 && Math.abs(y-(cy+18))<14) {
+    const cy=H/2-110+i*130;
+    if (Math.abs(x-W/2)<50 && Math.abs(y-(cy+40))<16) {
       const prog=saveData.challenges.progress[i]||0;
       if (prog>=ch.target && !ch.claimed) { saveData.stars+=ch.reward; saveData.challenges.list[i].claimed=true; saveGame(); sndLuckyStar(); }
     }
@@ -3090,7 +3090,7 @@ function handleChallengeTap(x,y) {
 // ====== v8.0 LUCKY SPIN SCREEN ======
 function drawLuckySpin() {
   drawBg();
-  X.fillStyle = 'rgba(0,0,0,0.6)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
   X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2,H/2,340,540,24);
   if (spinState.phase!=='spinning') {
     X.fillStyle='#ff8a9e'; X.beginPath(); X.arc(W/2+155,H/2-250,16,0,Math.PI*2); X.fill();
@@ -3151,28 +3151,28 @@ function drawOutfitSelector() {
   drawBg();
   X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
   // Panel
-  const panelGrad = X.createLinearGradient(W/2, H/2-240, W/2, H/2+240);
+  const panelGrad = X.createLinearGradient(W/2, H/2-260, W/2, H/2+260);
   panelGrad.addColorStop(0, '#fff5f8'); panelGrad.addColorStop(1, '#ffffff');
-  X.fillStyle = panelGrad; rrc(W/2,H/2,360,500,24);
+  X.fillStyle = panelGrad; rrc(W/2,H/2,360,540,24);
   X.strokeStyle = '#ffb3c6'; X.lineWidth = 2; X.stroke();
   // Close button
-  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+165,H/2-232,16,0,Math.PI*2); X.fill();
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+165,H/2-252,16,0,Math.PI*2); X.fill();
   X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('\u2715',W/2+165,H/2-232); X.textBaseline = 'alphabetic';
+  X.fillText('\u2715',W/2+165,H/2-252); X.textBaseline = 'alphabetic';
   // Title
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83D\uDC57 Outfits',W/2,H/2-200);
+  X.fillText('\uD83D\uDC57 Outfits',W/2,H/2-222);
   const cc=getCollectedCount();
   X.fillStyle='#999'; X.font='13px "Quicksand",sans-serif';
-  X.fillText(cc+'/'+TOTAL_ITEMS+' items collected',W/2,H/2-178);
+  X.fillText(cc+'/'+TOTAL_ITEMS+' items collected',W/2,H/2-198);
   // Progress bar
-  const barW=260, barH=6, barX=W/2-barW/2, barY=H/2-168;
+  const barW=260, barH=6, barX=W/2-barW/2, barY=H/2-186;
   X.fillStyle='#f0f0f0'; rrc(W/2, barY+barH/2, barW, barH, 3);
   const pct=Math.min(1, cc/30);
   if (pct>0) { X.fillStyle='#ff69b4'; rrc(barX+pct*barW/2, barY+barH/2, pct*barW, barH, 3); }
   // Outfit rows
   OUTFITS.forEach((outfit,i) => {
-    const cy=H/2-138+i*72;
+    const cy=H/2-155+i*80;
     const unlocked=cc>=outfit.milestone;
     const equipped=(saveData.equippedOutfit||'default')===outfit.id;
     // Row background
@@ -3181,7 +3181,7 @@ function drawOutfitSelector() {
       eqGrad.addColorStop(0, '#fce4ec'); eqGrad.addColorStop(1, '#fff0f5');
       X.fillStyle = eqGrad;
     } else { X.fillStyle = unlocked?'#fafafa':'#f0f0f0'; }
-    rrc(W/2,cy,320,60,16);
+    rrc(W/2,cy,320,66,16);
     if (equipped) { X.strokeStyle='#ff69b4'; X.lineWidth=1.5; X.stroke(); }
     // Preview circle
     const pvX = W/2-135, pvY = cy;
@@ -3222,10 +3222,10 @@ function drawOutfitSelector() {
   });
 }
 function handleOutfitTap(x,y) {
-  if (Math.abs(x-(W/2+165))<18&&Math.abs(y-(H/2-232))<18) { showOutfits=false; return; }
+  if (Math.abs(x-(W/2+165))<18&&Math.abs(y-(H/2-252))<18) { showOutfits=false; return; }
   const cc=getCollectedCount();
   OUTFITS.forEach((outfit,i) => {
-    const cy=H/2-138+i*72;
+    const cy=H/2-155+i*80;
     // Equip button hit area
     if (cc>=outfit.milestone&&Math.abs(x-(W/2+110))<40&&Math.abs(y-cy)<18) {
       saveData.equippedOutfit=outfit.id; saveGame(); sndCatch();
@@ -3587,7 +3587,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v9.3', W-10, H-8);
+  X.fillText('v9.4', W-10, H-8);
 }
 
 function drawResults() {
@@ -3648,7 +3648,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.3', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v9.4', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4283,7 +4283,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v9.3') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v9.4') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4365,7 +4365,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v9.3'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v9.4'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -4374,9 +4374,9 @@ function handleTap(x, y) {
   }
   if (showDaily) {
     // Claim button (positioned dynamically)
-    const claimY = H/2 - 60 + 7 * 32 + 18;
+    const claimY = H/2 - 80 + 7 * 38 + 24;
     const today = new Date().toISOString().slice(0,10);
-    if (Math.abs(x-W/2)<90 && Math.abs(y-claimY)<24) {
+    if (Math.abs(x-W/2)<95 && Math.abs(y-claimY)<26) {
       if (saveData.streak.lastClaimDate !== today) {
         const reward = claimDailyReward();
         if (reward && reward.pull) {
@@ -4387,7 +4387,7 @@ function handleTap(x, y) {
       showDaily = false; return;
     }
     // Close X
-    if (Math.abs(x-(W/2+150))<18 && Math.abs(y-(H/2-195))<18) { showDaily = false; return; }
+    if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-222))<18) { showDaily = false; return; }
     return;
   }
   if (showBlindBox) {
