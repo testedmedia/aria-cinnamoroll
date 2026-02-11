@@ -1286,7 +1286,6 @@ if (refParam && !saveData.referredBy) {
 }
 
 // First-game share prompt state
-let showFirstSharePrompt = false;
 
 // ====== HAPTICS ======
 function haptic(ms) {
@@ -2484,32 +2483,33 @@ function drawCollectionItem(cx, cy, si, owned, data) {
   if (owned) {
     // Draw item visual
     if (si.charKey && imgs[si.charKey]) {
-      drawImg(imgs[si.charKey], cx, cy - 14, 42, 42);
-      // Legendary/Epic: add colored overlay to distinguish variants
+      const imgSz = (si.rarity==='legendary'||si.rarity==='secret') ? 58 : 52;
+      drawImg(imgs[si.charKey], cx, cy - 12, imgSz, imgSz);
+      // Rarity glow ring
       if (si.rarity === 'legendary') {
-        X.save(); X.globalAlpha = 0.18; X.fillStyle = '#ffd700';
-        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.save(); X.globalAlpha = 0.2; X.fillStyle = '#ffd700';
+        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
         X.restore();
-        // Gold star badge
-        X.font = '10px sans-serif'; X.textAlign = 'center'; X.fillText('⭐', cx + 18, cy - 28);
+        X.font = '11px sans-serif'; X.textAlign = 'center'; X.fillText('\u2B50', cx + 22, cy - 30);
       } else if (si.rarity === 'epic') {
         X.save(); X.globalAlpha = 0.15; X.fillStyle = '#ab47bc';
-        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
         X.restore();
       } else if (si.rarity === 'secret') {
-        X.save(); X.globalAlpha = 0.15;
+        X.save(); X.globalAlpha = 0.18;
         X.fillStyle = `hsl(${(frame*2)%360},70%,60%)`;
-        X.beginPath(); X.arc(cx, cy - 14, 22, 0, Math.PI*2); X.fill();
+        X.beginPath(); X.arc(cx, cy - 12, imgSz/2+2, 0, Math.PI*2); X.fill();
         X.restore();
       }
     } else {
-      // Emoji items: show emoji bigger for legendary, add glow
+      // Emoji items
+      const eSz = (si.rarity==='legendary'||si.rarity==='secret') ? '36px' : '32px';
       if (si.rarity === 'legendary' || si.rarity === 'secret') {
         X.save(); X.globalAlpha = 0.2; X.fillStyle = si.rarity === 'secret' ? '#ff69b4' : '#ffd700';
-        X.beginPath(); X.arc(cx, cy - 6, 20, 0, Math.PI*2); X.fill();
+        X.beginPath(); X.arc(cx, cy - 6, 22, 0, Math.PI*2); X.fill();
         X.restore();
       }
-      X.font = '28px sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, cx, cy - 6);
+      X.font = eSz+' sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, cx, cy - 4);
     }
     // Name (auto-size to fit card width)
     X.fillStyle = '#333'; X.textAlign = 'center';
@@ -3232,16 +3232,6 @@ function handleOutfitTap(x,y) {
     }
   });
 }
-function handleOutfitTap(x,y) {
-  if (Math.abs(x-(W/2+155))<18&&Math.abs(y-(H/2-222))<18) { showOutfits=false; return; }
-  const cc=getCollectedCount();
-  OUTFITS.forEach((outfit,i) => {
-    const cy=H/2-130+i*62;
-    if (cc>=outfit.milestone&&Math.abs(x-(W/2+100))<35&&Math.abs(y-cy)<14) {
-      saveData.equippedOutfit=outfit.id; saveGame(); sndCatch();
-    }
-  });
-}
 
 // ====== v8.0 LOGIN CALENDAR SCREEN ======
 function drawLoginCalendar() {
@@ -3597,7 +3587,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v9.2', W-10, H-8);
+  X.fillText('v9.3', W-10, H-8);
 }
 
 function drawResults() {
@@ -3606,169 +3596,50 @@ function drawResults() {
 
   // Clean white card
   X.fillStyle = 'rgba(255,255,255,0.95)';
-  rrc(W/2, H/2, 320, 440, 24);
-  X.strokeStyle = '#ffb3c6'; X.lineWidth = 2;
-  const pw=160,ph=220,cy=H/2;
-  X.beginPath();
-  X.moveTo(W/2-pw+24,cy-ph); X.lineTo(W/2+pw-24,cy-ph);
-  X.quadraticCurveTo(W/2+pw,cy-ph,W/2+pw,cy-ph+24);
-  X.lineTo(W/2+pw,cy+ph-24);
-  X.quadraticCurveTo(W/2+pw,cy+ph,W/2+pw-24,cy+ph);
-  X.lineTo(W/2-pw+24,cy+ph);
-  X.quadraticCurveTo(W/2-pw,cy+ph,W/2-pw,cy+ph-24);
-  X.lineTo(W/2-pw,cy-ph+24);
-  X.quadraticCurveTo(W/2-pw,cy-ph,W/2-pw+24,cy-ph);
-  X.closePath(); X.stroke();
-
-  // Characters
-  const cb2 = Math.sin(frame*0.06)*4;
-  drawImg(imgs.cinna, W/2-55, 170+cb2, 42, 42);
-  drawImg(imgs.purin, W/2+55, 175+cb2, 46, 46);
+  rrc(W/2, H/2, 300, 340, 24);
 
   // Title
+  const cardTop = H/2 - 150;
   X.fillStyle = '#e91e63';
-  X.font = 'bold 24px "Fredoka One",cursive';
+  X.font = 'bold 26px "Fredoka One",cursive';
   X.textAlign = 'center';
-  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, 218);
+  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, cardTop + 40);
 
   // Score
-  X.fillStyle = '#e91e63'; X.font = 'bold 48px "Fredoka One",sans-serif';
-  X.fillText(score, W/2, 274);
+  X.fillStyle = '#e91e63'; X.font = 'bold 56px "Fredoka One",sans-serif';
+  X.fillText(score, W/2, cardTop + 100);
 
-  // Stats line
-  X.font = '11px "Quicksand",sans-serif'; X.fillStyle = '#888';
-  X.fillText(T('caught')+': '+caught+'  |  '+T('combo')+': '+maxCombo+'x  |  '+T('best')+': '+hi, W/2, 298);
+  // Stats
+  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#999';
+  X.fillText(T('caught')+': '+caught+'  \u2022  '+T('combo')+': '+maxCombo+'x  \u2022  '+T('best')+': '+hi, W/2, cardTop + 128);
 
-  // Stars earned pill
+  // Stars earned
   if (!starsEarned) starsEarned = calculateStarsEarned(score).total;
   const starsInfo = calculateStarsEarned(score);
-  X.fillStyle = '#fff8e1'; rrc(W/2, 322, 180, 26, 13);
-  X.fillStyle = '#ff8f00'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('+'+starsInfo.total+' ⭐' + (starsInfo.bonus > 0 ? ' (+'+starsInfo.bonus+' bonus)' : ''), W/2, 324);
+  X.fillStyle = '#ff8f00'; X.font = 'bold 13px "Fredoka One",sans-serif';
+  X.fillText('+'+starsInfo.total+' \u2B50 earned', W/2, cardTop + 155);
 
-  // Collected items (compact)
-  let nextY = 348;
-  if (sessionCollected.length > 0) {
-    const maxShow = Math.min(sessionCollected.length, 6);
-    for (let i = 0; i < maxShow; i++) {
-      const ch = sessionCollected[i];
-      const ix = W/2 - (maxShow * 26)/2 + i * 26 + 13;
-      const tier = getRarityTier(ch.rarity || 'common');
-      const rc = tier.color === 'rainbow' ? '#ff69b4' : tier.color;
-      X.strokeStyle = rc; X.lineWidth = 1.5;
-      X.beginPath(); X.arc(ix, nextY, 11, 0, Math.PI*2); X.stroke();
-      X.fillStyle = '#fff'; X.beginPath(); X.arc(ix, nextY, 10, 0, Math.PI*2); X.fill();
-      if (ch.imgKey && imgs[ch.imgKey]) { drawImg(imgs[ch.imgKey], ix, nextY, 16, 16); }
-      else { X.font = '11px sans-serif'; X.textAlign = 'center'; X.fillText(ch.emoji || '✨', ix, nextY + 4); }
-    }
-    if (sessionCollected.length > 6) {
-      X.fillStyle = '#999'; X.font = '9px "Quicksand",sans-serif'; X.textAlign = 'center';
-      X.fillText('+'+(sessionCollected.length-6), W/2 + (maxShow*26)/2 + 14, nextY + 3);
-    }
-    nextY += 30;
-  }
+  // Play Again button (clean, no pulse)
+  const playY = cardTop + 195;
+  X.fillStyle = '#e91e63'; rrc(W/2, playY, 220, 48, 24);
+  X.fillStyle = '#fff'; X.font = 'bold 18px "Fredoka One",sans-serif';
+  X.fillText('Play Again', W/2, playY + 2);
 
-  // === BUTTONS (clean, well-spaced) ===
-  const btnStart = Math.max(nextY + 10, 385);
-
-  // Play Again (biggest, most prominent) with motivation
-  const nearMilestone = getNextCollectionMilestone();
-  const againPulse = 1 + Math.sin(frame*0.08)*0.02;
-  X.save();
-  X.translate(W/2, btnStart);
-  X.scale(againPulse, againPulse);
-  rrc(0, 0, 240, 52, 21);
-  const agGrad = X.createLinearGradient(-120, 0, 120, 0);
-  agGrad.addColorStop(0, '#ff6b9d');
-  agGrad.addColorStop(1, '#e91e63');
-  X.fillStyle = agGrad;
-  X.fill();
-  X.restore();
-  X.textAlign = 'center';
-  X.font = 'bold 18px "Fredoka One",sans-serif';
-  X.fillStyle = '#fff';
-  X.fillText('🎮 One More Game!', W/2, btnStart + 2);
-  if (nearMilestone) {
-    X.font = '11px "Quicksand",sans-serif';
-    X.fillStyle = '#ff6b9d';
-    X.fillText(nearMilestone, W/2, btnStart + 24);
-  }
-
-  // Share + Leaderboard side by side
-  X.fillStyle = '#1da1f2'; rrc(W/2-58, btnStart+42, 106, 30, 15);
-  X.fillStyle = '#fff'; X.font = 'bold 11px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('shareScore'), W/2-58, btnStart+43);
-
-  X.fillStyle = '#fff3e0'; rrc(W/2+58, btnStart+42, 106, 30, 15);
-  X.fillStyle = '#e65100'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText(T('leaderboard'), W/2+58, btnStart+43);
-
-  // Challenge a Friend button (centered below share row)
-  const chalBtnY = btnStart + 72;
-  const chalPulse = 1 + Math.sin(frame*0.08)*0.02;
-  X.save(); X.translate(W/2, chalBtnY); X.scale(chalPulse, chalPulse);
-  X.fillStyle = '#25d366'; rrc(0, 0, 200, 32, 16);
-  X.fillStyle = '#fff'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83D\uDCF2 Challenge a Friend!', 0, 2);
-  X.restore();
-
-  // Collection link (subtle)
-  X.fillStyle = '#e91e63'; X.font = 'bold 11px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText('\u2728 Collection '+getCollectedCount()+'/'+TOTAL_ITEMS, W/2, btnStart+102);
+  // Collection button (subtle, below)
+  const colY = playY + 48;
+  X.fillStyle = '#fce4ec'; rrc(W/2, colY, 180, 34, 17);
+  X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
+  X.fillText('\u2728 Collection '+getCollectedCount()+'/'+TOTAL_ITEMS, W/2, colY + 2);
 
   // Version
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.1', W-8, H-8);
-}
-
-// First-game share prompt overlay (draws on top of results)
-function drawFirstSharePrompt() {
-  // Dim backdrop
-  X.fillStyle = 'rgba(0,0,0,0.6)';
-  X.fillRect(0, 0, W, H);
-  // Card
-  X.fillStyle = 'rgba(255,255,255,0.97)'; rrc(W/2, H/2, 300, 280, 24);
-  X.strokeStyle = '#ff69b4'; X.lineWidth = 3;
-  const pw2=150,ph2=140;
-  X.beginPath();
-  X.moveTo(W/2-pw2+24,H/2-ph2); X.lineTo(W/2+pw2-24,H/2-ph2);
-  X.quadraticCurveTo(W/2+pw2,H/2-ph2,W/2+pw2,H/2-ph2+24);
-  X.lineTo(W/2+pw2,H/2+ph2-24);
-  X.quadraticCurveTo(W/2+pw2,H/2+ph2,W/2+pw2-24,H/2+ph2);
-  X.lineTo(W/2-pw2+24,H/2+ph2);
-  X.quadraticCurveTo(W/2-pw2,H/2+ph2,W/2-pw2,H/2+ph2-24);
-  X.lineTo(W/2-pw2,H/2-ph2+24);
-  X.quadraticCurveTo(W/2-pw2,H/2-ph2,W/2-pw2+24,H/2-ph2);
-  X.closePath(); X.stroke();
-  // Emoji celebration
-  X.font = '36px sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83C\uDF89', W/2, H/2 - 95);
-  // Title
-  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",cursive'; X.textAlign = 'center';
-  X.fillText('Great First Game!', W/2, H/2 - 55);
-  // Subtitle
-  X.fillStyle = '#888'; X.font = '14px "Quicksand",sans-serif';
-  X.fillText('You scored ' + score + ' points!', W/2, H/2 - 30);
-  X.fillText('Share with your friends so they', W/2, H/2 - 8);
-  X.fillText('can play too!', W/2, H/2 + 10);
-  // Share button (pulsing)
-  const sp = 1 + Math.sin(frame*0.1)*0.04;
-  X.save(); X.translate(W/2, H/2 + 50); X.scale(sp, sp);
-  X.fillStyle = '#25d366'; rrc(0, 0, 220, 44, 22);
-  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83D\uDCF2 Share with Friends!', 0, 2);
-  X.restore();
-  // Skip button
-  X.fillStyle = '#bbb'; X.font = '13px "Quicksand",sans-serif'; X.textAlign = 'center';
-  X.fillText('Maybe later', W/2, H/2 + 100);
+  X.textAlign = 'right'; X.fillText('v9.3', W-8, H-8);
 }
 
 // Store button positions for results click handling
 function getResultsBtnY() {
-  let nextY = 348;
-  if (sessionCollected.length > 0) nextY += 30;
-  const btnStart = Math.max(nextY + 10, 385);
-  return { play: btnStart, share: btnStart + 42, lb: btnStart + 42, challenge: btnStart + 72, collection: btnStart + 102 };
+  const cardTop = H/2 - 150;
+  return { play: cardTop + 195, collection: cardTop + 243 };
 }
 
 function drawLoading() {
@@ -4648,32 +4519,14 @@ function handleTap(x, y) {
     showTutorialOrStart();
   } else if (state === 'results') {
     const rb = getResultsBtnY();
-    // Play Again -> menu (trigger spin if available)
-    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.play)<24) {
+    // Play Again
+    if (Math.abs(x-W/2)<110 && Math.abs(y-rb.play)<24) {
       if (saveData.lastSpinDate !== getTodayStr()) { showSpin=true; spinState={phase:'idle',angle:0,speed:0,result:null}; }
       else { state = 'menu'; }
       return;
     }
-    // Share (left button)
-    if (Math.abs(x-(W/2-58))<55 && Math.abs(y-rb.share)<18) { openShare(); saveData.shareCount++; saveGame(); if (saveData.shareCount >= 5) checkAchievement('social-butterfly'); return; }
-    // Leaderboard (right button)
-    if (Math.abs(x-(W/2+58))<55 && Math.abs(y-rb.lb)<18) { openLB(); return; }
-    // Challenge a Friend button
-    if (Math.abs(x-W/2)<100 && Math.abs(y-rb.challenge)<18) {
-      const chalUrl = window.location.origin + window.location.pathname + '?s=' + score + '&n=' + encodeURIComponent(playerName||'Player') + '&ref=' + encodeURIComponent(playerName||'Player');
-      const chalTxt = (playerName||'Someone') + ' scored ' + score + ' in Aria\'s Sanrio Adventure! Can you beat them? ' + chalUrl;
-      if (navigator.share) {
-        navigator.share({title:'Beat my score!',text:chalTxt,url:chalUrl}).catch(()=>{});
-      } else {
-        navigator.clipboard.writeText(chalTxt).then(()=>{}).catch(()=>{});
-      }
-      saveData.hasShared = true; saveData.shareCount++; saveGame();
-      trackEvent('share_challenge_results',{score});
-      if (saveData.shareCount >= 5) checkAchievement('social-butterfly');
-      return;
-    }
-    // Collection link
-    if (Math.abs(x-W/2)<80 && Math.abs(y-rb.collection)<14) { showCollection = true; collectionScrollY = 0; return; }
+    // Collection button
+    if (Math.abs(x-W/2)<90 && Math.abs(y-rb.collection)<17) { showCollection = true; collectionScrollY = 0; return; }
   }
 }
 
