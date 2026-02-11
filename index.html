@@ -1900,21 +1900,35 @@ function drawCelebration() {
 // ====== BACKGROUND ======
 function drawBg() {
   bgHue = (bgHue + 0.15) % 360;
+  const vActive = isValentineActive();
   const g = X.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, `hsl(${(bgHue+320)%360},80%,92%)`);
-  g.addColorStop(0.3, `hsl(${(bgHue+210)%360},70%,90%)`);
-  g.addColorStop(0.6, `hsl(${(bgHue+270)%360},60%,92%)`);
-  g.addColorStop(1, `hsl(${(bgHue+140)%360},60%,88%)`);
+  if (vActive) {
+    // Valentine pink/red gradient
+    g.addColorStop(0, '#ffe0ec');
+    g.addColorStop(0.3, '#ffc1d6');
+    g.addColorStop(0.6, '#ffd6e7');
+    g.addColorStop(1, '#ffe8f0');
+  } else {
+    g.addColorStop(0, `hsl(${(bgHue+320)%360},80%,92%)`);
+    g.addColorStop(0.3, `hsl(${(bgHue+210)%360},70%,90%)`);
+    g.addColorStop(0.6, `hsl(${(bgHue+270)%360},60%,92%)`);
+    g.addColorStop(1, `hsl(${(bgHue+140)%360},60%,88%)`);
+  }
   X.fillStyle = g; X.fillRect(0,0,W,H);
-  X.fillStyle = 'rgba(255,255,255,0.3)';
+  X.fillStyle = vActive ? 'rgba(255,182,193,0.25)' : 'rgba(255,255,255,0.3)';
   for (let i = 0; i < 15; i++) {
     X.beginPath();
     X.arc(((i*73+frame*0.2)%(W+40))-20, ((i*97+frame*0.1)%(H+40))-20, 6+(i%3)*3, 0, Math.PI*2);
     X.fill();
   }
-  X.globalAlpha = 0.12;
-  for (let i = 0; i < 4; i++) {
-    drawHeart(((i*83+frame*0.3)%(W+60))-30, ((i*120+frame*0.5)%(H+60))-30, 8+i*2);
+  const heartCount = vActive ? 14 : 4;
+  const heartAlpha = vActive ? 0.22 : 0.12;
+  X.globalAlpha = heartAlpha;
+  X.fillStyle = vActive ? '#ff69b4' : X.fillStyle;
+  for (let i = 0; i < heartCount; i++) {
+    const hx = ((i*83+frame*(0.3+i*0.04))%(W+60))-30;
+    const hy = ((i*97+frame*(0.15+i*0.02))%(H+60))-30;
+    drawHeart(hx, hy, 8+i%5*3);
   }
   X.globalAlpha = 1;
 }
@@ -2837,12 +2851,13 @@ function drawOutfitOnPlayer(px, py) {
 function drawMenu() {
   drawBg();
   // Title
-  X.fillStyle = '#fff'; X.strokeStyle = '#e91e63'; X.lineWidth = 5;
+  const vMenu = isValentineActive();
+  X.fillStyle = '#fff'; X.strokeStyle = vMenu ? '#ff1493' : '#e91e63'; X.lineWidth = 5;
   X.font = 'bold 30px "Fredoka One",cursive';
   X.textAlign = 'center'; X.textBaseline = 'middle';
   X.strokeText(T('title1'), W/2, 40);
   X.fillText(T('title1'), W/2, 40);
-  X.strokeStyle = '#ff8a9e';
+  X.strokeStyle = vMenu ? '#ff69b4' : '#ff8a9e';
   X.strokeText(T('title2'), W/2, 74);
   X.fillText(T('title2'), W/2, 74);
 
@@ -2860,6 +2875,14 @@ function drawMenu() {
     X.fillText('Season Ended', W/2, 115);
   }
 
+  // Valentine event indicator below season banner
+  if (isValentineActive()) {
+    const viBounce = Math.sin(frame*0.1)*2;
+    X.fillStyle = '#ff1493';
+    X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDC98 Valentine\'s Event LIVE! \uD83D\uDC98', W/2, 132+viBounce);
+  }
+
   // Characters
   const cb = Math.sin(frame*0.04)*6;
   drawImg(imgs.cinnaFly, W/2-75, 175+cb, 70, 45);
@@ -2871,10 +2894,17 @@ function drawMenu() {
   const by = 248;
   const bp = 1+Math.sin(frame*0.06)*0.03;
   X.save(); X.translate(W/2, by); X.scale(bp, bp);
-  X.fillStyle = '#ff8a9e'; rrc(0, 0, 200, 48, 24);
+  if (isValentineActive()) {
+    const pg = X.createLinearGradient(-100, 0, 100, 0);
+    pg.addColorStop(0, '#ff1493'); pg.addColorStop(0.5, '#ff69b4'); pg.addColorStop(1, '#ff1493');
+    X.fillStyle = pg;
+  } else {
+    X.fillStyle = '#ff8a9e';
+  }
+  rrc(0, 0, 200, 48, 24);
   X.fillStyle = '#fff'; X.font = 'bold 20px "Fredoka One",sans-serif';
   X.textAlign = 'center';
-  X.fillText(T('tapToPlay'), 0, 2);
+  X.fillText(isValentineActive() ? '\uD83D\uDC96 '+T('tapToPlay')+' \uD83D\uDC96' : T('tapToPlay'), 0, 2);
   X.restore();
 
   // Player info + stars
@@ -2965,12 +2995,13 @@ function drawMenu() {
   X.fillText('\u2B50 Star Shop', W/2, 550);
 
   // v8.0 Challenges + Outfits row
-  X.fillStyle = '#f3e5f5'; rrc(W/2-90, 580, 90, 26, 13);
+  const corY = isValentineActive() ? 568 : 580;
+  X.fillStyle = '#f3e5f5'; rrc(W/2-90, corY, 90, 26, 13);
   X.fillStyle = '#9c27b0'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83C\uDFAF Challenges', W/2-90, 582);
-  X.fillStyle = '#fce4ec'; rrc(W/2+90, 580, 80, 26, 13);
+  X.fillText('\uD83C\uDFAF Challenges', W/2-90, corY+2);
+  X.fillStyle = '#fce4ec'; rrc(W/2+90, corY, 80, 26, 13);
   X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif';
-  X.fillText('\uD83D\uDC57 Outfits', W/2+90, 582);
+  X.fillText('\uD83D\uDC57 Outfits', W/2+90, corY+2);
 
   // Settings gear
   X.fillStyle = 'rgba(255,255,255,0.7)';
@@ -2978,11 +3009,52 @@ function drawMenu() {
   X.fillStyle = '#888'; X.font = '18px sans-serif'; X.textAlign = 'center';
   X.fillText('\u2699', W-30, 33);
 
-  // Valentine banner
+  // Valentine mega-banner
   if (isValentineActive()) {
-    X.fillStyle = '#fce4ec'; rrc(W/2, 610, 220, 24, 12);
-    X.fillStyle = '#e91e63'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('\uD83D\uDC9D Valentine\'s Event! Limited items!', W/2, 612);
+    const vPulse = 1 + Math.sin(frame*0.08)*0.03;
+    const vGlow = Math.sin(frame*0.06)*0.15 + 0.85;
+    X.save();
+    X.translate(W/2, 610);
+    X.scale(vPulse, vPulse);
+    // Banner background with gradient
+    const vg = X.createLinearGradient(-140, -28, 140, 28);
+    vg.addColorStop(0, '#ff1493');
+    vg.addColorStop(0.5, '#ff69b4');
+    vg.addColorStop(1, '#ff1493');
+    X.fillStyle = vg;
+    rrc(0, 0, 290, 56, 28);
+    // Sparkle border
+    X.strokeStyle = `rgba(255,255,255,${vGlow})`;
+    X.lineWidth = 2;
+    X.beginPath();
+    const bw=145, bh=28, br=28;
+    X.moveTo(-bw+br, -bh);
+    X.lineTo(bw-br, -bh);
+    X.quadraticCurveTo(bw, -bh, bw, -bh+br);
+    X.lineTo(bw, bh-br);
+    X.quadraticCurveTo(bw, bh, bw-br, bh);
+    X.lineTo(-bw+br, bh);
+    X.quadraticCurveTo(-bw, bh, -bw, bh-br);
+    X.lineTo(-bw, -bh+br);
+    X.quadraticCurveTo(-bw, -bh, -bw+br, -bh);
+    X.closePath();
+    X.stroke();
+    // Hearts on sides
+    X.fillStyle = '#fff';
+    X.globalAlpha = 0.9;
+    drawHeart(-118, 0, 8);
+    drawHeart(118, 0, 8);
+    X.globalAlpha = 1;
+    // Main text
+    X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDC98 VALENTINE\'S EVENT \uD83D\uDC98', 0, -6);
+    // Sub text with countdown
+    const vEnd = new Date('2026-02-16T00:00:00');
+    const vNow = new Date();
+    const vDays = Math.max(0, Math.ceil((vEnd - vNow) / 86400000));
+    X.font = 'bold 10px "Quicksand",sans-serif';
+    X.fillText('4 Exclusive Items! ' + vDays + ' days left!', 0, 12);
+    X.restore();
   }
 
   // Challenge banner
@@ -3894,12 +3966,13 @@ function handleTap(x, y) {
     // v8.0 Shop button (below blind box)
     if (Math.abs(x-W/2)<90 && Math.abs(y-548)<16) { showShop=true; return; }
     // v8.0 Challenges button
-    if (Math.abs(x-(W/2-90))<50 && Math.abs(y-580)<16) {
+    const corYH = isValentineActive() ? 568 : 580;
+    if (Math.abs(x-(W/2-90))<50 && Math.abs(y-corYH)<16) {
       if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) { saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]}; saveGame(); }
       showChallenges=true; return;
     }
     // v8.0 Outfits button
-    if (Math.abs(x-(W/2+90))<50 && Math.abs(y-580)<16) { showOutfits=true; return; }
+    if (Math.abs(x-(W/2+90))<50 && Math.abs(y-corYH)<16) { showOutfits=true; return; }
     // Streak display -> daily rewards
     if (Math.abs(x-W/2)<100 && Math.abs(y-336)<14) { showDaily = true; return; }
     // Stars display -> show star count (no action, just visual)
