@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.8', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.9', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2609,12 +2609,11 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.8', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v9.9', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
-  drawBg();
-  X.fillStyle = 'rgba(0,0,20,0.6)'; X.fillRect(0, 0, W, H);
+  X.fillStyle = '#1a1a2e'; X.fillRect(0, 0, W, H);
 
   if (!bbState) { showBlindBox = false; return; }
 
@@ -2703,7 +2702,7 @@ function drawBlindBoxScreen() {
     bbState.timer += 1/60;
     const r = bbState.result;
     const tier = getRarityTier(r.rarity);
-    const rc = tier.color === 'rainbow' ? `hsl(${(frame*4)%360},80%,60%)` : tier.color;
+    const rc = tier.color === 'rainbow' ? '#ff69b4' : tier.color;
     const si = r.item;
     const fadeIn = Math.min(1, bbState.timer * 3);
     X.globalAlpha = fadeIn;
@@ -2714,7 +2713,7 @@ function drawBlindBoxScreen() {
     X.fillStyle = grd; X.fillRect(0, 0, W, H);
 
     // Card
-    X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H*0.35, 180, 220, 20);
+    X.fillStyle = '#fff'; rrc(W/2, H*0.35, 180, 220, 20);
     X.strokeStyle = rc; X.lineWidth = 3;
     X.beginPath();
     const cw=90, ch=110;
@@ -2893,7 +2892,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v9.8 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v9.9 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3581,7 +3580,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v9.8', W-10, H-8);
+  X.fillText('v9.9', W-10, H-8);
 }
 
 function drawResults() {
@@ -3642,7 +3641,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.8', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v9.9', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4277,7 +4276,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v9.8') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v9.9') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4359,7 +4358,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v9.8'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v9.9'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
