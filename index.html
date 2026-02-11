@@ -3594,52 +3594,68 @@ function drawResults() {
   drawBg(); drawGround();
   drawCelebration();
 
-  // Clean white card
-  X.fillStyle = 'rgba(255,255,255,0.95)';
-  rrc(W/2, H/2, 300, 340, 24);
+  const isNew = score >= hi && score > 0;
+  let y = 60;
 
-  // Title
-  const cardTop = H/2 - 150;
-  X.fillStyle = '#e91e63';
-  X.font = 'bold 26px "Fredoka One",cursive';
-  X.textAlign = 'center';
-  X.fillText(score>=hi&&score>0?T('newRecord'):T('greatJob'), W/2, cardTop + 40);
+  // Title (big, breathing room)
+  X.fillStyle = '#fff'; X.strokeStyle = '#e91e63'; X.lineWidth = 4;
+  X.font = 'bold 28px "Fredoka One",cursive';
+  X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.strokeText(isNew ? T('newRecord') : T('greatJob'), W/2, y);
+  X.fillText(isNew ? T('newRecord') : T('greatJob'), W/2, y);
 
-  // Score
-  X.fillStyle = '#e91e63'; X.font = 'bold 56px "Fredoka One",sans-serif';
-  X.fillText(score, W/2, cardTop + 100);
+  // Score (hero, centered, lots of space)
+  y += 70;
+  X.fillStyle = '#fff'; X.strokeStyle = isNew ? '#ff1493' : '#e91e63'; X.lineWidth = 5;
+  X.font = 'bold 72px "Fredoka One",sans-serif';
+  X.strokeText(score, W/2, y);
+  X.fillText(score, W/2, y);
 
-  // Stats
-  X.font = '12px "Quicksand",sans-serif'; X.fillStyle = '#999';
-  X.fillText(T('caught')+': '+caught+'  \u2022  '+T('combo')+': '+maxCombo+'x  \u2022  '+T('best')+': '+hi, W/2, cardTop + 128);
+  // Stats line (clean, subtle)
+  y += 50;
+  X.fillStyle = 'rgba(255,255,255,0.7)'; X.font = '13px "Quicksand",sans-serif';
+  X.fillText(T('caught') + ': ' + caught + '  \u2022  ' + T('combo') + ': ' + maxCombo + 'x  \u2022  ' + T('best') + ': ' + hi, W/2, y);
 
-  // Stars earned
+  // Stars earned (warm, spaced)
+  y += 44;
   if (!starsEarned) starsEarned = calculateStarsEarned(score).total;
   const starsInfo = calculateStarsEarned(score);
-  X.fillStyle = '#ff8f00'; X.font = 'bold 13px "Fredoka One",sans-serif';
-  X.fillText('+'+starsInfo.total+' \u2B50 earned', W/2, cardTop + 155);
+  X.fillStyle = 'rgba(0,0,0,0.25)'; rrc(W/2, y, 160, 36, 18);
+  X.fillStyle = '#ffd700'; X.font = 'bold 15px "Fredoka One",sans-serif';
+  X.fillText('+' + starsInfo.total + ' \u2B50 earned', W/2, y + 1);
 
-  // Play Again button (clean, no pulse)
-  const playY = cardTop + 195;
-  X.fillStyle = '#e91e63'; rrc(W/2, playY, 220, 48, 24);
-  X.fillStyle = '#fff'; X.font = 'bold 18px "Fredoka One",sans-serif';
+  // Characters (same style as menu, gentle bob)
+  y += 56;
+  const cb = Math.sin(frame * 0.04) * 5;
+  drawImg(imgs.cinnaFly, W/2 - 70, y + cb, 55, 36);
+  drawImg(imgs.avatar, W/2, y - 8 + Math.sin(frame * 0.04) * 4, 60, 80);
+  drawOutfitOnPlayer(W/2, y - 8 + Math.sin(frame * 0.04) * 4);
+  drawImg(imgs.purin, W/2 + 70, y + 8 + Math.sin(frame * 0.04 + 1) * 5, 50, 45);
+
+  // Play Again (big, clean, generous padding)
+  y += 80;
+  const playY = y;
+  X.fillStyle = isNew ? '#ff1493' : '#ff8a9e';
+  rrc(W/2, playY, 220, 52, 26);
+  X.fillStyle = '#fff'; X.font = 'bold 20px "Fredoka One",sans-serif';
   X.fillText('Play Again', W/2, playY + 2);
 
-  // Collection button (subtle, below)
-  const colY = playY + 48;
-  X.fillStyle = '#fce4ec'; rrc(W/2, colY, 180, 34, 17);
+  // Collection button (spaced below)
+  const colY = playY + 56;
+  X.fillStyle = '#fce4ec'; rrc(W/2, colY, 180, 36, 18);
   X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
-  X.fillText('\u2728 Collection '+getCollectedCount()+'/'+TOTAL_ITEMS, W/2, colY + 2);
+  X.fillText('\u2728 Collection ' + getCollectedCount() + '/' + TOTAL_ITEMS, W/2, colY + 2);
 
-  // Version
+  // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v9.3', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v9.3', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
 function getResultsBtnY() {
-  const cardTop = H/2 - 150;
-  return { play: cardTop + 195, collection: cardTop + 243 };
+  // y starts at 60, +70 score, +50 stats, +44 stars, +56 chars, +80 play
+  const playY = 60 + 70 + 50 + 44 + 56 + 80;
+  return { play: playY, collection: playY + 56 };
 }
 
 function drawLoading() {
