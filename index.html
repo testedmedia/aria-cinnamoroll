@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.1', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.2', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2624,7 +2624,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.1', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.2', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2722,74 +2722,96 @@ function drawBlindBoxScreen() {
     const fadeIn = Math.min(1, bbState.timer * 3);
     X.globalAlpha = fadeIn;
 
-    // Rarity glow
-    const grd = X.createRadialGradient(W/2, H*0.35, 10, W/2, H*0.35, 140);
-    grd.addColorStop(0, rc + '66'); grd.addColorStop(1, 'transparent');
+    // Rarity glow behind card
+    const grd = X.createRadialGradient(W/2, H*0.38, 20, W/2, H*0.38, 180);
+    grd.addColorStop(0, rc + '44'); grd.addColorStop(1, 'transparent');
     X.fillStyle = grd; X.fillRect(0, 0, W, H);
 
-    // Card
-    X.fillStyle = '#fff'; rrc(W/2, H*0.35, 180, 220, 20);
-    X.strokeStyle = rc; X.lineWidth = 3;
+    // Card - bigger and pastel-tinted
+    const cardW = 240, cardH = 290, cardY = H*0.38, cardR = 22;
+    const rarityBg = {common:'#fff',rare:'#f0f8ff',epic:'#faf0ff',legendary:'#fffcf0',secret:'#fff0f5'};
+    X.fillStyle = rarityBg[r.rarity] || '#fff'; rrc(W/2, cardY, cardW, cardH, cardR);
+    // Rarity border
+    X.strokeStyle = rc; X.lineWidth = r.rarity==='legendary'||r.rarity==='secret' ? 4 : 3;
+    const chw=cardW/2, chh=cardH/2;
     X.beginPath();
-    const cw=90, ch=110;
-    X.moveTo(W/2-cw+20, H*0.35-ch); X.lineTo(W/2+cw-20, H*0.35-ch);
-    X.quadraticCurveTo(W/2+cw, H*0.35-ch, W/2+cw, H*0.35-ch+20);
-    X.lineTo(W/2+cw, H*0.35+ch-20); X.quadraticCurveTo(W/2+cw, H*0.35+ch, W/2+cw-20, H*0.35+ch);
-    X.lineTo(W/2-cw+20, H*0.35+ch); X.quadraticCurveTo(W/2-cw, H*0.35+ch, W/2-cw, H*0.35+ch-20);
-    X.lineTo(W/2-cw, H*0.35-ch+20); X.quadraticCurveTo(W/2-cw, H*0.35-ch, W/2-cw+20, H*0.35-ch);
+    X.moveTo(W/2-chw+cardR, cardY-chh); X.lineTo(W/2+chw-cardR, cardY-chh);
+    X.quadraticCurveTo(W/2+chw, cardY-chh, W/2+chw, cardY-chh+cardR);
+    X.lineTo(W/2+chw, cardY+chh-cardR); X.quadraticCurveTo(W/2+chw, cardY+chh, W/2+chw-cardR, cardY+chh);
+    X.lineTo(W/2-chw+cardR, cardY+chh); X.quadraticCurveTo(W/2-chw, cardY+chh, W/2-chw, cardY+chh-cardR);
+    X.lineTo(W/2-chw, cardY-chh+cardR); X.quadraticCurveTo(W/2-chw, cardY-chh, W/2-chw+cardR, cardY-chh);
     X.closePath(); X.stroke();
 
-    // Rarity banner
-    X.fillStyle = rc; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    // Rarity banner pill at top
     const banners = {common:'COMMON',rare:'RARE!',epic:'EPIC!!',legendary:'LEGENDARY!!!',secret:'SECRET!!!!!'};
-    X.fillText(banners[r.rarity] || 'COMMON', W/2, H*0.35 - 84);
+    const bLabel = banners[r.rarity] || 'COMMON';
+    X.fillStyle = rc; X.globalAlpha = fadeIn * 0.18; rrc(W/2, cardY - chh + 28, 120, 22, 11); X.globalAlpha = fadeIn;
+    X.fillStyle = rc; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText(bLabel, W/2, cardY - chh + 32);
 
-    // Item visual
-    X.save(); X.translate(W/2, H*0.35 - 10);
-    if (si.charKey && imgs[si.charKey]) { drawImg(imgs[si.charKey], 0, 0, 72, 72); }
-    else { X.font = '48px sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, 0, 16); }
-    X.restore();
-
-    // Name
-    X.fillStyle = '#333'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText(si.name, W/2, H*0.35 + 68);
-    // NEW or count
-    if (r.isNew) {
-      X.fillStyle = '#ff1744'; X.font = 'bold 12px "Fredoka One",sans-serif';
-      X.fillText('✨ NEW! ✨', W/2, H*0.35 + 86);
+    // Character image - FULL CARD WIDTH (same approach as collection cards)
+    const imgY = cardY - 20;
+    if (si.charKey && imgs[si.charKey]) {
+      // Rarity glow behind character
+      if (r.rarity === 'legendary' || r.rarity === 'secret' || r.rarity === 'epic') {
+        X.save(); X.globalAlpha = fadeIn * 0.2;
+        X.fillStyle = r.rarity === 'legendary' ? '#ffd700' : r.rarity === 'secret' ? '#ff69b4' : '#ab47bc';
+        X.beginPath(); X.arc(W/2, imgY, 60, 0, Math.PI*2); X.fill();
+        X.restore(); X.globalAlpha = fadeIn;
+      }
+      drawImg(imgs[si.charKey], W/2, imgY, cardW - 40, 100);
     } else {
-      X.fillStyle = '#999'; X.font = '11px "Quicksand",sans-serif';
-      X.fillText('x' + r.count + (r.count >= 10 ? ' SHINY!' : ''), W/2, H*0.35 + 86);
+      X.font = '64px sans-serif'; X.textAlign = 'center'; X.fillText(si.emoji, W/2, imgY + 22);
     }
 
-    // Milestone share prompt on collection popup
+    // Name - big and bold
+    X.fillStyle = '#333'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText(si.name, W/2, cardY + 60);
+
+    // Rarity + drop rate pill
+    const dropPct = RARITY_TIERS.find(rt => rt.id === r.rarity);
+    const rlabel = tier.label.toUpperCase() + (dropPct ? ' ' + dropPct.dropRate + '%' : '');
+    X.fillStyle = rc; X.globalAlpha = fadeIn * 0.15; rrc(W/2, cardY + 80, 100, 18, 9); X.globalAlpha = fadeIn;
+    X.fillStyle = rc; X.font = 'bold 10px "Quicksand",sans-serif'; X.textAlign = 'center';
+    X.fillText(rlabel, W/2, cardY + 83);
+
+    // NEW or count
+    if (r.isNew) {
+      X.fillStyle = '#ff1744'; X.font = 'bold 14px "Fredoka One",sans-serif';
+      X.fillText('\u2728 NEW! \u2728', W/2, cardY + 104);
+    } else {
+      X.fillStyle = '#999'; X.font = '12px "Quicksand",sans-serif';
+      X.fillText('x' + r.count + (r.count >= 10 ? ' SHINY!' : ''), W/2, cardY + 104);
+    }
+
+    // Milestone share prompt
     const cc = getCollectedCount();
     const milestones = [5, 10, 20, 30];
     if (r.isNew && milestones.includes(cc)) {
-      X.fillStyle = '#ff6b00'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-      X.fillText('\uD83C\uDF89 ' + cc + ' items collected!', W/2, H*0.35 + 102);
-      X.fillStyle = '#25d366'; X.font = 'bold 11px "Quicksand",sans-serif';
-      X.fillText('\uD83D\uDCF2 Tell your friends!', W/2, H*0.35 + 118);
+      X.fillStyle = '#ff6b00'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+      X.fillText('\uD83C\uDF89 ' + cc + ' items collected!', W/2, cardY + 122);
+      X.fillStyle = '#25d366'; X.font = 'bold 12px "Quicksand",sans-serif';
+      X.fillText('\uD83D\uDCF2 Tell your friends!', W/2, cardY + 140);
     }
 
     X.globalAlpha = 1;
 
     // Buttons
-    const btnBase = H*0.35 + 130 + (r.isNew && milestones.includes(cc) ? 30 : 0);
+    const btnBase = cardY + chh + 30 + (r.isNew && milestones.includes(cc) ? 20 : 0);
     if (saveData.stars >= 5) {
-      X.fillStyle = '#3f51b5'; rrc(W/2, btnBase, 220, 40, 20);
-      X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
-      X.fillText('Open Another (5⭐)', W/2, btnBase + 2);
+      X.fillStyle = '#3f51b5'; rrc(W/2, btnBase, 230, 44, 22);
+      X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
+      X.fillText('Open Another (5\u2B50)', W/2, btnBase + 3);
     }
     // Share button for milestones
     if (r.isNew && milestones.includes(cc)) {
-      X.fillStyle = '#25d366'; rrc(W/2, btnBase + 48, 180, 34, 17);
-      X.fillStyle = '#fff'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
-      X.fillText('\uD83D\uDCF2 Share Milestone!', W/2, btnBase + 50);
+      X.fillStyle = '#25d366'; rrc(W/2, btnBase + 52, 190, 38, 19);
+      X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+      X.fillText('\uD83D\uDCF2 Share Milestone!', W/2, btnBase + 54);
     }
-    X.fillStyle = 'rgba(255,255,255,0.3)'; rrc(W/2, btnBase + (r.isNew && milestones.includes(cc) ? 90 : 50), 120, 36, 18);
-    X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('Close', W/2, btnBase + (r.isNew && milestones.includes(cc) ? 92 : 52));
+    X.fillStyle = 'rgba(255,255,255,0.3)'; rrc(W/2, btnBase + (r.isNew && milestones.includes(cc) ? 96 : 54), 130, 40, 20);
+    X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('Close', W/2, btnBase + (r.isNew && milestones.includes(cc) ? 98 : 56));
   }
 }
 
@@ -2848,55 +2870,64 @@ function drawDailyRewards() {
 }
 
 function drawAchievements() {
-  drawBg();
-  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, W-20, H-40, 20);
+  // Static kawaii background
+  const abg = X.createLinearGradient(0, 0, 0, H);
+  abg.addColorStop(0, '#fce4ec'); abg.addColorStop(0.5, '#fff3e0'); abg.addColorStop(1, '#e8eaf6');
+  X.fillStyle = abg; X.fillRect(0, 0, W, H);
+  // Static decorative hearts
+  X.globalAlpha = 0.08; X.font = '28px sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2764', 30, 100); X.fillText('\u2764', W-35, 180);
+  X.fillText('\u2764', 50, H-120); X.fillText('\u2764', W-50, H-200);
+  X.globalAlpha = 1;
+
+  X.fillStyle = 'rgba(255,255,255,0.92)'; rrc(W/2, H/2, W-16, H-32, 20);
 
   // Close X
   X.fillStyle = '#ff8a9e';
-  X.beginPath(); X.arc(W-24, 34, 16, 0, Math.PI*2); X.fill();
+  X.beginPath(); X.arc(W-22, 30, 16, 0, Math.PI*2); X.fill();
   X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('✕', W-24, 34); X.textBaseline = 'alphabetic';
+  X.fillText('\u2715', W-22, 30); X.textBaseline = 'alphabetic';
 
-  X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('🏆 Trophies 🏆', W/2, 52);
-  X.fillStyle = '#999'; X.font = 'bold 12px "Quicksand",sans-serif';
-  X.fillText(getAchievementCount()+'/'+ACHIEVEMENTS_DEF.length+' Unlocked', W/2, 72);
+  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83C\uDFC6 Trophies \uD83C\uDFC6', W/2, 52);
+  X.fillStyle = '#999'; X.font = 'bold 13px "Quicksand",sans-serif';
+  X.fillText(getAchievementCount()+'/'+ACHIEVEMENTS_DEF.length+' Unlocked', W/2, 74);
 
-  // 2-column grid
-  const cols = 2, pad = 12, cardW = (W - pad*3)/cols, cardH = 72;
+  // 2-column grid - bigger cards
+  const cols = 2, pad = 14, cardW = (W - pad*3)/cols, cardH = 82;
   ACHIEVEMENTS_DEF.forEach((ach, i) => {
     const col = i % cols, row = Math.floor(i / cols);
     const cx = pad + col * (cardW + pad) + cardW/2;
-    const cy = 100 + row * (cardH + 8) + cardH/2;
+    const cy = 104 + row * (cardH + 8) + cardH/2;
     const unlocked = saveData.achievements[ach.id]?.unlocked;
-    X.fillStyle = unlocked ? '#fff' : '#f5f5f5'; rrc(cx, cy, cardW-4, cardH-4, 10);
-    X.strokeStyle = unlocked ? '#ffd700' : '#eee'; X.lineWidth = unlocked ? 2 : 1;
-    X.beginPath();
+    X.fillStyle = unlocked ? '#fffcf0' : '#f8f8f8'; rrc(cx, cy, cardW-4, cardH-4, 12);
+    X.strokeStyle = unlocked ? '#ffd700' : '#eee'; X.lineWidth = unlocked ? 2.5 : 1;
     const hw=(cardW-4)/2, hh=(cardH-4)/2;
-    X.moveTo(cx-hw+10,cy-hh); X.lineTo(cx+hw-10,cy-hh); X.quadraticCurveTo(cx+hw,cy-hh,cx+hw,cy-hh+10);
-    X.lineTo(cx+hw,cy+hh-10); X.quadraticCurveTo(cx+hw,cy+hh,cx+hw-10,cy+hh);
-    X.lineTo(cx-hw+10,cy+hh); X.quadraticCurveTo(cx-hw,cy+hh,cx-hw,cy+hh-10);
-    X.lineTo(cx-hw,cy-hh+10); X.quadraticCurveTo(cx-hw,cy-hh,cx-hw+10,cy-hh);
+    X.beginPath();
+    X.moveTo(cx-hw+12,cy-hh); X.lineTo(cx+hw-12,cy-hh); X.quadraticCurveTo(cx+hw,cy-hh,cx+hw,cy-hh+12);
+    X.lineTo(cx+hw,cy+hh-12); X.quadraticCurveTo(cx+hw,cy+hh,cx+hw-12,cy+hh);
+    X.lineTo(cx-hw+12,cy+hh); X.quadraticCurveTo(cx-hw,cy+hh,cx-hw,cy+hh-12);
+    X.lineTo(cx-hw,cy-hh+12); X.quadraticCurveTo(cx-hw,cy-hh,cx-hw+12,cy-hh);
     X.closePath(); X.stroke();
     // Badge
-    X.font = unlocked ? '24px sans-serif' : '20px sans-serif'; X.textAlign = 'center';
-    X.fillText(unlocked ? ach.badge : '❓', cx - cardW/2 + 28, cy + 8);
+    X.font = unlocked ? '28px sans-serif' : '22px sans-serif'; X.textAlign = 'center';
+    X.fillText(unlocked ? ach.badge : '\u2753', cx - cardW/2 + 30, cy + 10);
     // Text
-    X.fillStyle = unlocked ? '#333' : '#bbb'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'left';
-    X.fillText(unlocked ? ach.name : '???', cx - cardW/2 + 50, cy - 6);
-    X.fillStyle = unlocked ? '#888' : '#ccc'; X.font = '9px "Quicksand",sans-serif';
-    X.fillText(ach.desc, cx - cardW/2 + 50, cy + 8);
+    X.fillStyle = unlocked ? '#333' : '#bbb'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'left';
+    X.fillText(unlocked ? ach.name : '???', cx - cardW/2 + 54, cy - 8);
+    X.fillStyle = unlocked ? '#777' : '#ccc'; X.font = '10px "Quicksand",sans-serif';
+    X.fillText(ach.desc, cx - cardW/2 + 54, cy + 8);
     if (unlocked) {
       const d = new Date(saveData.achievements[ach.id].date);
-      X.fillStyle = '#bbb'; X.font = '8px "Quicksand",sans-serif';
-      X.fillText((d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(), cx - cardW/2 + 50, cy + 20);
+      X.fillStyle = '#bbb'; X.font = '9px "Quicksand",sans-serif';
+      X.fillText((d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(), cx - cardW/2 + 54, cy + 22);
     }
   });
 
   // Back button
-  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 32, 120, 36, 18);
-  X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('Back', W/2, H - 30);
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 34, 130, 40, 20);
+  X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('Back', W/2, H - 32);
 }
 
 function drawWhatsNew() {
@@ -2907,7 +2938,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.1 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.2 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3595,7 +3626,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.1', W-10, H-8);
+  X.fillText('v10.2', W-10, H-8);
 }
 
 function drawResults() {
@@ -3656,7 +3687,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.1', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.2', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4291,7 +4322,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.1') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.2') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4373,7 +4404,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.1'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.2'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -4420,25 +4451,26 @@ function handleTap(x, y) {
       const ccR = getCollectedCount();
       const milestonesR = [5, 10, 20, 30];
       const hasMilestone = r.isNew && milestonesR.includes(ccR);
-      const btnBase = H*0.35 + 130 + (hasMilestone ? 30 : 0);
+      const cardY = H*0.38, chh = 145;
+      const btnBase = cardY + chh + 30 + (hasMilestone ? 20 : 0);
       // Open Another
-      if (saveData.stars >= 5 && Math.abs(x-W/2)<110 && Math.abs(y-btnBase)<22) {
+      if (saveData.stars >= 5 && Math.abs(x-W/2)<115 && Math.abs(y-btnBase)<24) {
         bbState = { phase:'select' }; return;
       }
       // Share Milestone button
-      if (hasMilestone && Math.abs(x-W/2)<90 && Math.abs(y-(btnBase+48))<18) {
+      if (hasMilestone && Math.abs(x-W/2)<95 && Math.abs(y-(btnBase+52))<20) {
         openShare();
         return;
       }
       // Close
-      const closeY = btnBase + (hasMilestone ? 90 : 50);
-      if (Math.abs(x-W/2)<60 && Math.abs(y-closeY)<20) { showBlindBox = false; bbState = null; return; }
+      const closeY = btnBase + (hasMilestone ? 96 : 54);
+      if (Math.abs(x-W/2)<65 && Math.abs(y-closeY)<22) { showBlindBox = false; bbState = null; return; }
     }
     return;
   }
   if (showAchievements) {
-    if (Math.abs(x-W/2)<60 && Math.abs(y-(H-32))<20) { showAchievements = false; return; }
-    if (Math.abs(x-(W-24))<18 && Math.abs(y-34)<18) { showAchievements = false; return; }
+    if (Math.abs(x-W/2)<65 && Math.abs(y-(H-34))<22) { showAchievements = false; return; }
+    if (Math.abs(x-(W-22))<18 && Math.abs(y-30)<18) { showAchievements = false; return; }
     return;
   }
   if (showShowcase) {
