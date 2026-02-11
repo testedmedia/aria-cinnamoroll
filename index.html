@@ -3741,13 +3741,7 @@ function drawMenu() {
   X.fillStyle = '#fff'; X.font = 'bold 11px sans-serif';
   X.fillText(audioUnlocked?'🔊':'🔇', 82, H-12);
 
-  // Share reminder badge (3+ games, never shared)
-  if (saveData.totalRoundsPlayed >= 3 && !saveData.hasShared) {
-    const shareBadgeY = 648 + Math.sin(frame*0.1)*5;
-    X.fillStyle = '#25d366'; rrc(W/2, shareBadgeY, 200, 34, 17);
-    X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
-    X.fillText('\uD83D\uDCF2 Share with friends!', W/2, shareBadgeY + 2);
-  }
+  // share badge removed
 
   X.fillStyle = 'rgba(255,255,255,0.6)'; X.font = 'bold 11px "Quicksand",sans-serif';
   X.textAlign = 'right';
