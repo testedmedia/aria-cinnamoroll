@@ -548,6 +548,13 @@ function buildTutorialItems() {
   renderGrid(power, 'tutPower');
 }
 
+// ====== SETTINGS ======
+let sfxEnabled = localStorage.getItem('aria_sfx') !== '0';
+let musicEnabled = localStorage.getItem('aria_music') !== '0';
+let showSettings = false;
+let showOnboarding = false;
+let onboardingSlide = 0;
+
 // ====== STATE ======
 let state = 'menu';
 let score = 0, combo = 0, maxCombo = 0, caught = 0, missed = 0;
@@ -1442,6 +1449,7 @@ function unlockAudio() {
   document.addEventListener(evt, unlockAudio, {once:false,passive:true});
 });
 function playTone(freq, dur, type, vol) {
+  if (!sfxEnabled) return;
   try {
     const ac = ensureAudio();
     const o = ac.createOscillator();
@@ -1488,7 +1496,7 @@ function sndCelebration() {
 
 // Background Music - chill kawaii lo-fi loop (synthesized)
 function startBGM() {
-  if (bgmPlaying || !AC) return;
+  if (bgmPlaying || !AC || !musicEnabled) return;
   try {
     bgmGain = AC.createGain();
     bgmGain.gain.value = 0.04;
@@ -2579,7 +2587,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.15', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.16', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2863,7 +2871,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.15', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.16', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3191,17 +3199,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.15 - Premium Game Juice!', W/2, H/2 - 172);
+  X.fillText('v10.16 - Settings & Onboarding!', W/2, H/2 - 172);
 
   const features = [
-    '\uD83C\uDFB5 Background music during gameplay!',
-    '\uD83C\uDFC5 Achievement unlock popups!',
-    '\uD83C\uDF08 Rainbow fever mode border glow!',
-    '\u26A1 Speed lines at high combos!',
-    '\uD83D\uDE31 "SO CLOSE!" near-miss alerts!',
+    '\u2699\uFE0F Full settings screen (gear icon)!',
+    '\uD83D\uDD0A Toggle sound effects on/off!',
+    '\uD83C\uDFB5 Toggle background music on/off!',
+    '\uD83C\uDF0D Switch EN/ES in settings!',
+    '\uD83D\uDC4B Welcome onboarding for new players!',
     '\uD83C\uDF6A Girl Scout Cookie Day event!',
-    '\u2728 Retina HD crispy graphics!',
-    '\uD83C\uDFC6 Play Again = instant restart!',
+    '\uD83C\uDFC5 Achievement popups + fever glow!',
+    '\u26A1 Speed lines + near-miss alerts!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3441,7 +3449,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.15 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.16 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4188,7 +4196,135 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.15', W-10, H-8);
+  X.fillText('v10.16', W-10, H-8);
+}
+
+// ====== SETTINGS SCREEN ======
+function drawSettingsScreen() {
+  drawBg();
+  // Panel background
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 520, 24);
+
+  X.fillStyle = '#e91e63'; X.font = 'bold 24px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2699\uFE0F Settings', W/2, H/2 - 220);
+
+  let sy = H/2 - 170;
+  const rowH = 56;
+
+  // Sound Effects toggle
+  X.fillStyle = '#fce4ec'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#555'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'left';
+  X.fillText('\uD83D\uDD0A Sound Effects', W/2 - 130, sy + 2);
+  // Toggle pill
+  X.fillStyle = sfxEnabled ? '#4caf50' : '#ccc'; rrc(W/2 + 115, sy, 52, 26, 13);
+  X.fillStyle = '#fff'; X.beginPath(); X.arc(sfxEnabled ? W/2+130 : W/2+100, sy, 10, 0, Math.PI*2); X.fill();
+
+  sy += rowH;
+  // Music toggle
+  X.fillStyle = '#fce4ec'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#555'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'left';
+  X.fillText('\uD83C\uDFB5 Background Music', W/2 - 130, sy + 2);
+  X.fillStyle = musicEnabled ? '#4caf50' : '#ccc'; rrc(W/2 + 115, sy, 52, 26, 13);
+  X.fillStyle = '#fff'; X.beginPath(); X.arc(musicEnabled ? W/2+130 : W/2+100, sy, 10, 0, Math.PI*2); X.fill();
+
+  sy += rowH;
+  // Language
+  X.fillStyle = '#fce4ec'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#555'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'left';
+  X.fillText('\uD83C\uDF0D Language', W/2 - 130, sy + 2);
+  X.fillStyle = lang === 'en' ? '#e91e63' : '#aaa'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('EN', W/2 + 95, sy + 2);
+  X.fillStyle = '#ccc'; X.fillText('|', W/2 + 115, sy + 2);
+  X.fillStyle = lang === 'es' ? '#e91e63' : '#aaa';
+  X.fillText('ES', W/2 + 135, sy + 2);
+
+  sy += rowH;
+  // Change Name
+  X.fillStyle = '#e3f2fd'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#1976d2'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u270F\uFE0F Change Name: ' + (playerName || 'Not set'), W/2, sy + 2);
+
+  sy += rowH;
+  // Player stats
+  X.fillStyle = '#f3e5f5'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#9c27b0'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
+  X.fillText('Best: ' + hi + ' \u2022 Stars: ' + saveData.stars + ' \u2022 Games: ' + (saveData.totalRoundsPlayed||0), W/2, sy + 2);
+
+  sy += rowH;
+  // Reset progress (danger)
+  X.fillStyle = '#ffebee'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#e74c3c'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u26A0\uFE0F Reset All Progress', W/2, sy + 2);
+
+  // Back button
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H/2 + 230, 160, 42, 21);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('Back', W/2, H/2 + 232);
+}
+
+// ====== ONBOARDING WELCOME SCREENS ======
+function drawOnboarding() {
+  const slides = [
+    {
+      title: 'Welcome to Aria\'s\nSanrio Adventure!',
+      desc: 'Catch treats, collect Sanrio\ncharacters & earn stars!',
+      emoji: '\uD83C\uDF38',
+      bg: ['#ffe0ec','#ffc1d6'],
+      items: ['donut','boba','star','heart']
+    },
+    {
+      title: 'Catch Items,\nAvoid Bombs!',
+      desc: 'Tap to jump! Catch treats for\npoints, dodge bombs!',
+      emoji: '\uD83D\uDCA5',
+      bg: ['#e3f2fd','#bbdefb'],
+      items: ['bomb','magnet','shield','clock']
+    },
+    {
+      title: 'Collect Them All!',
+      desc: '41 Sanrio characters, outfits,\nblind boxes & events!',
+      emoji: '\u2728',
+      bg: ['#f3e5f5','#e1bee7'],
+      items: []
+    }
+  ];
+  const s = slides[onboardingSlide];
+  // Background
+  const g = X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, s.bg[0]); g.addColorStop(1, s.bg[1]);
+  X.fillStyle = g; X.fillRect(0,0,W,H);
+
+  // Big emoji
+  X.font = '72px sans-serif'; X.textAlign = 'center';
+  X.fillText(s.emoji, W/2, 180);
+
+  // Title
+  X.fillStyle = '#333'; X.font = 'bold 26px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  const titleLines = s.title.split('\n');
+  titleLines.forEach((ln, i) => X.fillText(ln, W/2, 260 + i * 36));
+
+  // Description
+  X.fillStyle = '#666'; X.font = '15px "Quicksand",sans-serif';
+  const descLines = s.desc.split('\n');
+  descLines.forEach((ln, i) => X.fillText(ln, W/2, 340 + titleLines.length * 36 + i * 24));
+
+  // Slide dots
+  const dotY = H - 160;
+  for (let i = 0; i < slides.length; i++) {
+    X.fillStyle = i === onboardingSlide ? '#e91e63' : '#ffb3c6';
+    X.beginPath(); X.arc(W/2 + (i - 1) * 24, dotY, i === onboardingSlide ? 6 : 4, 0, Math.PI*2); X.fill();
+  }
+
+  // Next / Get Started button
+  const isLast = onboardingSlide === slides.length - 1;
+  X.fillStyle = '#e91e63'; rrc(W/2, H - 100, 220, 52, 26);
+  X.fillStyle = '#fff'; X.font = 'bold 18px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText(isLast ? 'Let\'s Play!' : 'Next \u25B6', W/2, H - 98);
+
+  // Skip
+  if (!isLast) {
+    X.fillStyle = 'rgba(0,0,0,0.3)'; X.font = '13px "Quicksand",sans-serif';
+    X.fillText('Skip', W/2, H - 50);
+  }
 }
 
 function drawResults() {
@@ -4256,7 +4392,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.15', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.16', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4958,6 +5094,8 @@ function loop(timestamp) {
     else if (showSpin) { drawLuckySpin(); }
     else if (showOutfits) { drawOutfitSelector(); }
     else if (showLoginCalendar) { drawLoginCalendar(); }
+    else if (showSettings) { drawSettingsScreen(); }
+    else if (showOnboarding) { drawOnboarding(); }
     else if (state === 'menu') drawMenu();
     else if (state === 'playing') {
       if (!gamePaused) update(dt);
@@ -4973,8 +5111,9 @@ function loop(timestamp) {
   if (useRAF) loopId = requestAnimationFrame(loop);
 }
 
-// v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.15') { showWhatsNew = true; }
+// v7.0 Initialization: Onboarding + What's New + Daily popup
+if (!localStorage.getItem('aria_onboarded')) { showOnboarding = true; onboardingSlide = 0; }
+else if (saveData.lastVersion !== 'v10.16') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5058,7 +5197,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.15'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.16'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5180,6 +5319,57 @@ function handleTap(x, y) {
     }
     return;
   }
+  // Settings screen taps
+  if (showSettings) {
+    // Back button
+    if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+230))<22) { showSettings = false; return; }
+    let sy = H/2 - 170;
+    const rowH = 56;
+    // SFX toggle
+    if (Math.abs(x-(W/2+115))<30 && Math.abs(y-sy)<22) {
+      sfxEnabled = !sfxEnabled; localStorage.setItem('aria_sfx', sfxEnabled ? '1' : '0'); return;
+    }
+    sy += rowH;
+    // Music toggle
+    if (Math.abs(x-(W/2+115))<30 && Math.abs(y-sy)<22) {
+      musicEnabled = !musicEnabled; localStorage.setItem('aria_music', musicEnabled ? '1' : '0');
+      if (!musicEnabled) stopBGM(); return;
+    }
+    sy += rowH;
+    // Language EN
+    if (Math.abs(x-(W/2+95))<20 && Math.abs(y-sy)<22) { setLang('en'); return; }
+    // Language ES
+    if (Math.abs(x-(W/2+135))<20 && Math.abs(y-sy)<22) { setLang('es'); return; }
+    sy += rowH;
+    // Change Name
+    if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) { showSettings = false; promptName(); return; }
+    sy += rowH * 2;
+    // Reset Progress
+    if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) {
+      if (confirm('Reset ALL progress? This cannot be undone!')) {
+        localStorage.clear(); location.reload();
+      }
+      return;
+    }
+    return;
+  }
+
+  // Onboarding taps
+  if (showOnboarding) {
+    const isLast = onboardingSlide === 2;
+    // Next / Let's Play button
+    if (Math.abs(x-W/2)<110 && Math.abs(y-(H-100))<26) {
+      if (isLast) { showOnboarding = false; localStorage.setItem('aria_onboarded', '1'); }
+      else onboardingSlide++;
+      return;
+    }
+    // Skip
+    if (!isLast && Math.abs(x-W/2)<40 && Math.abs(y-(H-50))<20) {
+      showOnboarding = false; localStorage.setItem('aria_onboarded', '1'); return;
+    }
+    return;
+  }
+
   if (showCollection) {
     // Close X (enlarged hit area)
     if (Math.abs(x-(W-24))<28 && Math.abs(y-34)<28) { showCollection = false; gamePausedForBP = false; return; }
@@ -5197,7 +5387,7 @@ function handleTap(x, y) {
 
   if (state === 'menu') {
     // Settings gear (top-right)
-    if (Math.abs(x-(W-30))<20 && Math.abs(y-30)<20) { promptName(); return; }
+    if (Math.abs(x-(W-30))<20 && Math.abs(y-30)<20) { showSettings = true; return; }
     // Calculate dynamic Y positions (must match drawMenu exactly)
     const vMenu = isValentineActive();
     const gsMenu = isGirlScoutActive();

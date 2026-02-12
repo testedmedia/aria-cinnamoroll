@@ -1,5 +1,17 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.16 - Settings & Onboarding (2026-02-12)
+- Full settings screen accessible from gear icon on menu
+- Sound effects toggle (on/off with pill switch)
+- Background music toggle (on/off)
+- Language switch (EN/ES) in settings panel
+- Change name button in settings
+- Player stats display (best score, stars, games played)
+- Reset all progress option (with confirmation)
+- 3-slide onboarding welcome carousel for new players
+- Onboarding auto-shows on first visit, skippable
+- Settings persisted to localStorage
+
 ## v10.15 - Premium Game Juice (2026-02-12)
 - Background music: chill kawaii lo-fi synth loop during gameplay
 - Achievement unlock popups: gold banner slides down with badge + name
