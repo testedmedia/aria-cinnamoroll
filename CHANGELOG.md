@@ -1,5 +1,12 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.20 - Bug Fixes (2026-02-12)
+- Fixed: Backpack button now opens collection during gameplay
+- Fixed: Removed duplicate pause/sound buttons from HUD
+- Fixed: Background music now properly initializes AudioContext
+- Increased BGM volume (was nearly inaudible)
+- Single clean pause button (top-right circle)
+
 ## v10.19 - Remove Onboarding, Clean What's New (2026-02-12)
 - Removed onboarding welcome carousel (goes straight to game)
 - What's New screen restored to clean version update style
