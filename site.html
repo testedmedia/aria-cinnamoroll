@@ -67,22 +67,40 @@ footer a:hover{text-decoration:underline}
 .stat{text-align:center}
 .stat-num{font-family:'Fredoka One',cursive;font-size:32px;color:#e91e63}
 .stat-label{font-size:12px;color:#888;margin-top:4px}
+
+/* Language Toggle */
+.lang-toggle-wrap{position:fixed;top:16px;right:16px;z-index:1000}
+.lang-toggle{display:flex;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-radius:50px;overflow:hidden;box-shadow:0 4px 20px rgba(233,30,99,0.18);border:2px solid #ffb3c6}
+.lang-btn{padding:8px 18px;font-family:'Fredoka One',cursive;font-size:14px;border:none;background:transparent;color:#e91e63;cursor:pointer;transition:all .2s;letter-spacing:0.5px}
+.lang-btn.active{background:linear-gradient(135deg,#ff8a9e,#e91e63);color:#fff}
+.lang-btn:hover:not(.active){background:rgba(233,30,99,0.08)}
+
 @media(max-width:600px){
   .hero{min-height:auto;padding:60px 20px}
   .feat-grid{grid-template-columns:1fr}
   .char-circle{width:48px;height:48px;font-size:22px}
   .stats{gap:20px}
   .stat-num{font-size:24px}
+  .lang-toggle-wrap{top:10px;right:10px}
+  .lang-btn{padding:6px 14px;font-size:12px}
 }
 </style>
 </head>
 <body>
 
+<!-- Language Toggle -->
+<div class="lang-toggle-wrap">
+  <div class="lang-toggle">
+    <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
 <section class="hero">
   <div class="hero-content">
-    <div class="badge">FREE TO PLAY</div>
+    <div class="badge" data-i18n="badge">FREE TO PLAY</div>
     <h1>Aria's Sanrio Adventure</h1>
-    <p class="subtitle">Kawaii Catching Game</p>
+    <p class="subtitle" data-i18n="subtitle">Kawaii Catching Game</p>
     <div class="chars">
       <div class="char-circle"><img src="cinnamoroll2.png" width="40" alt="Cinnamoroll"></div>
       <div class="char-circle"><img src="hellokitty.png" width="40" alt="Hello Kitty"></div>
@@ -91,70 +109,70 @@ footer a:hover{text-decoration:underline}
       <div class="char-circle"><img src="mymelody.png" width="40" alt="My Melody"></div>
       <div class="char-circle"><img src="gudetama.png" width="36" alt="Gudetama"></div>
     </div>
-    <p>Catch boba, treats & collect adorable Sanrio characters! Open blind boxes, unlock outfits, and climb the global leaderboard.</p>
+    <p data-i18n="heroDesc">Catch boba, treats & collect adorable Sanrio characters! Open blind boxes, unlock outfits, and climb the global leaderboard.</p>
     <div class="stats">
-      <div class="stat"><div class="stat-num">41+</div><div class="stat-label">Collectibles</div></div>
-      <div class="stat"><div class="stat-num">16</div><div class="stat-label">Outfits</div></div>
-      <div class="stat"><div class="stat-num">12</div><div class="stat-label">Characters</div></div>
-      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Seasons</div></div>
+      <div class="stat"><div class="stat-num">41+</div><div class="stat-label" data-i18n="statCollectibles">Collectibles</div></div>
+      <div class="stat"><div class="stat-num">16</div><div class="stat-label" data-i18n="statOutfits">Outfits</div></div>
+      <div class="stat"><div class="stat-num">12</div><div class="stat-label" data-i18n="statCharacters">Characters</div></div>
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label" data-i18n="statSeasons">Seasons</div></div>
     </div>
     <div class="cta-group">
-      <a href="/index.html" class="btn btn-primary">Play Now - Free!</a>
-      <a href="#download" class="btn btn-secondary">Download the App</a>
+      <a href="/index.html" class="btn btn-primary" data-i18n="ctaPlay">Play Now - Free!</a>
+      <a href="#download" class="btn btn-secondary" data-i18n="ctaDownload">Download the App</a>
     </div>
   </div>
 </section>
 
 <section class="features" id="features">
-  <h2 class="section-title">Why You'll Love It</h2>
-  <p class="section-sub">Everything a Sanrio fan could dream of, in one adorable game</p>
+  <h2 class="section-title" data-i18n="featTitle">Why You'll Love It</h2>
+  <p class="section-sub" data-i18n="featSub">Everything a Sanrio fan could dream of, in one adorable game</p>
   <div class="feat-grid">
     <div class="feat-card">
       <div class="feat-icon">🎁</div>
-      <h3>Blind Box Pulls</h3>
-      <p>Open mystery boxes to discover rare Sanrio characters with epic reveal animations!</p>
+      <h3 data-i18n="feat1Title">Blind Box Pulls</h3>
+      <p data-i18n="feat1Desc">Open mystery boxes to discover rare Sanrio characters with epic reveal animations!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">👗</div>
-      <h3>16 Outfits</h3>
-      <p>Unlock costumes from the shop, achievements, blind boxes & seasonal events!</p>
+      <h3 data-i18n="feat2Title">16 Outfits</h3>
+      <p data-i18n="feat2Desc">Unlock costumes from the shop, achievements, blind boxes & seasonal events!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">📷</div>
-      <h3>Custom Avatar</h3>
-      <p>Upload your own photo as the in-game character. Your game, your look!</p>
+      <h3 data-i18n="feat3Title">Custom Avatar</h3>
+      <p data-i18n="feat3Desc">Upload your own photo as the in-game character. Your game, your look!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🏆</div>
-      <h3>Global Leaderboard</h3>
-      <p>Compete with players worldwide. Can you reach the top 3?</p>
+      <h3 data-i18n="feat4Title">Global Leaderboard</h3>
+      <p data-i18n="feat4Desc">Compete with players worldwide. Can you reach the top 3?</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🎯</div>
-      <h3>Daily Challenges</h3>
-      <p>3 new challenges every day. Complete them for bonus stars!</p>
+      <h3 data-i18n="feat5Title">Daily Challenges</h3>
+      <p data-i18n="feat5Desc">3 new challenges every day. Complete them for bonus stars!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">💝</div>
-      <h3>Seasonal Events</h3>
-      <p>Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!</p>
+      <h3 data-i18n="feat6Title">Seasonal Events</h3>
+      <p data-i18n="feat6Desc">Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🎰</div>
-      <h3>Lucky Spin</h3>
-      <p>Free daily spin wheel for stars, rare pulls, and surprise rewards!</p>
+      <h3 data-i18n="feat7Title">Lucky Spin</h3>
+      <p data-i18n="feat7Desc">Free daily spin wheel for stars, rare pulls, and surprise rewards!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">⭐</div>
-      <h3>Star Shop</h3>
-      <p>Spend earned stars on power-ups, outfits, and flash sale deals!</p>
+      <h3 data-i18n="feat8Title">Star Shop</h3>
+      <p data-i18n="feat8Desc">Spend earned stars on power-ups, outfits, and flash sale deals!</p>
     </div>
   </div>
 </section>
 
 <section class="collect" id="characters">
-  <h2 class="section-title">Collect Them All!</h2>
-  <p class="section-sub">12 beloved Sanrio characters with themed items across 5 rarity tiers</p>
+  <h2 class="section-title" data-i18n="collectTitle">Collect Them All!</h2>
+  <p class="section-sub" data-i18n="collectSub">12 beloved Sanrio characters with themed items across 5 rarity tiers</p>
   <div class="collect-grid">
     <div class="collect-item"><img src="cinnamoroll2.png" alt="Cinnamoroll"><span>Cinnamoroll</span></div>
     <div class="collect-item"><img src="hellokitty.png" alt="Hello Kitty"><span>Hello Kitty</span></div>
@@ -172,30 +190,30 @@ footer a:hover{text-decoration:underline}
 </section>
 
 <section class="outfits" id="outfits">
-  <h2 class="section-title">Dress Up Your Character!</h2>
-  <p class="section-sub">16 outfits to unlock through gameplay, shopping, achievements & more</p>
+  <h2 class="section-title" data-i18n="outfitTitle">Dress Up Your Character!</h2>
+  <p class="section-sub" data-i18n="outfitSub">16 outfits to unlock through gameplay, shopping, achievements & more</p>
   <div class="outfit-row">
-    <div class="outfit-chip">🎀 Hello Kitty Bow</div>
-    <div class="outfit-chip">🐰 My Melody Hood</div>
-    <div class="outfit-chip">☁️ Cinnamoroll Ears</div>
-    <div class="outfit-chip">💀 Kuromi Hat</div>
-    <div class="outfit-chip">👑 Kawaii Queen</div>
-    <div class="outfit-chip">👨‍🍳 Chef Hat</div>
-    <div class="outfit-chip">🏴‍☠️ Pirate Bandana</div>
-    <div class="outfit-chip">🌸 Flower Crown</div>
-    <div class="outfit-chip">👑 Golden Crown</div>
-    <div class="outfit-chip">🌈 Rainbow Aura</div>
-    <div class="outfit-chip">😇 Angel Wings</div>
-    <div class="outfit-chip">😈 Devil Horns</div>
-    <div class="outfit-chip">💕 Valentine Crown</div>
-    <div class="outfit-chip">🐇 Spring Bunny</div>
-    <div class="outfit-chip">😎 Summer Shades</div>
+    <div class="outfit-chip" data-i18n="outfit1">🎀 Hello Kitty Bow</div>
+    <div class="outfit-chip" data-i18n="outfit2">🐰 My Melody Hood</div>
+    <div class="outfit-chip" data-i18n="outfit3">☁️ Cinnamoroll Ears</div>
+    <div class="outfit-chip" data-i18n="outfit4">💀 Kuromi Hat</div>
+    <div class="outfit-chip" data-i18n="outfit5">👑 Kawaii Queen</div>
+    <div class="outfit-chip" data-i18n="outfit6">👨‍🍳 Chef Hat</div>
+    <div class="outfit-chip" data-i18n="outfit7">🏴‍☠️ Pirate Bandana</div>
+    <div class="outfit-chip" data-i18n="outfit8">🌸 Flower Crown</div>
+    <div class="outfit-chip" data-i18n="outfit9">👑 Golden Crown</div>
+    <div class="outfit-chip" data-i18n="outfit10">🌈 Rainbow Aura</div>
+    <div class="outfit-chip" data-i18n="outfit11">😇 Angel Wings</div>
+    <div class="outfit-chip" data-i18n="outfit12">😈 Devil Horns</div>
+    <div class="outfit-chip" data-i18n="outfit13">💕 Valentine Crown</div>
+    <div class="outfit-chip" data-i18n="outfit14">🐇 Spring Bunny</div>
+    <div class="outfit-chip" data-i18n="outfit15">😎 Summer Shades</div>
   </div>
 </section>
 
 <section class="download" id="download">
-  <h2 class="section-title">Get the App!</h2>
-  <p class="section-sub">Play anytime, anywhere. Free on your phone or tablet.</p>
+  <h2 class="section-title" data-i18n="dlTitle">Get the App!</h2>
+  <p class="section-sub" data-i18n="dlSub">Play anytime, anywhere. Free on your phone or tablet.</p>
   <div class="phone-mock">
     <div class="phone-screen">
       <img src="icon-512.png" width="80" style="border-radius:18px">
@@ -203,22 +221,167 @@ footer a:hover{text-decoration:underline}
     </div>
   </div>
   <div class="cta-group">
-    <a href="/index.html" class="btn btn-primary">Play in Browser - Free!</a>
-    <p style="color:#999;font-size:13px;margin-top:8px">App Store version coming soon!</p>
+    <a href="/index.html" class="btn btn-primary" data-i18n="dlCta">Play in Browser - Free!</a>
+    <p style="color:#999;font-size:13px;margin-top:8px" data-i18n="dlComingSoon">App Store version coming soon!</p>
   </div>
 </section>
 
 <footer>
   <div class="footer-links">
-    <a href="/index.html">Play Game</a>
-    <a href="/privacy.html">Privacy Policy</a>
-    <a href="/terms.html">Terms of Service</a>
-    <a href="#features">Features</a>
-    <a href="#characters">Characters</a>
+    <a href="/index.html" data-i18n="footGame">Play Game</a>
+    <a href="/privacy.html" data-i18n="footPrivacy">Privacy Policy</a>
+    <a href="/terms.html" data-i18n="footTerms">Terms of Service</a>
+    <a href="#features" data-i18n="footFeatures">Features</a>
+    <a href="#characters" data-i18n="footCharacters">Characters</a>
   </div>
-  <p>Aria's Sanrio Adventure v10.9 &copy; 2026. Made with 💖</p>
-  <p style="margin-top:8px;font-size:11px">This is a fan-made game. Sanrio characters are trademarks of Sanrio Co., Ltd.</p>
+  <p data-i18n="footCopy">Aria's Sanrio Adventure v10.9 &copy; 2026. Made with 💖</p>
+  <p style="margin-top:8px;font-size:11px" data-i18n="footDisclaimer">This is a fan-made game. Sanrio characters are trademarks of Sanrio Co., Ltd.</p>
 </footer>
+
+<script>
+const i18n = {
+  en: {
+    badge: "FREE TO PLAY",
+    subtitle: "Kawaii Catching Game",
+    heroDesc: "Catch boba, treats & collect adorable Sanrio characters! Open blind boxes, unlock outfits, and climb the global leaderboard.",
+    statCollectibles: "Collectibles",
+    statOutfits: "Outfits",
+    statCharacters: "Characters",
+    statSeasons: "Seasons",
+    ctaPlay: "Play Now - Free!",
+    ctaDownload: "Download the App",
+    featTitle: "Why You'll Love It",
+    featSub: "Everything a Sanrio fan could dream of, in one adorable game",
+    feat1Title: "Blind Box Pulls",
+    feat1Desc: "Open mystery boxes to discover rare Sanrio characters with epic reveal animations!",
+    feat2Title: "16 Outfits",
+    feat2Desc: "Unlock costumes from the shop, achievements, blind boxes & seasonal events!",
+    feat3Title: "Custom Avatar",
+    feat3Desc: "Upload your own photo as the in-game character. Your game, your look!",
+    feat4Title: "Global Leaderboard",
+    feat4Desc: "Compete with players worldwide. Can you reach the top 3?",
+    feat5Title: "Daily Challenges",
+    feat5Desc: "3 new challenges every day. Complete them for bonus stars!",
+    feat6Title: "Seasonal Events",
+    feat6Desc: "Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!",
+    feat7Title: "Lucky Spin",
+    feat7Desc: "Free daily spin wheel for stars, rare pulls, and surprise rewards!",
+    feat8Title: "Star Shop",
+    feat8Desc: "Spend earned stars on power-ups, outfits, and flash sale deals!",
+    collectTitle: "Collect Them All!",
+    collectSub: "12 beloved Sanrio characters with themed items across 5 rarity tiers",
+    outfitTitle: "Dress Up Your Character!",
+    outfitSub: "16 outfits to unlock through gameplay, shopping, achievements & more",
+    outfit1: "\u{1F380} Hello Kitty Bow",
+    outfit2: "\u{1F430} My Melody Hood",
+    outfit3: "\u2601\uFE0F Cinnamoroll Ears",
+    outfit4: "\u{1F480} Kuromi Hat",
+    outfit5: "\u{1F451} Kawaii Queen",
+    outfit6: "\u{1F468}\u200D\u{1F373} Chef Hat",
+    outfit7: "\u{1F3F4}\u200D\u2620\uFE0F Pirate Bandana",
+    outfit8: "\u{1F338} Flower Crown",
+    outfit9: "\u{1F451} Golden Crown",
+    outfit10: "\u{1F308} Rainbow Aura",
+    outfit11: "\u{1F607} Angel Wings",
+    outfit12: "\u{1F608} Devil Horns",
+    outfit13: "\u{1F495} Valentine Crown",
+    outfit14: "\u{1F407} Spring Bunny",
+    outfit15: "\u{1F60E} Summer Shades",
+    dlTitle: "Get the App!",
+    dlSub: "Play anytime, anywhere. Free on your phone or tablet.",
+    dlCta: "Play in Browser - Free!",
+    dlComingSoon: "App Store version coming soon!",
+    footGame: "Play Game",
+    footPrivacy: "Privacy Policy",
+    footTerms: "Terms of Service",
+    footFeatures: "Features",
+    footCharacters: "Characters",
+    footCopy: "Aria's Sanrio Adventure v10.9 \u00A9 2026. Made with \u{1F496}",
+    footDisclaimer: "This is a fan-made game. Sanrio characters are trademarks of Sanrio Co., Ltd."
+  },
+  es: {
+    badge: "GRATIS PARA JUGAR",
+    subtitle: "Juego Kawaii de Atrapar",
+    heroDesc: "\u00A1Atrapa boba, dulces y colecciona adorables personajes de Sanrio! Abre cajas sorpresa, desbloquea trajes y sube en la tabla de posiciones global.",
+    statCollectibles: "Coleccionables",
+    statOutfits: "Trajes",
+    statCharacters: "Personajes",
+    statSeasons: "Temporadas",
+    ctaPlay: "\u00A1Jugar Ahora - Gratis!",
+    ctaDownload: "Descargar la App",
+    featTitle: "\u00BFPor Qu\u00E9 Te Encantar\u00E1?",
+    featSub: "Todo lo que un fan de Sanrio podr\u00EDa so\u00F1ar, en un juego adorable",
+    feat1Title: "Cajas Sorpresa",
+    feat1Desc: "\u00A1Abre cajas misteriosas para descubrir personajes raros de Sanrio con animaciones espectaculares!",
+    feat2Title: "16 Trajes",
+    feat2Desc: "\u00A1Desbloquea disfraces en la tienda, logros, cajas sorpresa y eventos de temporada!",
+    feat3Title: "Avatar Personalizado",
+    feat3Desc: "\u00A1Sube tu propia foto como personaje del juego. Tu juego, tu estilo!",
+    feat4Title: "Tabla de L\u00EDderes Global",
+    feat4Desc: "\u00A1Compite con jugadores de todo el mundo! \u00BFPuedes llegar al top 3?",
+    feat5Title: "Desaf\u00EDos Diarios",
+    feat5Desc: "\u00A13 desaf\u00EDos nuevos cada d\u00EDa. \u00A1Compl\u00E9talos para ganar estrellas extra!",
+    feat6Title: "Eventos de Temporada",
+    feat6Desc: "\u00A1San Valent\u00EDn, Flores de Cerezo, Verano y Halloween con objetos exclusivos!",
+    feat7Title: "Ruleta de la Suerte",
+    feat7Desc: "\u00A1Gira la ruleta gratis cada d\u00EDa para ganar estrellas, premios raros y sorpresas!",
+    feat8Title: "Tienda de Estrellas",
+    feat8Desc: "\u00A1Gasta tus estrellas en mejoras, trajes y ofertas rel\u00E1mpago!",
+    collectTitle: "\u00A1Colecci\u00F3nalos Todos!",
+    collectSub: "12 queridos personajes de Sanrio con objetos tem\u00E1ticos en 5 niveles de rareza",
+    outfitTitle: "\u00A1Viste a Tu Personaje!",
+    outfitSub: "16 trajes para desbloquear jugando, comprando, con logros y m\u00E1s",
+    outfit1: "\u{1F380} Lazo de Hello Kitty",
+    outfit2: "\u{1F430} Capucha de My Melody",
+    outfit3: "\u2601\uFE0F Orejas de Cinnamoroll",
+    outfit4: "\u{1F480} Gorro de Kuromi",
+    outfit5: "\u{1F451} Reina Kawaii",
+    outfit6: "\u{1F468}\u200D\u{1F373} Gorro de Chef",
+    outfit7: "\u{1F3F4}\u200D\u2620\uFE0F Pa\u00F1uelo Pirata",
+    outfit8: "\u{1F338} Corona de Flores",
+    outfit9: "\u{1F451} Corona Dorada",
+    outfit10: "\u{1F308} Aura Arco\u00EDris",
+    outfit11: "\u{1F607} Alas de \u00C1ngel",
+    outfit12: "\u{1F608} Cuernos de Diablito",
+    outfit13: "\u{1F495} Corona de San Valent\u00EDn",
+    outfit14: "\u{1F407} Conejito de Primavera",
+    outfit15: "\u{1F60E} Lentes de Verano",
+    dlTitle: "\u00A1Obt\u00E9n la App!",
+    dlSub: "Juega cuando quieras, donde quieras. Gratis en tu tel\u00E9fono o tablet.",
+    dlCta: "\u00A1Jugar en el Navegador - Gratis!",
+    dlComingSoon: "\u00A1Versi\u00F3n de App Store pr\u00F3ximamente!",
+    footGame: "Jugar",
+    footPrivacy: "Pol\u00EDtica de Privacidad",
+    footTerms: "T\u00E9rminos de Servicio",
+    footFeatures: "Caracter\u00EDsticas",
+    footCharacters: "Personajes",
+    footCopy: "Aria's Sanrio Adventure v10.9 \u00A9 2026. Hecho con \u{1F496}",
+    footDisclaimer: "Este es un juego hecho por fans. Los personajes de Sanrio son marcas registradas de Sanrio Co., Ltd."
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (i18n[lang] && i18n[lang][key]) {
+      el.textContent = i18n[lang][key];
+    }
+  });
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  });
+  document.documentElement.lang = lang;
+  localStorage.setItem('aria-lang', lang);
+}
+
+// Initialize from saved preference
+(function() {
+  var saved = localStorage.getItem('aria-lang');
+  if (saved && (saved === 'en' || saved === 'es')) {
+    setLang(saved);
+  }
+})();
+</script>
 
 </body>
 </html>

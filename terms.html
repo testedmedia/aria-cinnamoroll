@@ -11,46 +11,162 @@
   p, li { margin: 8px 0; }
   .date { color: #999; font-size: 13px; }
   ul { padding-left: 24px; }
+  .lang-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+  .lang-toggle button {
+    border: none;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border: 2px solid #e91e63;
+  }
+  .lang-toggle button:first-child {
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+  }
+  .lang-toggle button:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+  .lang-toggle button.active {
+    background: #e91e63;
+    color: #fff;
+  }
+  .lang-toggle button:not(.active) {
+    background: #fff;
+    color: #e91e63;
+  }
 </style>
 </head>
 <body>
-<h1>Terms of Service</h1>
-<p class="date">Last updated: February 11, 2026</p>
+<div class="lang-toggle">
+  <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+  <button id="btn-es" onclick="setLang('es')">ES</button>
+</div>
 
-<h2>1. Acceptance of Terms</h2>
-<p>By playing Aria's Sanrio Adventure ("the Game"), you agree to these Terms of Service. If you do not agree, please do not use the Game.</p>
+<h1 data-i18n="title"></h1>
+<p class="date" data-i18n="date"></p>
 
-<h2>2. Description of Service</h2>
-<p>Aria's Sanrio Adventure is a free-to-play casual catching and collecting game available via web browser and mobile app. The Game includes collectible items, outfits, leaderboards, and seasonal events.</p>
+<h2 data-i18n="s1_title"></h2>
+<p data-i18n="s1_body"></p>
 
-<h2>3. User Conduct</h2>
-<p>You agree to:</p>
+<h2 data-i18n="s2_title"></h2>
+<p data-i18n="s2_body"></p>
+
+<h2 data-i18n="s3_title"></h2>
+<p data-i18n="s3_intro"></p>
 <ul>
-<li>Use the Game for personal, non-commercial entertainment only</li>
-<li>Not attempt to hack, exploit, or reverse-engineer the Game</li>
-<li>Not use offensive or inappropriate names on the leaderboard</li>
-<li>Not use automated scripts or bots to play the Game</li>
+<li data-i18n="s3_li1"></li>
+<li data-i18n="s3_li2"></li>
+<li data-i18n="s3_li3"></li>
+<li data-i18n="s3_li4"></li>
 </ul>
 
-<h2>4. Intellectual Property</h2>
-<p>Aria's Sanrio Adventure is a fan-made game. Sanrio character names and likenesses are trademarks of Sanrio Co., Ltd. This game is not affiliated with, endorsed by, or sponsored by Sanrio Co., Ltd.</p>
+<h2 data-i18n="s4_title"></h2>
+<p data-i18n="s4_body"></p>
 
-<h2>5. User Content</h2>
-<p>If you upload a custom avatar photo, the image is stored locally on your device only. We do not collect, store, or process uploaded images on any server.</p>
+<h2 data-i18n="s5_title"></h2>
+<p data-i18n="s5_body"></p>
 
-<h2>6. Game Progress</h2>
-<p>Game progress (collections, scores, stars, outfits) is stored locally on your device. We are not responsible for loss of game data due to clearing browser storage, device changes, or app deletion.</p>
+<h2 data-i18n="s6_title"></h2>
+<p data-i18n="s6_body"></p>
 
-<h2>7. No Warranty</h2>
-<p>The Game is provided "as is" without warranties of any kind. We do not guarantee uninterrupted access or that the Game will be free from errors.</p>
+<h2 data-i18n="s7_title"></h2>
+<p data-i18n="s7_body"></p>
 
-<h2>8. Limitation of Liability</h2>
-<p>We shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Game.</p>
+<h2 data-i18n="s8_title"></h2>
+<p data-i18n="s8_body"></p>
 
-<h2>9. Changes to Terms</h2>
-<p>We may update these terms at any time. Continued use of the Game after changes constitutes acceptance of the new terms.</p>
+<h2 data-i18n="s9_title"></h2>
+<p data-i18n="s9_body"></p>
 
-<h2>10. Contact</h2>
-<p>Questions about these terms? Visit <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.</p>
+<h2 data-i18n="s10_title"></h2>
+<p data-i18n="s10_body"></p>
+
+<script>
+const i18n = {
+  en: {
+    title: "Terms of Service",
+    date: "Last updated: February 11, 2026",
+    s1_title: "1. Acceptance of Terms",
+    s1_body: 'By playing Aria\'s Sanrio Adventure ("the Game"), you agree to these Terms of Service. If you do not agree, please do not use the Game.',
+    s2_title: "2. Description of Service",
+    s2_body: "Aria's Sanrio Adventure is a free-to-play casual catching and collecting game available via web browser and mobile app. The Game includes collectible items, outfits, leaderboards, and seasonal events.",
+    s3_title: "3. User Conduct",
+    s3_intro: "You agree to:",
+    s3_li1: "Use the Game for personal, non-commercial entertainment only",
+    s3_li2: "Not attempt to hack, exploit, or reverse-engineer the Game",
+    s3_li3: "Not use offensive or inappropriate names on the leaderboard",
+    s3_li4: "Not use automated scripts or bots to play the Game",
+    s4_title: "4. Intellectual Property",
+    s4_body: "Aria's Sanrio Adventure is a fan-made game. Sanrio character names and likenesses are trademarks of Sanrio Co., Ltd. This game is not affiliated with, endorsed by, or sponsored by Sanrio Co., Ltd.",
+    s5_title: "5. User Content",
+    s5_body: "If you upload a custom avatar photo, the image is stored locally on your device only. We do not collect, store, or process uploaded images on any server.",
+    s6_title: "6. Game Progress",
+    s6_body: "Game progress (collections, scores, stars, outfits) is stored locally on your device. We are not responsible for loss of game data due to clearing browser storage, device changes, or app deletion.",
+    s7_title: "7. No Warranty",
+    s7_body: 'The Game is provided "as is" without warranties of any kind. We do not guarantee uninterrupted access or that the Game will be free from errors.',
+    s8_title: "8. Limitation of Liability",
+    s8_body: "We shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Game.",
+    s9_title: "9. Changes to Terms",
+    s9_body: "We may update these terms at any time. Continued use of the Game after changes constitutes acceptance of the new terms.",
+    s10_title: "10. Contact",
+    s10_body: 'Questions about these terms? Visit <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.'
+  },
+  es: {
+    title: "Terminos de Servicio",
+    date: "Ultima actualizacion: 11 de febrero de 2026",
+    s1_title: "1. Aceptacion de los Terminos",
+    s1_body: 'Al jugar Aria\'s Sanrio Adventure ("el Juego"), usted acepta estos Terminos de Servicio. Si no esta de acuerdo, por favor no utilice el Juego.',
+    s2_title: "2. Descripcion del Servicio",
+    s2_body: "Aria's Sanrio Adventure es un juego casual gratuito de atrapar y coleccionar disponible a traves del navegador web y la aplicacion movil. El Juego incluye objetos coleccionables, atuendos, tablas de clasificacion y eventos de temporada.",
+    s3_title: "3. Conducta del Usuario",
+    s3_intro: "Usted se compromete a:",
+    s3_li1: "Usar el Juego unicamente para entretenimiento personal y no comercial",
+    s3_li2: "No intentar hackear, explotar o realizar ingenieria inversa del Juego",
+    s3_li3: "No usar nombres ofensivos o inapropiados en la tabla de clasificacion",
+    s3_li4: "No usar scripts automatizados o bots para jugar el Juego",
+    s4_title: "4. Propiedad Intelectual",
+    s4_body: "Aria's Sanrio Adventure es un juego hecho por fans. Los nombres y apariencias de los personajes de Sanrio son marcas registradas de Sanrio Co., Ltd. Este juego no esta afiliado, respaldado ni patrocinado por Sanrio Co., Ltd.",
+    s5_title: "5. Contenido del Usuario",
+    s5_body: "Si sube una foto personalizada como avatar, la imagen se almacena unicamente en su dispositivo de forma local. No recopilamos, almacenamos ni procesamos imagenes subidas en ningun servidor.",
+    s6_title: "6. Progreso del Juego",
+    s6_body: "El progreso del juego (colecciones, puntuaciones, estrellas, atuendos) se almacena localmente en su dispositivo. No somos responsables de la perdida de datos del juego debido a la limpieza del almacenamiento del navegador, cambios de dispositivo o eliminacion de la aplicacion.",
+    s7_title: "7. Sin Garantia",
+    s7_body: 'El Juego se proporciona "tal cual" sin garantias de ningun tipo. No garantizamos el acceso ininterrumpido ni que el Juego este libre de errores.',
+    s8_title: "8. Limitacion de Responsabilidad",
+    s8_body: "No seremos responsables de ningun dano indirecto, incidental o consecuente derivado del uso del Juego.",
+    s9_title: "9. Cambios en los Terminos",
+    s9_body: "Podemos actualizar estos terminos en cualquier momento. El uso continuado del Juego despues de los cambios constituye la aceptacion de los nuevos terminos.",
+    s10_title: "10. Contacto",
+    s10_body: 'Tiene preguntas sobre estos terminos? Visite <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.'
+  }
+};
+
+function setLang(lang) {
+  localStorage.setItem('arias-lang', lang);
+  document.documentElement.lang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (i18n[lang][key] !== undefined) {
+      el.innerHTML = i18n[lang][key];
+    }
+  });
+  document.title = lang === 'es'
+    ? "Terminos de Servicio - Aria's Sanrio Adventure"
+    : "Terms of Service - Aria's Sanrio Adventure";
+}
+
+(function() {
+  var saved = localStorage.getItem('arias-lang') || 'en';
+  setLang(saved);
+})();
+</script>
 </body>
 </html>

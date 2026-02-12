@@ -10,42 +10,158 @@
   h2 { color: #9c27b0; font-size: 18px; margin-top: 24px; }
   p { margin: 8px 0; }
   .date { color: #999; font-size: 13px; }
+  ul { padding-left: 24px; }
+  li { margin: 8px 0; }
+  .lang-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+  .lang-toggle button {
+    border: none;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border: 2px solid #e91e63;
+  }
+  .lang-toggle button:first-child {
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+  }
+  .lang-toggle button:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+  .lang-toggle button.active {
+    background: #e91e63;
+    color: #fff;
+  }
+  .lang-toggle button:not(.active) {
+    background: #fff;
+    color: #e91e63;
+  }
 </style>
 </head>
 <body>
-<h1>Privacy Policy</h1>
-<p class="date">Last updated: February 11, 2026</p>
+<div class="lang-toggle">
+  <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+  <button id="btn-es" onclick="setLang('es')">ES</button>
+</div>
 
-<h2>Overview</h2>
-<p>Aria's Sanrio Adventure is a free casual game designed for players of all ages. We take privacy seriously, especially for younger players.</p>
+<h1 data-i18n="title"></h1>
+<p class="date" data-i18n="date"></p>
 
-<h2>Data We Collect</h2>
-<p><strong>Player Name:</strong> Stored locally on your device only. Used for the in-game leaderboard. Never sent to third parties.</p>
-<p><strong>Game Progress:</strong> Your collection, scores, outfits, and stars are stored locally on your device using browser storage (localStorage).</p>
-<p><strong>Leaderboard Scores:</strong> If you play the game, your chosen display name and score may be submitted to our anonymous leaderboard. No personal information, email, or device identifiers are collected.</p>
-<p><strong>Custom Avatar Photos:</strong> If you upload a photo as your avatar, it is stored locally on your device only. It is never uploaded to any server.</p>
+<h2 data-i18n="overview_title"></h2>
+<p data-i18n="overview_body"></p>
 
-<h2>Data We Do NOT Collect</h2>
+<h2 data-i18n="collect_title"></h2>
+<p data-i18n="collect_name"></p>
+<p data-i18n="collect_progress"></p>
+<p data-i18n="collect_leaderboard"></p>
+<p data-i18n="collect_avatar"></p>
+
+<h2 data-i18n="nocollect_title"></h2>
 <ul>
-<li>No email addresses</li>
-<li>No real names (only chosen display names)</li>
-<li>No location data</li>
-<li>No device identifiers</li>
-<li>No analytics or tracking</li>
-<li>No cookies</li>
-<li>No advertising data</li>
+<li data-i18n="nocollect_1"></li>
+<li data-i18n="nocollect_2"></li>
+<li data-i18n="nocollect_3"></li>
+<li data-i18n="nocollect_4"></li>
+<li data-i18n="nocollect_5"></li>
+<li data-i18n="nocollect_6"></li>
+<li data-i18n="nocollect_7"></li>
 </ul>
 
-<h2>Children's Privacy</h2>
-<p>This game is suitable for all ages. We do not knowingly collect personal information from children. The only data stored is gameplay progress on the local device.</p>
+<h2 data-i18n="children_title"></h2>
+<p data-i18n="children_body"></p>
 
-<h2>Third-Party Services</h2>
-<p>This game does not use any third-party analytics, advertising, or tracking services.</p>
+<h2 data-i18n="thirdparty_title"></h2>
+<p data-i18n="thirdparty_body"></p>
 
-<h2>Changes to This Policy</h2>
-<p>We may update this policy from time to time. Changes will be reflected on this page with an updated date.</p>
+<h2 data-i18n="changes_title"></h2>
+<p data-i18n="changes_body"></p>
 
-<h2>Contact</h2>
-<p>If you have questions about this privacy policy, please visit our website at <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.</p>
+<h2 data-i18n="contact_title"></h2>
+<p data-i18n="contact_body"></p>
+
+<script>
+const i18n = {
+  en: {
+    title: "Privacy Policy",
+    date: "Last updated: February 11, 2026",
+    overview_title: "Overview",
+    overview_body: "Aria's Sanrio Adventure is a free casual game designed for players of all ages. We take privacy seriously, especially for younger players.",
+    collect_title: "Data We Collect",
+    collect_name: "<strong>Player Name:</strong> Stored locally on your device only. Used for the in-game leaderboard. Never sent to third parties.",
+    collect_progress: "<strong>Game Progress:</strong> Your collection, scores, outfits, and stars are stored locally on your device using browser storage (localStorage).",
+    collect_leaderboard: "<strong>Leaderboard Scores:</strong> If you play the game, your chosen display name and score may be submitted to our anonymous leaderboard. No personal information, email, or device identifiers are collected.",
+    collect_avatar: "<strong>Custom Avatar Photos:</strong> If you upload a photo as your avatar, it is stored locally on your device only. It is never uploaded to any server.",
+    nocollect_title: "Data We Do NOT Collect",
+    nocollect_1: "No email addresses",
+    nocollect_2: "No real names (only chosen display names)",
+    nocollect_3: "No location data",
+    nocollect_4: "No device identifiers",
+    nocollect_5: "No analytics or tracking",
+    nocollect_6: "No cookies",
+    nocollect_7: "No advertising data",
+    children_title: "Children's Privacy",
+    children_body: "This game is suitable for all ages. We do not knowingly collect personal information from children. The only data stored is gameplay progress on the local device.",
+    thirdparty_title: "Third-Party Services",
+    thirdparty_body: "This game does not use any third-party analytics, advertising, or tracking services.",
+    changes_title: "Changes to This Policy",
+    changes_body: "We may update this policy from time to time. Changes will be reflected on this page with an updated date.",
+    contact_title: "Contact",
+    contact_body: 'If you have questions about this privacy policy, please visit our website at <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.'
+  },
+  es: {
+    title: "Politica de Privacidad",
+    date: "Ultima actualizacion: 11 de febrero de 2026",
+    overview_title: "Descripcion General",
+    overview_body: "Aria's Sanrio Adventure es un juego casual gratuito disenado para jugadores de todas las edades. Nos tomamos la privacidad muy en serio, especialmente para los jugadores mas jovenes.",
+    collect_title: "Datos que Recopilamos",
+    collect_name: "<strong>Nombre del Jugador:</strong> Se almacena unicamente en su dispositivo de forma local. Se utiliza para la tabla de clasificacion del juego. Nunca se envia a terceros.",
+    collect_progress: "<strong>Progreso del Juego:</strong> Su coleccion, puntuaciones, atuendos y estrellas se almacenan localmente en su dispositivo mediante el almacenamiento del navegador (localStorage).",
+    collect_leaderboard: "<strong>Puntuaciones de la Tabla de Clasificacion:</strong> Si juega el juego, su nombre de pantalla elegido y su puntuacion pueden ser enviados a nuestra tabla de clasificacion anonima. No se recopila informacion personal, correo electronico ni identificadores del dispositivo.",
+    collect_avatar: "<strong>Fotos de Avatar Personalizadas:</strong> Si sube una foto como su avatar, se almacena unicamente en su dispositivo de forma local. Nunca se sube a ningun servidor.",
+    nocollect_title: "Datos que NO Recopilamos",
+    nocollect_1: "Sin direcciones de correo electronico",
+    nocollect_2: "Sin nombres reales (solo nombres de pantalla elegidos)",
+    nocollect_3: "Sin datos de ubicacion",
+    nocollect_4: "Sin identificadores de dispositivo",
+    nocollect_5: "Sin analiticas ni rastreo",
+    nocollect_6: "Sin cookies",
+    nocollect_7: "Sin datos publicitarios",
+    children_title: "Privacidad de los Menores",
+    children_body: "Este juego es apto para todas las edades. No recopilamos intencionalmente informacion personal de menores. Los unicos datos almacenados son el progreso del juego en el dispositivo local.",
+    thirdparty_title: "Servicios de Terceros",
+    thirdparty_body: "Este juego no utiliza ningun servicio de analiticas, publicidad o rastreo de terceros.",
+    changes_title: "Cambios en Esta Politica",
+    changes_body: "Podemos actualizar esta politica de vez en cuando. Los cambios se reflejaran en esta pagina con una fecha de actualizacion.",
+    contact_title: "Contacto",
+    contact_body: 'Si tiene preguntas sobre esta politica de privacidad, visite nuestro sitio web en <a href="https://aria-cinnamoroll.vercel.app">aria-cinnamoroll.vercel.app</a>.'
+  }
+};
+
+function setLang(lang) {
+  localStorage.setItem('arias-lang', lang);
+  document.documentElement.lang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (i18n[lang][key] !== undefined) {
+      el.innerHTML = i18n[lang][key];
+    }
+  });
+  document.title = lang === 'es'
+    ? "Politica de Privacidad - Aria's Sanrio Adventure"
+    : "Privacy Policy - Aria's Sanrio Adventure";
+}
+
+(function() {
+  var saved = localStorage.getItem('arias-lang') || 'en';
+  setLang(saved);
+})();
+</script>
 </body>
 </html>
