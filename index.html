@@ -154,9 +154,14 @@
     <h2>What's your name?</h2>
     <p>Enter your name for the leaderboard!</p>
     <input class="name-input" id="nameIn" type="text" placeholder="Your name..." maxlength="12" autocomplete="off" spellcheck="false" enterkeyhint="go">
+    <div style="margin:12px 0 6px;display:flex;gap:10px;justify-content:center">
+      <button id="genderGirl" onclick="selectGender('girl')" style="flex:1;padding:10px;border-radius:14px;border:3px solid #ffb3c6;background:#fff5f8;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;transition:all .2s">👧 Girl</button>
+      <button id="genderBoy" onclick="selectGender('boy')" style="flex:1;padding:10px;border-radius:14px;border:3px solid #b3d4ff;background:#f0f7ff;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;transition:all .2s">👦 Boy</button>
+    </div>
     <button class="go-btn" id="goBtn" onclick="saveName()">Let's Go! 🌟</button>
   </div>
 </div>
+<input type="file" id="avatarUpload" accept="image/*" style="display:none">
 
 <div class="tut-overlay" id="tutOv">
   <div class="tut-panel">
@@ -433,14 +438,28 @@ function renderLB() {
 function openLB() { loadGlobalLB().then(() => { renderLB(); document.getElementById('lbOv').classList.add('active'); trackEvent('leaderboard_view'); }); }
 function closeLB() { document.getElementById('lbOv').classList.remove('active'); }
 document.getElementById('lbOv').addEventListener('click', e => { if(e.target===e.currentTarget) closeLB(); });
-function promptName() { document.getElementById('nameOv').classList.add('active'); document.getElementById('nameIn').value = playerName; setTimeout(()=>document.getElementById('nameIn').focus(),350); }
+function promptName() {
+  document.getElementById('nameOv').classList.add('active');
+  document.getElementById('nameIn').value = playerName;
+  if (selectedGender) selectGender(selectedGender);
+  setTimeout(()=>document.getElementById('nameIn').focus(),350);
+}
 let nameCallback = null;
+let selectedGender = localStorage.getItem('aria_gender') || null;
+function selectGender(g) {
+  selectedGender = g;
+  document.getElementById('genderGirl').style.border = g==='girl' ? '3px solid #e91e63' : '3px solid #ffb3c6';
+  document.getElementById('genderGirl').style.background = g==='girl' ? '#fce4ec' : '#fff5f8';
+  document.getElementById('genderBoy').style.border = g==='boy' ? '3px solid #1976d2' : '3px solid #b3d4ff';
+  document.getElementById('genderBoy').style.background = g==='boy' ? '#e3f2fd' : '#f0f7ff';
+}
 function saveName() {
   const v = document.getElementById('nameIn').value.trim();
   if (!v) { document.getElementById('nameIn').style.borderColor='#e74c3c'; return; }
   playerName = v;
   window._pName = playerName;
   localStorage.setItem('aria_player', playerName);
+  if (selectedGender) { localStorage.setItem('aria_gender', selectedGender); saveData.gender = selectedGender; saveGame(); }
   trackEvent('name_set', { detail: v });
   document.getElementById('nameOv').classList.remove('active');
   if (nameCallback) { const cb = nameCallback; nameCallback = null; cb(); }
@@ -808,12 +827,27 @@ const DAILY_CHALLENGES_POOL = [
   { id:'catch_epic_1', type:'catch_rarity', rarity:'epic', target:1, desc:'Catch 1 epic item', reward:4 },
 ];
 const OUTFITS = [
-  { id:'default', name:'Default', milestone:0, desc:'Starting outfit' },
-  { id:'hk_bow', name:'Hello Kitty Bow', milestone:5, desc:'Collect 5 items', drawFn:'drawBow' },
-  { id:'melody_hood', name:'My Melody Hood', milestone:10, desc:'Collect 10 items', drawFn:'drawMelodyHood' },
-  { id:'cinna_ears', name:'Cinnamoroll Ears', milestone:15, desc:'Collect 15 items', drawFn:'drawCinnaEars' },
-  { id:'kuromi_hat', name:'Kuromi Hat', milestone:20, desc:'Collect 20 items', drawFn:'drawKuromiHat' },
-  { id:'full_costume', name:'Kawaii Queen', milestone:30, desc:'Collect 30 items', drawFn:'drawFullCostume' },
+  // Collection milestones (free / gameplay)
+  { id:'default', name:'Default', milestone:0, desc:'Starting outfit', unlock:'free', rarity:'common' },
+  { id:'hk_bow', name:'Hello Kitty Bow', milestone:5, desc:'Collect 5 items', unlock:'milestone', rarity:'common' },
+  { id:'melody_hood', name:'My Melody Hood', milestone:10, desc:'Collect 10 items', unlock:'milestone', rarity:'rare' },
+  { id:'cinna_ears', name:'Cinnamoroll Ears', milestone:15, desc:'Collect 15 items', unlock:'milestone', rarity:'rare' },
+  { id:'kuromi_hat', name:'Kuromi Hat', milestone:20, desc:'Collect 20 items', unlock:'milestone', rarity:'epic' },
+  { id:'full_costume', name:'Kawaii Queen', milestone:30, desc:'Collect 30 items', unlock:'milestone', rarity:'legendary' },
+  // Star Shop outfits
+  { id:'chef_hat', name:'Chef Hat', desc:'Star Shop (50\u2B50)', unlock:'shop', cost:50, rarity:'rare' },
+  { id:'pirate_bandana', name:'Pirate Bandana', desc:'Star Shop (75\u2B50)', unlock:'shop', cost:75, rarity:'rare' },
+  { id:'flower_crown', name:'Flower Crown', desc:'Star Shop (40\u2B50)', unlock:'shop', cost:40, rarity:'rare' },
+  // Achievement rewards
+  { id:'golden_crown', name:'Golden Crown', desc:'Score 50,000+', unlock:'achievement', achievementId:'score-crusher', rarity:'epic' },
+  { id:'rainbow_aura', name:'Rainbow Aura', desc:'Collect all items', unlock:'achievement', achievementId:'master-collector', rarity:'legendary' },
+  // Blind box exclusives
+  { id:'angel_wings', name:'Angel Wings', desc:'Blind Box only', unlock:'blindbox', rarity:'legendary' },
+  { id:'devil_horns', name:'Devil Horns', desc:'Blind Box only', unlock:'blindbox', rarity:'epic' },
+  // Seasonal (time-gated, purchasable during event)
+  { id:'valentine_heart', name:'Valentine Crown', desc:'Feb only (30\u2B50)', unlock:'seasonal', cost:30, startDate:'02-01', endDate:'02-28', rarity:'epic' },
+  { id:'spring_bunny', name:'Spring Bunny', desc:'Mar-May (25\u2B50)', unlock:'seasonal', cost:25, startDate:'03-01', endDate:'05-31', rarity:'epic' },
+  { id:'summer_shades', name:'Summer Shades', desc:'Jun-Aug (20\u2B50)', unlock:'seasonal', cost:20, startDate:'06-01', endDate:'08-31', rarity:'rare' },
 ];
 const SPIN_SEGMENTS = [
   { label:'1\u2B50', reward:{type:'stars',amount:1}, color:'#ffcdd2', weight:30 },
@@ -840,6 +874,9 @@ const DEFAULT_SAVE = {
   shopPurchases: {},
   challenges: { date: null, list: [], progress: [0, 0, 0] },
   equippedOutfit: 'default',
+  unlockedOutfits: ['default'],
+  customAvatar: null,
+  gender: null,
   lastSpinDate: null,
   hasShared: false,
   referredBy: null,
@@ -863,6 +900,14 @@ function loadGame() {
   if (!merged.collection || typeof merged.collection !== 'object') merged.collection = {};
   if (!merged.achievements || typeof merged.achievements !== 'object') merged.achievements = {};
   if (!Array.isArray(merged.showcase)) merged.showcase = [null, null, null];
+  // Migrate: ensure unlockedOutfits exists and includes milestone-earned outfits
+  if (!Array.isArray(merged.unlockedOutfits)) merged.unlockedOutfits = ['default'];
+  const cc = Object.keys(merged.collection || {}).length;
+  OUTFITS.forEach(o => {
+    if (o.unlock === 'free' && !merged.unlockedOutfits.includes(o.id)) merged.unlockedOutfits.push(o.id);
+    if (o.unlock === 'milestone' && cc >= o.milestone && !merged.unlockedOutfits.includes(o.id)) merged.unlockedOutfits.push(o.id);
+    if (o.unlock === 'achievement' && merged.achievements?.[o.achievementId]?.unlocked && !merged.unlockedOutfits.includes(o.id)) merged.unlockedOutfits.push(o.id);
+  });
   // Migrate old collection format
   try {
     const oldCol = JSON.parse(localStorage.getItem('aria_collection') || '{}');
@@ -1096,9 +1141,29 @@ function updateSpinWheel() {
     sndLuckyStar();
   }
 }
+function isSeasonalActive(outfit) {
+  if (!outfit.startDate || !outfit.endDate) return false;
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const today = mm+'-'+dd;
+  return today >= outfit.startDate && today <= outfit.endDate;
+}
+function isOutfitUnlocked(outfit) {
+  if (saveData.unlockedOutfits && saveData.unlockedOutfits.includes(outfit.id)) return true;
+  if (outfit.unlock === 'free') return true;
+  if (outfit.unlock === 'milestone') return getCollectedCount() >= outfit.milestone;
+  return false;
+}
+function unlockOutfit(outfitId) {
+  if (!saveData.unlockedOutfits) saveData.unlockedOutfits = ['default'];
+  if (!saveData.unlockedOutfits.includes(outfitId)) {
+    saveData.unlockedOutfits.push(outfitId);
+    saveGame();
+  }
+}
 function getUnlockedOutfits() {
-  const cc = getCollectedCount();
-  return OUTFITS.filter(o => cc >= o.milestone);
+  return OUTFITS.filter(o => isOutfitUnlocked(o));
 }
 
 function getRarityTier(rarityId) {
@@ -1168,6 +1233,11 @@ function claimDailyReward() {
 function checkAchievement(id) {
   if (saveData.achievements[id]?.unlocked) return false;
   saveData.achievements[id] = { unlocked: true, date: Date.now() };
+  // Auto-unlock outfit rewards tied to this achievement
+  OUTFITS.forEach(o => { if (o.unlock === 'achievement' && o.achievementId === id) unlockOutfit(o.id); });
+  // Auto-unlock milestone outfits on collection growth
+  const cc = getCollectedCount();
+  OUTFITS.forEach(o => { if (o.unlock === 'milestone' && cc >= o.milestone) unlockOutfit(o.id); });
   saveGame();
   return true;
 }
@@ -1179,6 +1249,14 @@ function getAchievementCount() {
 function pullBlindBox(freeRarity) {
   if (!freeRarity && saveData.stars < 5) return null;
   if (!freeRarity) saveData.stars -= 5;
+  // 8% chance to drop a blind-box exclusive outfit instead
+  const bbOutfits = OUTFITS.filter(o => o.unlock === 'blindbox' && !saveData.unlockedOutfits?.includes(o.id));
+  if (bbOutfits.length > 0 && Math.random() < 0.08) {
+    const droppedOutfit = bbOutfits[Math.floor(Math.random() * bbOutfits.length)];
+    unlockOutfit(droppedOutfit.id);
+    saveGame();
+    return { item: { id: droppedOutfit.id, name: droppedOutfit.name, emoji: '\uD83D\uDC57', rarity: droppedOutfit.rarity, color: '#ff69b4' }, rarity: droppedOutfit.rarity, isNew: true, count: 1, isOutfitDrop: true };
+  }
   let rarity = freeRarity || getRarityForDrop();
 
   // Check daily limit and downgrade if hit
@@ -1386,6 +1464,43 @@ loadI('hangyodon', 'hangyodon.png');
 loadI('gudetama', 'gudetama.png');
 loadI('tuxedosam', 'tuxedosam.png');
 loadI('twinstars', 'littletwinstars.png');
+
+// Load custom avatar from save data if exists
+(function loadCustomAvatar() {
+  try {
+    const sd = JSON.parse(localStorage.getItem('aria_save_v7'));
+    if (sd && sd.customAvatar) {
+      const ci = new Image(); ci.src = sd.customAvatar;
+      ci.onload = () => { imgs.customAvatar = ci; };
+    }
+  } catch(e) {}
+})();
+// Avatar upload handler
+document.getElementById('avatarUpload').addEventListener('change', function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      // Resize to 128x128 via offscreen canvas
+      const oc = document.createElement('canvas'); oc.width=128; oc.height=128;
+      const octx = oc.getContext('2d');
+      // Center-crop to square
+      const s = Math.min(img.width, img.height);
+      const sx = (img.width-s)/2, sy = (img.height-s)/2;
+      octx.beginPath(); octx.arc(64,64,64,0,Math.PI*2); octx.clip();
+      octx.drawImage(img, sx, sy, s, s, 0, 0, 128, 128);
+      const dataUrl = oc.toDataURL('image/png');
+      saveData.customAvatar = dataUrl;
+      const ci = new Image(); ci.src = dataUrl;
+      ci.onload = () => { imgs.customAvatar = ci; };
+      saveGame();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
 
 function drawImg(img, x, y, mw, mh) {
   if (!img?.complete || !img.naturalWidth) return;
@@ -2341,7 +2456,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.8', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.9', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2416,7 +2531,8 @@ function drawPlayer() {
   // Shadow
   X.fillStyle = 'rgba(255,200,220,0.3)';
   X.beginPath(); X.ellipse(px, P.baseY+35, 40, 8, 0, 0, Math.PI*2); X.fill();
-  drawImg(imgs.avatar, px, py, 65, 88);
+  if (imgs.customAvatar && saveData.customAvatar) { drawImg(imgs.customAvatar, px, py, 65, 65); }
+  else { drawImg(imgs.avatar, px, py, 65, 88); }
   drawOutfitOnPlayer(px, py);
   // Magnet aura
   if (powerups.magnet > 0) {
@@ -2624,7 +2740,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.8', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.9', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2952,17 +3068,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.8 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.9 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
-    '\u2B50 Star Shop - buy power-up boosts!',
-    '\uD83C\uDFB0 Lucky Spin - free daily spin!',
-    '\uD83C\uDFAF Daily Challenges - 3 new tasks/day',
-    '\uD83D\uDC57 Outfits - unlock avatar costumes!',
-    '\uD83E\uDD5A Gudetama, Tuxedo Sam & Twin Stars!',
-    '\uD83D\uDC9D Valentine\'s Day limited items!',
-    '\u2728 41 collectible items total',
-    '\uD83C\uDFB5 New Sanrio characters to discover',
+    '\uD83D\uDC57 16 Outfits! Shop, achieve, blind box!',
+    '\uD83D\uDCF7 Upload YOUR photo as avatar!',
+    '\uD83D\uDC51 Chef, Pirate, Angel, Devil & more!',
+    '\uD83C\uDF38 Seasonal outfits (Valentine, Spring...)',
+    '\uD83C\uDF81 Blind Box exclusive outfit drops!',
+    '\uD83C\uDFC6 Achievement reward outfits!',
+    '\uD83D\uDCDD Change your name anytime in settings!',
+    '\u2728 Pick your gender for your profile!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3202,89 +3318,97 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v9.0 OUTFIT SELECTOR SCREEN (with previews) ======
+// ====== v10.9 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
   X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
-  // Panel
-  const panelGrad = X.createLinearGradient(W/2, H/2-260, W/2, H/2+260);
-  panelGrad.addColorStop(0, '#fff5f8'); panelGrad.addColorStop(1, '#ffffff');
-  X.fillStyle = panelGrad; rrc(W/2,H/2,360,540,24);
-  X.strokeStyle = '#ffb3c6'; X.lineWidth = 2; X.stroke();
-  // Close button
-  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+165,H/2-252,16,0,Math.PI*2); X.fill();
-  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('\u2715',W/2+165,H/2-252); X.textBaseline = 'alphabetic';
+  const panelW=360, panelH=560, panelTop=H/2-panelH/2;
+  const panelGrad = X.createLinearGradient(W/2,panelTop,W/2,panelTop+panelH);
+  panelGrad.addColorStop(0,'#fff5f8'); panelGrad.addColorStop(1,'#fff');
+  X.fillStyle=panelGrad; rrc(W/2,H/2,panelW,panelH,24);
+  X.strokeStyle='#ffb3c6'; X.lineWidth=2; X.stroke();
+  // Close
+  X.fillStyle='#ff8a9e'; X.beginPath(); X.arc(W/2+165,panelTop+18,16,0,Math.PI*2); X.fill();
+  X.fillStyle='#fff'; X.font='bold 18px sans-serif'; X.textAlign='center'; X.textBaseline='middle';
+  X.fillText('\u2715',W/2+165,panelTop+18); X.textBaseline='alphabetic';
   // Title
-  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83D\uDC57 Outfits',W/2,H/2-222);
-  const cc=getCollectedCount();
-  X.fillStyle='#999'; X.font='13px "Quicksand",sans-serif';
-  X.fillText(cc+'/'+TOTAL_ITEMS+' items collected',W/2,H/2-198);
-  // Progress bar
-  const barW=260, barH=6, barX=W/2-barW/2, barY=H/2-186;
-  X.fillStyle='#f0f0f0'; rrc(W/2, barY+barH/2, barW, barH, 3);
-  const pct=Math.min(1, cc/30);
-  if (pct>0) { X.fillStyle='#ff69b4'; rrc(barX+pct*barW/2, barY+barH/2, pct*barW, barH, 3); }
-  // Outfit rows
+  X.fillStyle='#e91e63'; X.font='bold 20px "Fredoka One",sans-serif'; X.textAlign='center';
+  X.fillText('\uD83D\uDC57 Outfits & Styles',W/2,panelTop+46);
+  // Upload Photo button
+  X.fillStyle=saveData.customAvatar?'#e8f5e9':'#f3e5f5'; rrc(W/2,panelTop+74,200,28,14);
+  X.fillStyle=saveData.customAvatar?'#2e7d32':'#9c27b0'; X.font='bold 11px "Fredoka One",sans-serif';
+  X.fillText(saveData.customAvatar?'\uD83D\uDCF7 Change Photo':'\uD83D\uDCF7 Upload Your Photo',W/2,panelTop+76);
+  if (saveData.customAvatar) {
+    X.fillStyle='#ffebee'; rrc(W/2+130,panelTop+74,40,22,11);
+    X.fillStyle='#e53935'; X.font='bold 9px sans-serif'; X.fillText('\u2715',W/2+130,panelTop+76);
+  }
+  // Scrollable list
+  const listTop=panelTop+94, listBot=panelTop+panelH-16, listH=listBot-listTop;
+  X.save(); X.beginPath(); X.rect(W/2-panelW/2+6,listTop,panelW-12,listH); X.clip();
+  const rowH=72, gp=6, totalH=OUTFITS.length*(rowH+gp);
+  const maxScroll=Math.max(0,totalH-listH);
+  outfitScrollY=Math.max(-maxScroll,Math.min(0,outfitScrollY));
+  const rarCols={common:'#999',rare:'#4fc3f7',epic:'#ab47bc',legendary:'#ffd700'};
   OUTFITS.forEach((outfit,i) => {
-    const cy=H/2-155+i*80;
-    const unlocked=cc>=outfit.milestone;
+    const cy=listTop+36+i*(rowH+gp)+outfitScrollY;
+    if (cy<listTop-rowH||cy>listBot+rowH) return;
+    const unlocked=isOutfitUnlocked(outfit);
     const equipped=(saveData.equippedOutfit||'default')===outfit.id;
-    // Row background
-    if (equipped) {
-      const eqGrad = X.createLinearGradient(W/2-160, cy, W/2+160, cy);
-      eqGrad.addColorStop(0, '#fce4ec'); eqGrad.addColorStop(1, '#fff0f5');
-      X.fillStyle = eqGrad;
-    } else { X.fillStyle = unlocked?'#fafafa':'#f0f0f0'; }
-    rrc(W/2,cy,320,66,16);
-    if (equipped) { X.strokeStyle='#ff69b4'; X.lineWidth=1.5; X.stroke(); }
+    if (equipped) { const eg=X.createLinearGradient(W/2-160,cy,W/2+160,cy); eg.addColorStop(0,'#fce4ec'); eg.addColorStop(1,'#fff0f5'); X.fillStyle=eg; }
+    else { X.fillStyle=unlocked?'#fafafa':'#f5f5f5'; }
+    rrc(W/2,cy,panelW-32,rowH,14);
+    if (equipped) { X.strokeStyle='#ff69b4'; X.lineWidth=2; X.stroke(); }
     // Preview circle
-    const pvX = W/2-135, pvY = cy;
-    X.fillStyle = unlocked ? '#fff' : '#e8e8e8';
-    X.beginPath(); X.arc(pvX, pvY, 22, 0, Math.PI*2); X.fill();
-    X.strokeStyle = unlocked ? '#ffb3c6' : '#ddd'; X.lineWidth = 1.5; X.stroke();
-    if (outfit.id === 'default') {
-      // Draw mini avatar placeholder
-      X.fillStyle = unlocked ? '#ff69b4' : '#ccc'; X.font = '18px sans-serif'; X.textAlign = 'center';
-      X.fillText('\u2728', pvX, pvY+6);
-    } else if (unlocked) {
-      drawOutfitPreview(pvX, pvY+8, outfit.id, 0.7);
-    } else {
-      X.fillStyle = '#ccc'; X.font = '16px sans-serif'; X.textAlign = 'center';
-      X.fillText('\uD83D\uDD12', pvX, pvY+6);
-    }
-    // Text
+    const pvX=W/2-140;
+    X.fillStyle=unlocked?'#fff':'#e8e8e8'; X.beginPath(); X.arc(pvX,cy,24,0,Math.PI*2); X.fill();
+    X.strokeStyle=rarCols[outfit.rarity]||'#ddd'; X.lineWidth=2; X.stroke();
+    if (outfit.id==='default') { X.fillStyle=unlocked?'#ff69b4':'#ccc'; X.font='20px sans-serif'; X.textAlign='center'; X.fillText('\u2728',pvX,cy+7); }
+    else if (unlocked) { drawOutfitPreview(pvX,cy+8,outfit.id,0.65); }
+    else { X.fillStyle='#ccc'; X.font='18px sans-serif'; X.textAlign='center'; X.fillText('\uD83D\uDD12',pvX,cy+7); }
+    // Rarity badge
+    const rt=RARITY_TIERS.find(t=>t.id===outfit.rarity);
+    if (rt&&outfit.rarity!=='common') { X.fillStyle=rarCols[outfit.rarity]; X.font='bold 8px "Quicksand",sans-serif'; X.textAlign='left'; X.fillText(rt.label.toUpperCase(),W/2-108,cy-22); }
+    // Name
     X.fillStyle=unlocked?'#333':'#aaa'; X.font='bold 13px "Fredoka One",sans-serif'; X.textAlign='left';
-    X.fillText(outfit.name,W/2-105,cy-6);
+    X.fillText(outfit.name,W/2-108,cy-6);
+    // Desc with unlock info
     X.fillStyle=unlocked?'#888':'#bbb'; X.font='11px "Quicksand",sans-serif';
-    X.fillText(outfit.desc,W/2-105,cy+12);
-    // Action button
-    if (equipped) {
-      X.fillStyle='#e91e63'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='right';
-      X.fillText('\u2713 Equipped',W/2+145,cy+4);
-    } else if (unlocked) {
-      // Equip button with gradient
-      const btnGrad = X.createLinearGradient(W/2+90, cy-14, W/2+90, cy+14);
-      btnGrad.addColorStop(0, '#ff8a9e'); btnGrad.addColorStop(1, '#e91e63');
-      X.fillStyle = btnGrad; rrc(W/2+110,cy,65,28,14);
-      X.fillStyle='#fff'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='center';
-      X.fillText('Equip',W/2+110,cy+4);
-    } else {
-      // Locked with milestone
-      X.fillStyle='#bbb'; X.font='bold 10px "Quicksand",sans-serif'; X.textAlign='right';
-      X.fillText(outfit.milestone+' items',W/2+145,cy+4);
+    let dt=outfit.desc;
+    if (!unlocked) {
+      if (outfit.unlock==='shop') dt=outfit.cost+'\u2B50 in Star Shop';
+      else if (outfit.unlock==='achievement') dt='Achievement: '+outfit.desc;
+      else if (outfit.unlock==='blindbox') dt='Blind Box exclusive drop';
+      else if (outfit.unlock==='seasonal') dt=(isSeasonalActive(outfit)?'Available now! ':'Event only ')+outfit.cost+'\u2B50';
+      else if (outfit.unlock==='milestone') dt=outfit.milestone+' items to unlock';
     }
+    X.fillText(dt,W/2-108,cy+12);
+    // Action
+    if (equipped) { X.fillStyle='#e91e63'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='right'; X.fillText('\u2713 Equipped',W/2+148,cy+4); }
+    else if (unlocked) { const bg=X.createLinearGradient(W/2+90,cy-14,W/2+90,cy+14); bg.addColorStop(0,'#ff8a9e'); bg.addColorStop(1,'#e91e63'); X.fillStyle=bg; rrc(W/2+118,cy,65,28,14); X.fillStyle='#fff'; X.font='bold 11px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText('Equip',W/2+118,cy+4); }
+    else if (outfit.unlock==='shop'||(outfit.unlock==='seasonal'&&isSeasonalActive(outfit))) { const cb=saveData.stars>=outfit.cost; X.fillStyle=cb?'#ff8f00':'#ccc'; rrc(W/2+118,cy,70,28,14); X.fillStyle='#fff'; X.font='bold 10px "Fredoka One",sans-serif'; X.textAlign='center'; X.fillText(outfit.cost+'\u2B50 Buy',W/2+118,cy+4); }
+    else { X.fillStyle='#ccc'; X.font='bold 10px "Quicksand",sans-serif'; X.textAlign='right'; X.fillText('\uD83D\uDD12 Locked',W/2+148,cy+4); }
   });
+  X.restore();
+  // Scroll indicator
+  if (totalH>listH) { const sp=Math.abs(outfitScrollY)/maxScroll; const bh=Math.max(30,listH*(listH/totalH)); const by=listTop+sp*(listH-bh); X.fillStyle='rgba(0,0,0,0.12)'; rrc(W/2+panelW/2-12,by+bh/2,4,bh,2); }
 }
 function handleOutfitTap(x,y) {
-  if (Math.abs(x-(W/2+165))<18&&Math.abs(y-(H/2-252))<18) { showOutfits=false; return; }
-  const cc=getCollectedCount();
+  const panelH=560, panelTop=H/2-panelH/2;
+  if (Math.abs(x-(W/2+165))<18&&Math.abs(y-(panelTop+18))<18) { showOutfits=false; return; }
+  // Upload photo
+  if (Math.abs(x-W/2)<100&&Math.abs(y-(panelTop+74))<16) { document.getElementById('avatarUpload').click(); return; }
+  // Remove photo
+  if (saveData.customAvatar&&Math.abs(x-(W/2+130))<24&&Math.abs(y-(panelTop+74))<14) { saveData.customAvatar=null; imgs.customAvatar=null; saveGame(); return; }
+  // Outfit rows
+  const listTop=panelTop+94, rowH=72, gp=6;
   OUTFITS.forEach((outfit,i) => {
-    const cy=H/2-155+i*80;
-    // Equip button hit area
-    if (cc>=outfit.milestone&&Math.abs(x-(W/2+110))<40&&Math.abs(y-cy)<18) {
-      saveData.equippedOutfit=outfit.id; saveGame(); sndCatch();
+    const cy=listTop+36+i*(rowH+gp)+outfitScrollY;
+    if (cy<listTop-rowH||cy>panelTop+panelH) return;
+    const unlocked=isOutfitUnlocked(outfit);
+    if (unlocked&&Math.abs(x-(W/2+118))<40&&Math.abs(y-cy)<18) { saveData.equippedOutfit=outfit.id; saveGame(); sndCatch(); return; }
+    if (!unlocked&&(outfit.unlock==='shop'||(outfit.unlock==='seasonal'&&isSeasonalActive(outfit)))) {
+      if (Math.abs(x-(W/2+118))<40&&Math.abs(y-cy)<18&&saveData.stars>=outfit.cost) { saveData.stars-=outfit.cost; unlockOutfit(outfit.id); sndLuckyStar(); return; }
     }
   });
 }
@@ -3542,6 +3666,233 @@ function drawOutfitOnPlayer(px, py) {
     X.fillStyle = 'rgba(255,182,193,0.45)';
     X.beginPath(); X.ellipse(fx-16, fy+24, 7, 3.5, 0, 0, Math.PI*2); X.fill();
     X.beginPath(); X.ellipse(fx+16, fy+24, 7, 3.5, 0, 0, Math.PI*2); X.fill();
+  } else if (outfit === 'chef_hat') {
+    // White chef toque
+    const cx = px, cy = py - 34 + bob;
+    X.fillStyle = '#fff';
+    X.beginPath(); X.ellipse(cx, cy+4, 18, 8, 0, 0, Math.PI*2); X.fill();
+    X.fillRect(cx-14, cy-14, 28, 18);
+    // Puffy top
+    X.beginPath(); X.arc(cx-8, cy-18, 10, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(cx+8, cy-18, 10, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(cx, cy-22, 10, 0, Math.PI*2); X.fill();
+    // Band
+    X.fillStyle = '#e0e0e0'; X.fillRect(cx-16, cy+0, 32, 4);
+    // Shadow detail
+    X.fillStyle = 'rgba(0,0,0,0.05)';
+    X.beginPath(); X.ellipse(cx, cy-10, 12, 8, 0, 0, Math.PI*2); X.fill();
+  } else if (outfit === 'pirate_bandana') {
+    // Red bandana + eye patch
+    const bx = px, by = py - 28 + bob;
+    // Bandana
+    const bGrad = X.createLinearGradient(bx-20, by, bx+20, by);
+    bGrad.addColorStop(0, '#d32f2f'); bGrad.addColorStop(0.5, '#f44336'); bGrad.addColorStop(1, '#d32f2f');
+    X.fillStyle = bGrad;
+    X.beginPath(); X.ellipse(bx, by, 22, 10, 0, Math.PI, 0); X.fill();
+    // Bandana knot tails (back)
+    X.fillStyle = '#d32f2f';
+    X.beginPath(); X.moveTo(bx+16, by-2); X.quadraticCurveTo(bx+28, by+8, bx+22, by+18); X.lineTo(bx+18, by+12); X.closePath(); X.fill();
+    X.beginPath(); X.moveTo(bx+14, by-2); X.quadraticCurveTo(bx+24, by+12, bx+20, by+22); X.lineTo(bx+16, by+16); X.closePath(); X.fill();
+    // Skull motif
+    X.fillStyle = '#fff';
+    X.beginPath(); X.arc(bx, by-4, 4, 0, Math.PI*2); X.fill();
+    X.fillStyle = '#d32f2f';
+    X.beginPath(); X.arc(bx-1.5, by-5, 1, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(bx+1.5, by-5, 1, 0, Math.PI*2); X.fill();
+    // Eye patch
+    X.fillStyle = '#1a1a2e';
+    X.beginPath(); X.ellipse(bx+10, by+14, 6, 5, 0.2, 0, Math.PI*2); X.fill();
+    X.strokeStyle = '#1a1a2e'; X.lineWidth = 1.5;
+    X.beginPath(); X.moveTo(bx+4, by+10); X.lineTo(bx-10, by-2); X.stroke();
+    X.beginPath(); X.moveTo(bx+16, by+12); X.lineTo(bx+22, by-2); X.stroke();
+  } else if (outfit === 'flower_crown') {
+    // Pastel flower wreath
+    const fx = px, fy = py - 32 + bob;
+    const flowers = [
+      {x:-14,y:-2,c:'#ffb7c5',cc:'#fff176'},
+      {x:-7,y:-6,c:'#b39ddb',cc:'#fff'},
+      {x:0,y:-8,c:'#f48fb1',cc:'#ffeb3b'},
+      {x:7,y:-6,c:'#81d4fa',cc:'#fff'},
+      {x:14,y:-2,c:'#a5d6a7',cc:'#fff176'}
+    ];
+    // Green vine base
+    X.strokeStyle = '#66bb6a'; X.lineWidth = 3; X.lineCap = 'round';
+    X.beginPath(); X.moveTo(fx-18, fy+2); X.quadraticCurveTo(fx, fy-10, fx+18, fy+2); X.stroke();
+    // Tiny leaves
+    X.fillStyle = '#81c784';
+    for (let l=-12;l<=12;l+=8) { X.beginPath(); X.ellipse(fx+l, fy-1, 3, 5, l*0.03, 0, Math.PI*2); X.fill(); }
+    // Flowers
+    flowers.forEach(f => {
+      for (let p=0;p<5;p++) { const a=p*Math.PI*2/5-Math.PI/2; X.fillStyle=f.c; X.beginPath(); X.ellipse(fx+f.x+Math.cos(a)*4, fy+f.y+Math.sin(a)*4, 3.5, 2.5, a, 0, Math.PI*2); X.fill(); }
+      X.fillStyle=f.cc; X.beginPath(); X.arc(fx+f.x, fy+f.y, 2, 0, Math.PI*2); X.fill();
+    });
+  } else if (outfit === 'golden_crown') {
+    // Ornate gold crown (achievement reward)
+    const gx = px, gy = py - 36 + bob;
+    const gGrad = X.createLinearGradient(gx-18, gy, gx+18, gy);
+    gGrad.addColorStop(0, '#ffd700'); gGrad.addColorStop(0.3, '#ffec80'); gGrad.addColorStop(0.7, '#ffec80'); gGrad.addColorStop(1, '#ffd700');
+    X.fillStyle = gGrad;
+    X.beginPath();
+    X.moveTo(gx-18, gy+8); X.lineTo(gx-18, gy-2); X.lineTo(gx-12, gy+4);
+    X.lineTo(gx-6, gy-12); X.lineTo(gx, gy); X.lineTo(gx+6, gy-12);
+    X.lineTo(gx+12, gy+4); X.lineTo(gx+18, gy-2); X.lineTo(gx+18, gy+8);
+    X.closePath(); X.fill();
+    X.strokeStyle = '#e6a800'; X.lineWidth = 1.5; X.stroke();
+    // Crown band
+    X.fillStyle = '#e6a800'; X.fillRect(gx-18, gy+5, 36, 5);
+    // Gems
+    X.fillStyle = '#e53935'; X.beginPath(); X.arc(gx, gy-2, 3, 0, Math.PI*2); X.fill();
+    X.fillStyle = '#1e88e5'; X.beginPath(); X.arc(gx-8, gy+2, 2, 0, Math.PI*2); X.fill();
+    X.fillStyle = '#1e88e5'; X.beginPath(); X.arc(gx+8, gy+2, 2, 0, Math.PI*2); X.fill();
+    // Sparkle
+    X.fillStyle = 'rgba(255,255,255,0.7)'; X.beginPath(); X.arc(gx-1, gy-4, 1.5, 0, Math.PI*2); X.fill();
+  } else if (outfit === 'rainbow_aura') {
+    // Prismatic shimmer ring (master collector)
+    const rx = px, ry = py;
+    const colors = ['#ff6b6b','#ffa94d','#ffd43b','#69db7c','#4dabf7','#9775fa','#f06595'];
+    X.lineWidth = 2.5;
+    for (let r = 0; r < 7; r++) {
+      const a = frame * 0.02 + r * Math.PI * 2 / 7;
+      const radius = 38 + Math.sin(frame * 0.04 + r) * 3;
+      X.strokeStyle = colors[r];
+      X.globalAlpha = 0.5 + Math.sin(frame * 0.08 + r) * 0.3;
+      X.beginPath(); X.arc(rx + Math.cos(a) * 2, ry + Math.sin(a) * 2, radius, a - 0.5, a + 0.5); X.stroke();
+    }
+    X.globalAlpha = 1;
+    // Sparkle particles
+    for (let s = 0; s < 6; s++) {
+      const sa = s * Math.PI * 2 / 6 + frame * 0.03;
+      const sr = 32 + Math.sin(frame * 0.06 + s * 2) * 8;
+      const sx = rx + Math.cos(sa) * sr, sy = ry + Math.sin(sa) * sr;
+      X.fillStyle = colors[s % 7]; X.globalAlpha = 0.6 + Math.sin(frame * 0.1 + s) * 0.4;
+      X.beginPath(); X.arc(sx, sy, 2, 0, Math.PI*2); X.fill();
+    }
+    X.globalAlpha = 1;
+  } else if (outfit === 'angel_wings') {
+    // White feathered wings behind character
+    const ax = px, ay = py - 5 + bob * 0.5;
+    const wingFlap = Math.sin(frame * 0.06) * 4;
+    // Left wing
+    X.fillStyle = 'rgba(255,255,255,0.85)';
+    X.beginPath(); X.moveTo(ax-8, ay); X.bezierCurveTo(ax-35-wingFlap, ay-30, ax-45-wingFlap, ay-10, ax-30, ay+15); X.bezierCurveTo(ax-20, ay+10, ax-12, ay+5, ax-8, ay); X.fill();
+    // Left wing feather details
+    X.strokeStyle = 'rgba(200,220,255,0.6)'; X.lineWidth = 1;
+    X.beginPath(); X.moveTo(ax-12, ay-5); X.quadraticCurveTo(ax-30-wingFlap, ay-15, ax-28, ay+5); X.stroke();
+    X.beginPath(); X.moveTo(ax-10, ay); X.quadraticCurveTo(ax-25-wingFlap, ay-8, ax-22, ay+10); X.stroke();
+    // Right wing
+    X.fillStyle = 'rgba(255,255,255,0.85)';
+    X.beginPath(); X.moveTo(ax+8, ay); X.bezierCurveTo(ax+35+wingFlap, ay-30, ax+45+wingFlap, ay-10, ax+30, ay+15); X.bezierCurveTo(ax+20, ay+10, ax+12, ay+5, ax+8, ay); X.fill();
+    X.strokeStyle = 'rgba(200,220,255,0.6)'; X.lineWidth = 1;
+    X.beginPath(); X.moveTo(ax+12, ay-5); X.quadraticCurveTo(ax+30+wingFlap, ay-15, ax+28, ay+5); X.stroke();
+    X.beginPath(); X.moveTo(ax+10, ay); X.quadraticCurveTo(ax+25+wingFlap, ay-8, ax+22, ay+10); X.stroke();
+    // Halo
+    X.strokeStyle = 'rgba(255,215,0,0.6)'; X.lineWidth = 2;
+    const haloY = ay - 42;
+    X.beginPath(); X.ellipse(ax, haloY, 14, 4, 0, 0, Math.PI*2); X.stroke();
+    X.strokeStyle = 'rgba(255,255,200,0.4)'; X.lineWidth = 3;
+    X.beginPath(); X.ellipse(ax, haloY, 14, 4, 0, 0, Math.PI*2); X.stroke();
+  } else if (outfit === 'devil_horns') {
+    // Red horns + pointed tail
+    const dx = px, dy = py - 30 + bob;
+    // Left horn
+    const hGrad = X.createLinearGradient(dx-12, dy-20, dx-12, dy);
+    hGrad.addColorStop(0, '#ff1744'); hGrad.addColorStop(1, '#b71c1c');
+    X.fillStyle = hGrad;
+    X.beginPath(); X.moveTo(dx-6, dy); X.lineTo(dx-16, dy-22); X.lineTo(dx-4, dy-4); X.closePath(); X.fill();
+    // Right horn
+    X.beginPath(); X.moveTo(dx+6, dy); X.lineTo(dx+16, dy-22); X.lineTo(dx+4, dy-4); X.closePath(); X.fill();
+    // Horn highlights
+    X.fillStyle = 'rgba(255,255,255,0.2)';
+    X.beginPath(); X.moveTo(dx-8, dy-4); X.lineTo(dx-14, dy-18); X.lineTo(dx-10, dy-6); X.closePath(); X.fill();
+    X.beginPath(); X.moveTo(dx+8, dy-4); X.lineTo(dx+14, dy-18); X.lineTo(dx+10, dy-6); X.closePath(); X.fill();
+    // Tail (behind, curving right)
+    X.strokeStyle = '#d32f2f'; X.lineWidth = 3; X.lineCap = 'round';
+    const tailBob = Math.sin(frame * 0.08) * 5;
+    X.beginPath(); X.moveTo(px+5, py+35); X.bezierCurveTo(px+20, py+45, px+30+tailBob, py+30, px+25+tailBob, py+20); X.stroke();
+    // Tail point
+    X.fillStyle = '#d32f2f';
+    X.beginPath();
+    const tx = px+25+tailBob, ty = py+20;
+    X.moveTo(tx, ty-5); X.lineTo(tx+6, ty); X.lineTo(tx, ty+5); X.closePath(); X.fill();
+  } else if (outfit === 'valentine_heart') {
+    // Heart tiara + floating hearts
+    const vx = px, vy = py - 34 + bob;
+    // Tiara band
+    X.fillStyle = '#ff69b4';
+    X.beginPath(); X.ellipse(vx, vy+4, 20, 6, 0, Math.PI, 0); X.fill();
+    // Center heart
+    X.fillStyle = '#e91e63';
+    X.beginPath();
+    X.moveTo(vx, vy-2); X.bezierCurveTo(vx-3, vy-8, vx-10, vy-8, vx-10, vy-2);
+    X.bezierCurveTo(vx-10, vy+3, vx, vy+8, vx, vy+8);
+    X.bezierCurveTo(vx, vy+8, vx+10, vy+3, vx+10, vy-2);
+    X.bezierCurveTo(vx+10, vy-8, vx+3, vy-8, vx, vy-2);
+    X.fill();
+    // Heart highlight
+    X.fillStyle = 'rgba(255,255,255,0.4)';
+    X.beginPath(); X.arc(vx-4, vy-3, 2, 0, Math.PI*2); X.fill();
+    // Floating hearts
+    for (let h = 0; h < 4; h++) {
+      const ha = h * Math.PI * 2 / 4 + frame * 0.02;
+      const hr = 28 + Math.sin(frame * 0.05 + h) * 5;
+      const hx = vx + Math.cos(ha) * hr, hy = py - 5 + Math.sin(ha) * hr;
+      X.fillStyle = h%2===0 ? '#ff69b4' : '#e91e63';
+      X.globalAlpha = 0.4 + Math.sin(frame * 0.08 + h) * 0.3;
+      X.font = '10px sans-serif'; X.textAlign = 'center'; X.fillText('\u2764', hx, hy);
+    }
+    X.globalAlpha = 1;
+  } else if (outfit === 'spring_bunny') {
+    // Pastel bunny ears + cotton tail
+    const bx = px, by = py - 32 + bob;
+    // Left ear
+    const earGrad = X.createLinearGradient(bx-10, by-30, bx-10, by);
+    earGrad.addColorStop(0, '#f8bbd0'); earGrad.addColorStop(1, '#fce4ec');
+    X.fillStyle = earGrad;
+    X.beginPath(); X.moveTo(bx-6, by); X.bezierCurveTo(bx-14, by-16, bx-16, by-34, bx-10, by-38);
+    X.bezierCurveTo(bx-4, by-34, bx-6, by-16, bx-2, by); X.fill();
+    // Left ear inner
+    X.fillStyle = '#f48fb1';
+    X.beginPath(); X.moveTo(bx-5, by-4); X.bezierCurveTo(bx-12, by-18, bx-13, by-30, bx-10, by-32);
+    X.bezierCurveTo(bx-7, by-30, bx-6, by-18, bx-3, by-4); X.fill();
+    // Right ear
+    X.fillStyle = earGrad;
+    X.beginPath(); X.moveTo(bx+6, by); X.bezierCurveTo(bx+14, by-16, bx+16, by-34, bx+10, by-38);
+    X.bezierCurveTo(bx+4, by-34, bx+6, by-16, bx+2, by); X.fill();
+    // Right ear inner
+    X.fillStyle = '#f48fb1';
+    X.beginPath(); X.moveTo(bx+5, by-4); X.bezierCurveTo(bx+12, by-18, bx+13, by-30, bx+10, by-32);
+    X.bezierCurveTo(bx+7, by-30, bx+6, by-18, bx+3, by-4); X.fill();
+    // Cotton tail
+    X.fillStyle = '#fff';
+    X.beginPath(); X.arc(px+2, py+38, 6, 0, Math.PI*2); X.fill();
+    X.fillStyle = 'rgba(248,187,208,0.3)';
+    X.beginPath(); X.arc(px+2, py+38, 6, 0, Math.PI*2); X.fill();
+  } else if (outfit === 'summer_shades') {
+    // Cool sunglasses + beach vibes
+    const sx = px, sy = py - 16 + bob;
+    // Lens frames
+    X.fillStyle = '#1a1a2e';
+    X.beginPath(); X.moveTo(sx-18, sy-2); X.lineTo(sx+18, sy-2); X.lineTo(sx+18, sy-4); X.lineTo(sx-18, sy-4); X.closePath(); X.fill();
+    // Left lens
+    const lGrad = X.createLinearGradient(sx-16, sy-2, sx-16, sy+8);
+    lGrad.addColorStop(0, '#1565c0'); lGrad.addColorStop(1, '#42a5f5');
+    X.fillStyle = lGrad;
+    X.beginPath(); X.ellipse(sx-9, sy+3, 9, 7, 0, 0, Math.PI*2); X.fill();
+    X.strokeStyle = '#1a1a2e'; X.lineWidth = 1.5; X.stroke();
+    // Right lens
+    X.fillStyle = lGrad;
+    X.beginPath(); X.ellipse(sx+9, sy+3, 9, 7, 0, 0, Math.PI*2); X.fill();
+    X.strokeStyle = '#1a1a2e'; X.lineWidth = 1.5; X.stroke();
+    // Bridge
+    X.strokeStyle = '#1a1a2e'; X.lineWidth = 2;
+    X.beginPath(); X.moveTo(sx-1, sy+1); X.quadraticCurveTo(sx, sy-2, sx+1, sy+1); X.stroke();
+    // Lens shine
+    X.fillStyle = 'rgba(255,255,255,0.3)';
+    X.beginPath(); X.ellipse(sx-11, sy+1, 3, 2, -0.3, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.ellipse(sx+7, sy+1, 3, 2, -0.3, 0, Math.PI*2); X.fill();
+    // Star on side
+    X.fillStyle = '#ffd700'; X.font = '8px sans-serif'; X.textAlign = 'center';
+    X.fillText('\u2B50', sx+20, sy+2);
   }
   X.restore();
 }
@@ -3584,7 +3935,8 @@ function drawMenu() {
   // Characters
   const cb = Math.sin(frame*0.04)*5;
   drawImg(imgs.cinnaFly, W/2-75, nextY+45+cb, 70, 45);
-  drawImg(imgs.avatar, W/2, nextY+35+Math.sin(frame*0.04)*4, 70, 95);
+  if (imgs.customAvatar&&saveData.customAvatar) { drawImg(imgs.customAvatar, W/2, nextY+35+Math.sin(frame*0.04)*4, 70, 70); }
+  else { drawImg(imgs.avatar, W/2, nextY+35+Math.sin(frame*0.04)*4, 70, 95); }
   drawOutfitOnPlayer(W/2, nextY+35+Math.sin(frame*0.04)*4);
   drawImg(imgs.purin, W/2+75, nextY+55+Math.sin(frame*0.04+1)*5, 65, 58);
 
@@ -3640,7 +3992,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.8', W-10, H-8);
+  X.fillText('v10.9', W-10, H-8);
 }
 
 function drawResults() {
@@ -3681,7 +4033,8 @@ function drawResults() {
   y += 56;
   const cb = Math.sin(frame * 0.04) * 5;
   drawImg(imgs.cinnaFly, W/2 - 70, y + cb, 55, 36);
-  drawImg(imgs.avatar, W/2, y - 8 + Math.sin(frame * 0.04) * 4, 60, 80);
+  if (imgs.customAvatar&&saveData.customAvatar) { drawImg(imgs.customAvatar, W/2, y - 8 + Math.sin(frame * 0.04) * 4, 60, 60); }
+  else { drawImg(imgs.avatar, W/2, y - 8 + Math.sin(frame * 0.04) * 4, 60, 80); }
   drawOutfitOnPlayer(W/2, y - 8 + Math.sin(frame * 0.04) * 4);
   drawImg(imgs.purin, W/2 + 70, y + 8 + Math.sin(frame * 0.04 + 1) * 5, 50, 45);
 
@@ -3701,7 +4054,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.8', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.9', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4024,6 +4377,9 @@ function update(dt) {
           if (it.rarity === 'secret') checkAchievement('secret-keeper');
           if (getCollectedCount() >= 10) checkAchievement('collector');
           if (getCollectedCount() >= TOTAL_ITEMS) checkAchievement('master-collector');
+          // Auto-unlock milestone outfits
+          const _cc = getCollectedCount();
+          OUTFITS.forEach(o => { if (o.unlock === 'milestone' && _cc >= o.milestone) unlockOutfit(o.id); });
           saveGame();
         }
         // Combo burst at milestones
@@ -4341,7 +4697,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.8') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.9') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4423,7 +4779,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.8'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.9'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -4587,7 +4943,7 @@ function handleTap(x, y) {
       if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) { saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]}; saveGame(); }
       showChallenges=true; return;
     }
-    if (Math.abs(x-rightX)<btnW/2 && Math.abs(y-r3Y)<btnH/2) { showOutfits=true; return; }
+    if (Math.abs(x-rightX)<btnW/2 && Math.abs(y-r3Y)<btnH/2) { showOutfits=true; outfitScrollY=0; return; }
     // Tap to Play (anywhere else)
     if (!playerName) { promptNameThenPlay(); return; }
     showTutorialOrStart();
@@ -4663,6 +5019,15 @@ C.addEventListener('touchmove', e => {
       } else { collectionTouchY = y; }
       return;
     }
+    // Outfit selector scrolling
+    if (showOutfits) {
+      if (collectionTouchY !== null) {
+        const dy = y - collectionTouchY;
+        outfitScrollY = Math.min(0, outfitScrollY + dy);
+        collectionTouchY = y;
+      } else { collectionTouchY = y; }
+      return;
+    }
     if (state === 'playing' && primaryTouch && touch.identifier === primaryTouch.id) {
       P.tx = x;
       if (Math.abs(x - primaryTouch.startX) > 12) primaryTouch.moved = true;
@@ -4715,6 +5080,10 @@ C.addEventListener('wheel', e => {
     const totalH = Math.ceil(filtered.length / 3) * 106;
     const maxVisH = H - 180;
     collectionScrollY = Math.min(0, Math.max(-(totalH - maxVisH), collectionScrollY - e.deltaY * 0.5));
+  }
+  if (showOutfits) {
+    e.preventDefault();
+    outfitScrollY = Math.min(0, outfitScrollY - e.deltaY * 0.5);
   }
 }, {passive:false});
 C.addEventListener('click', e => {

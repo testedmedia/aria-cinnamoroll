@@ -1,5 +1,19 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.9 - Outfit Economy + Custom Avatar (2026-02-11)
+- 16 outfits with 6 unlock types: free, milestone, shop, achievement, blind box, seasonal
+- Custom avatar upload: use your own photo as the in-game character
+- 10 new canvas-drawn outfits: Chef Hat, Pirate Bandana, Flower Crown, Golden Crown, Rainbow Aura, Angel Wings, Devil Horns, Valentine Crown, Spring Bunny, Summer Shades
+- Star Shop outfit purchases (40-75 stars)
+- Blind Box exclusive outfit drops (8% chance): Angel Wings, Devil Horns
+- Achievement auto-unlock outfits: Golden Crown (50k score), Rainbow Aura (collect all)
+- Seasonal time-gated outfits: Valentine Crown (Feb), Spring Bunny (Mar-May), Summer Shades (Jun-Aug)
+- Scrollable outfit selector with rarity badges and unlock requirement text
+- Gender selection on signup (Girl/Boy)
+- Name change accessible via settings gear anytime
+- Outfit overlays render on top of custom avatars
+- Save data migration: auto-populates unlocked outfits from existing progress
+
 ## v10.1 - Collection Card Overhaul
 - Full-width images on collection cards
 - Kawaii pastel card design
