@@ -1,5 +1,13 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.21 - Visual Polish Pack (2026-02-12)
+- Screen transitions: pink fade between menu/gameplay/results
+- Score count-up animation on results screen (ticks from 0 to final)
+- Catch burst rings: expanding ring pulse on every item catch
+- Item spawn pop-in: items scale from 0 with ease-out cubic
+- Power-up expiry warning: screen edge flash when magnet/2x/shield about to expire
+- Combo-scaled burst rings (bigger at 5x+ combo)
+
 ## v10.20 - Bug Fixes (2026-02-12)
 - Fixed: Backpack button now opens collection during gameplay
 - Fixed: Removed duplicate pause/sound buttons from HUD

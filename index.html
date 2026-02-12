@@ -570,6 +570,17 @@ let sparkles = [], texts = [], items = [];
 let bgHue = 0, shakeX = 0, shakeY = 0;
 let fever = false, feverTimer = 0;
 let achievementPopup = null; // {name, badge, timer}
+// Screen transition system
+let transition = null; // {type, progress, from, to, duration}
+function startTransition(from, to, duration) {
+  transition = { progress: 0, from, to, duration: duration || 0.4 };
+}
+// Catch burst rings
+let catchBursts = []; // {x, y, radius, maxRadius, color, alpha}
+// Score count-up on results
+let scoreCountUp = { current: 0, target: 0, done: false };
+// Power-up expiry flash
+let powerupFlashTimer = 0;
 let bgmPlaying = false;
 let bgmGain = null;
 
@@ -2296,7 +2307,7 @@ function spawnItem() {
   // v7.0: Tag with season rarity for glow effect
   const itemRarity = type === BLINDBOX ? null : (type.isBomb || type.isPower || type === CLOCK || type === LUCKY) ? null : getRarityForDrop();
   const raritySlowdown = itemRarity === 'legendary' || itemRarity === 'secret' ? 0.8 : itemRarity === 'epic' ? 0.9 : 1;
-  items.push({ x, y:-25, type, speed:spd * raritySlowdown, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0, rarity:itemRarity });
+  items.push({ x, y:-25, type, speed:spd * raritySlowdown, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0, rarity:itemRarity, spawnScale:0 });
 
   // Random Hello Kitty Shower event (~1.5% per spawn, after 10s)
   if (!hkShower.active && gameTime > 10 && Math.random() < 0.015) triggerHelloKittyShower();
@@ -2595,7 +2606,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.20', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.21', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2879,7 +2890,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.20', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.21', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3207,7 +3218,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.20 Update', W/2, H/2 - 172);
+  X.fillText('v10.21 Update', W/2, H/2 - 172);
 
   const features = [
     '\uD83C\uDF6A Girl Scout Cookie Day - 6 LIMITED items!',
@@ -3457,7 +3468,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.20 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.21 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4204,7 +4215,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.20', W-10, H-8);
+  X.fillText('v10.21', W-10, H-8);
 }
 
 // ====== SETTINGS SCREEN ======
@@ -4349,12 +4360,20 @@ function drawResults() {
   X.strokeText(isNew ? T('newRecord') : T('greatJob'), W/2, y);
   X.fillText(isNew ? T('newRecord') : T('greatJob'), W/2, y);
 
-  // Score (hero, centered, lots of space)
+  // Score (hero, centered, count-up animation)
   y += 70;
+  if (!scoreCountUp.done) {
+    scoreCountUp.current += Math.max(1, Math.ceil((scoreCountUp.target - scoreCountUp.current) * 0.08));
+    if (scoreCountUp.current >= scoreCountUp.target) { scoreCountUp.current = scoreCountUp.target; scoreCountUp.done = true; }
+  }
+  const displayScore = scoreCountUp.done ? score : scoreCountUp.current;
+  const countScale = scoreCountUp.done ? 1 : 1 + Math.sin(frame * 0.3) * 0.03;
+  X.save(); X.translate(W/2, y); X.scale(countScale, countScale);
   X.fillStyle = '#fff'; X.strokeStyle = isNew ? '#ff1493' : '#e91e63'; X.lineWidth = 5;
-  X.font = 'bold 72px "Fredoka One",sans-serif';
-  X.strokeText(score, W/2, y);
-  X.fillText(score, W/2, y);
+  X.font = 'bold 72px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.strokeText(displayScore, 0, 0);
+  X.fillText(displayScore, 0, 0);
+  X.restore();
 
   // Stats line (clean, subtle)
   y += 50;
@@ -4400,7 +4419,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.20', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.21', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4722,6 +4741,7 @@ function update(dt) {
         maxCombo = Math.max(maxCombo, combo);
         addSpark(it.x, it.y, it.type.color, 5);
         addText(it.x, it.y-20, '+'+Math.floor(pts), it.type.color);
+        catchBursts.push({ x:it.x, y:it.y, radius:8, maxRadius: combo >= 5 ? 50 : 35, color:it.type.color, alpha:0.6 });
         shake(combo >= 10 ? 4 : 2);
         sndCatch();
         // v7.0: Collection from regular catches (rarity-based)
@@ -4811,6 +4831,8 @@ function update(dt) {
 
   if (gameTime >= ROUND) {
     state = 'results';
+    startTransition('playing', 'results', 0.5);
+    scoreCountUp = { current: 0, target: score, done: false };
     stopBGM();
     texts = []; sparkles = []; // Clear gameplay text/spark effects
     // v8.0 Challenge evaluation
@@ -4902,21 +4924,53 @@ function drawGame() {
   }
   drawPurinSide(); drawFlyC();
   items.forEach(it => {
+    // Spawn pop-in animation
+    if (it.spawnScale !== undefined && it.spawnScale < 1) {
+      it.spawnScale = Math.min(1, it.spawnScale + 0.08);
+    }
+    const ss = it.spawnScale !== undefined ? it.spawnScale : 1;
+    X.save();
+    if (ss < 1) {
+      const ease = 1 - Math.pow(1 - ss, 3); // ease-out cubic
+      X.translate(it.x, it.y);
+      X.scale(ease, ease);
+      X.translate(-it.x, -it.y);
+    }
     // v7.0: Rarity glow ring on rare+ items
     if (it.rarity && it.rarity !== 'common') {
       const tier = getRarityTier(it.rarity);
       const gc = it.rarity === 'secret' ? `hsl(${(frame*5)%360},80%,60%)` : (tier.color === 'rainbow' ? '#ff69b4' : tier.color);
       const pulse = 1 + Math.sin(frame * 0.12 + it.wobble) * 0.15;
-      X.save(); X.globalAlpha = 0.5 * pulse;
+      X.globalAlpha = 0.5 * pulse;
       X.strokeStyle = gc; X.lineWidth = it.rarity === 'legendary' ? 3 : 2;
       X.beginPath(); X.arc(it.x, it.y, it.size * 1.4 * pulse, 0, Math.PI*2); X.stroke();
       X.globalAlpha = 0.1;
       X.fillStyle = gc; X.beginPath(); X.arc(it.x, it.y, it.size * 1.2, 0, Math.PI*2); X.fill();
-      X.restore();
+      X.globalAlpha = 1;
     }
     it.type.draw(it.x, it.y, it.size);
+    X.restore();
   });
   drawPlayer();
+  // Catch burst rings
+  for (let i = catchBursts.length - 1; i >= 0; i--) {
+    const b = catchBursts[i];
+    b.radius += (b.maxRadius - b.radius) * 0.15;
+    b.alpha -= 0.03;
+    if (b.alpha <= 0) { catchBursts.splice(i, 1); continue; }
+    X.save(); X.globalAlpha = b.alpha;
+    X.strokeStyle = b.color; X.lineWidth = 2.5;
+    X.beginPath(); X.arc(b.x, b.y, b.radius, 0, Math.PI*2); X.stroke();
+    X.restore();
+  }
+  // Power-up expiry warning flash
+  const expireSoon = (powerups.magnet > 0 && powerups.magnet < 1.5) || (powerups.double > 0 && powerups.double < 1.5) || (powerups.shield && powerups.shieldTimer < 1.5);
+  if (expireSoon) {
+    powerupFlashTimer += 1/60;
+    if (Math.sin(powerupFlashTimer * 12) > 0) {
+      X.fillStyle = 'rgba(255,0,0,0.08)'; X.fillRect(0, 0, W, H);
+    }
+  } else { powerupFlashTimer = 0; }
   // ninja removed
   // Hello Kitty Shower overlay
   if (hkShower.active) {
@@ -5149,13 +5203,24 @@ function loop(timestamp) {
       drawResults();
       if (showRatePrompt) drawRatePrompt();
     }
+    // Screen transition overlay
+    if (transition) {
+      transition.progress += dt / transition.duration;
+      if (transition.progress >= 1) { transition = null; }
+      else {
+        const t = transition.progress;
+        const alpha = t < 0.5 ? t * 2 : (1 - t) * 2;
+        X.fillStyle = `rgba(255,224,236,${alpha * 0.7})`;
+        X.fillRect(0, 0, W, H);
+      }
+    }
   } catch(e) {}
 
   if (useRAF) loopId = requestAnimationFrame(loop);
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.20') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.21') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5200,6 +5265,9 @@ function getMenuBtnY() {
 
 function startGame() {
   state = 'playing';
+  startTransition('menu', 'playing', 0.35);
+  scoreCountUp = { current: 0, target: 0, done: false };
+  catchBursts = [];
   score=0; combo=0; maxCombo=0; caught=0; missed=0;
   gameTime=0; items=[]; sparkles=[]; texts=[]; trail=[];
   ROUND = 25; gameLevel = 1; prevLevel = 1;
@@ -5239,7 +5307,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.20'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.21'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
