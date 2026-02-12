@@ -1,5 +1,10 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.13 - Leaderboard Fix + Event Button Sync (2026-02-12)
+- Fixed: Menu button tap zones now sync with event banners (leaderboard, shop, etc.)
+- Fixed: Multiple simultaneous events properly offset all interactive elements
+- All buttons (Blind Box, Collection, Shop, Leaderboard, Challenges, Outfits) now correctly tappable during events
+
 ## v10.12 - Girl Scout Cookie Day Event (2026-02-12)
 - 24-HOUR Girl Scout Cookie Day event (Feb 12 only!)
 - 6 LIMITED exclusive items only available today:
