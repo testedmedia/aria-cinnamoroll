@@ -1,5 +1,10 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.17 - Onboarding Priority Fix (2026-02-12)
+- Fixed: Onboarding now renders ABOVE daily login calendar (was being hidden)
+- Fixed: Login calendar suppressed during onboarding flow
+- Onboarding carousel properly shows on first-ever launch
+
 ## v10.16 - Settings & Onboarding (2026-02-12)
 - Full settings screen accessible from gear icon on menu
 - Sound effects toggle (on/off with pill switch)
