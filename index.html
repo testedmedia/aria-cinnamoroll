@@ -633,6 +633,18 @@ const EVENTS_CONFIG = [
     particles: 'hearts'
   },
   {
+    id: 'girlscout_2026',
+    name: 'Girl Scout Cookie Day',
+    emoji: '🍪',
+    startDate: '2026-02-12',
+    endDate: '2026-02-12',
+    seasonalTag: 'girlscout',
+    bgGradient: ['#e8f5e9','#c8e6c9','#a5d6a7','#dcedc8'],
+    accentColor: '#2e7d32',
+    bannerText: 'GIRL SCOUT COOKIE DAY',
+    particles: 'cookies'
+  },
+  {
     id: 'spring_2026',
     name: 'Cherry Blossom Festival',
     emoji: '🌸',
@@ -719,6 +731,13 @@ const SEASON_ITEMS = [
   { id:'valentine-cupid-cinna', name:'Cupid Cinnamoroll', cat:'sanrio', rarity:'epic', color:'#89c4f4', emoji:'💘', charKey:'cinna', seasonal:'valentine' },
   { id:'valentine-love-cookie', name:'Love Letter Cookie', cat:'sweet', rarity:'rare', color:'#ff1493', emoji:'💌', charKey:null, seasonal:'valentine' },
   { id:'valentine-purin', name:'Valentine Pompompurin', cat:'sanrio', rarity:'legendary', color:'#fdd835', emoji:'💝', charKey:'purin', seasonal:'valentine' },
+  // Girl Scout Cookie Day (Feb 12 - 24hr only!)
+  { id:'gs-thin-mint-boba', name:'Thin Mint Boba', cat:'boba', rarity:'epic', color:'#2e7d32', emoji:'🍪', charKey:null, seasonal:'girlscout' },
+  { id:'gs-samoa-treat', name:'Samoa Cookie Treat', cat:'sweet', rarity:'rare', color:'#8d6e63', emoji:'🥥', charKey:null, seasonal:'girlscout' },
+  { id:'gs-cookie-cinna', name:'Cookie Scout Cinnamoroll', cat:'sanrio', rarity:'legendary', color:'#4caf50', emoji:'🏕️', charKey:'cinna', seasonal:'girlscout' },
+  { id:'gs-tagalong-kitty', name:'Tagalong Hello Kitty', cat:'sanrio', rarity:'epic', color:'#ff6f00', emoji:'🍫', charKey:'hk', seasonal:'girlscout' },
+  { id:'gs-smores-purin', name:'S\'mores Pompompurin', cat:'sanrio', rarity:'legendary', color:'#fdd835', emoji:'🔥', charKey:'purin', seasonal:'girlscout' },
+  { id:'gs-lemonade-melody', name:'Lemonade My Melody', cat:'sanrio', rarity:'epic', color:'#fff176', emoji:'🍋', charKey:'melody', seasonal:'girlscout' },
   // Spring Cherry Blossom (Mar 1-14)
   { id:'spring-sakura-boba', name:'Sakura Boba', cat:'boba', rarity:'rare', color:'#ffb7c5', emoji:'🌸', charKey:null, seasonal:'spring' },
   { id:'spring-hanami-cake', name:'Hanami Cake', cat:'sweet', rarity:'epic', color:'#ff69b4', emoji:'🎂', charKey:'melody', seasonal:'spring' },
@@ -760,6 +779,7 @@ const ITEM_CATEGORIES = {
   sanrio: { label: 'Sanrio', filter: i => i.cat === 'sanrio' },
   secret: { label: 'Secret', filter: i => i.cat === 'secret' },
   valentine: { label: '💝', filter: i => i.seasonal === 'valentine' },
+  girlscout: { label: '🍪', filter: i => i.seasonal === 'girlscout' },
 };
 
 // v8.0 Star Shop
@@ -989,14 +1009,20 @@ function getActiveEvent() {
   }
   return null;
 }
+function getAllActiveEvents() {
+  const now = new Date();
+  return EVENTS_CONFIG.filter(ev => now >= new Date(ev.startDate) && now <= new Date(ev.endDate + 'T23:59:59'));
+}
+function isGirlScoutActive() {
+  return getAllActiveEvents().some(e => e.seasonalTag === 'girlscout');
+}
 // Backward compatibility
 function isValentineActive() {
-  const ev = getActiveEvent();
-  return ev && ev.seasonalTag === 'valentine';
+  return getAllActiveEvents().some(e => e.seasonalTag === 'valentine');
 }
 function getRandomSeasonItem(rarity) {
-  const ev = getActiveEvent();
-  const activeTags = ev ? [ev.seasonalTag] : [];
+  const activeEvents = getAllActiveEvents();
+  const activeTags = activeEvents.map(e => e.seasonalTag);
   const pool = SEASON_ITEMS.filter(i => i.rarity === rarity && (!i.seasonal || activeTags.includes(i.seasonal)));
   if (pool.length === 0) return SEASON_ITEMS[0];
   return pool[Math.floor(Math.random() * pool.length)];
@@ -2336,8 +2362,15 @@ function drawCelebration() {
 function drawBg() {
   bgHue = (bgHue + 0.15) % 360;
   const vActive = isValentineActive();
+  const gsEvent = isGirlScoutActive();
   const g = X.createLinearGradient(0,0,0,H);
-  if (vActive) {
+  if (gsEvent) {
+    // Girl Scout green/cream gradient
+    g.addColorStop(0, '#e8f5e9');
+    g.addColorStop(0.3, '#c8e6c9');
+    g.addColorStop(0.6, '#dcedc8');
+    g.addColorStop(1, '#f1f8e9');
+  } else if (vActive) {
     // Valentine pink/red gradient
     g.addColorStop(0, '#ffe0ec');
     g.addColorStop(0.3, '#ffc1d6');
@@ -2350,14 +2383,26 @@ function drawBg() {
     g.addColorStop(1, `hsl(${(bgHue+140)%360},60%,88%)`);
   }
   X.fillStyle = g; X.fillRect(0,0,W,H);
-  X.fillStyle = vActive ? 'rgba(255,182,193,0.25)' : 'rgba(255,255,255,0.3)';
+  X.fillStyle = gsEvent ? 'rgba(165,214,167,0.3)' : vActive ? 'rgba(255,182,193,0.25)' : 'rgba(255,255,255,0.3)';
   for (let i = 0; i < 15; i++) {
     X.beginPath();
     X.arc(((i*73+frame*0.2)%(W+40))-20, ((i*97+frame*0.1)%(H+40))-20, 6+(i%3)*3, 0, Math.PI*2);
     X.fill();
   }
+  if (gsEvent) {
+    // Floating cookie particles
+    X.globalAlpha = 0.25;
+    X.font = '16px sans-serif'; X.textAlign = 'center';
+    const cookieEmojis = ['\uD83C\uDF6A','\uD83E\uDDC1','\uD83C\uDF6B','\uD83C\uDF53','\uD83E\uDD5C'];
+    for (let i = 0; i < 12; i++) {
+      const cx = ((i*79+frame*(0.25+i*0.03))%(W+50))-25;
+      const cy = ((i*101+frame*(0.12+i*0.02))%(H+50))-25;
+      X.fillText(cookieEmojis[i%cookieEmojis.length], cx, cy);
+    }
+    X.globalAlpha = 1;
+  }
   const heartCount = vActive ? 14 : 4;
-  const heartAlpha = vActive ? 0.22 : 0.12;
+  const heartAlpha = (vActive && !gsEvent) ? 0.22 : gsEvent ? 0.08 : 0.12;
   X.globalAlpha = heartAlpha;
   X.fillStyle = vActive ? '#ff69b4' : X.fillStyle;
   for (let i = 0; i < heartCount; i++) {
@@ -2468,7 +2513,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.11', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.12', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2752,7 +2797,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.11', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.12', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3080,17 +3125,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.11 - Retina HD Graphics!', W/2, H/2 - 172);
+  X.fillText('v10.12 - Girl Scout Cookie Day!', W/2, H/2 - 172);
 
   const features = [
+    '\uD83C\uDF6A 24-HOUR Girl Scout Event LIVE!',
+    '\uD83C\uDFD5\uFE0F 6 LIMITED exclusive items TODAY ONLY!',
+    '\uD83E\uDD5C Thin Mint Boba \u2022 Samoa Cookie Treat',
+    '\uD83C\uDF6B Tagalong Hello Kitty \u2022 S\'mores Purin',
+    '\uD83C\uDF3F Cookie Scout Cinnamoroll (LEGENDARY!)',
+    '\uD83C\uDF4B Lemonade My Melody',
     '\u2728 Retina HD crispy graphics!',
-    '\uD83D\uDCF1 iPhone-optimized rendering!',
-    '\uD83C\uDFA8 HiDPI canvas at device resolution!',
-    '\uD83E\uDDE1 4 Girl Scout outfits (free!)',
-    '\uD83D\uDC57 20 Total outfits to collect!',
-    '\uD83D\uDCF7 Upload YOUR photo as avatar!',
-    '\uD83C\uDF38 Seasonal & Blind Box outfits!',
-    '\uD83D\uDCDD Change name anytime in settings!',
+    '\uD83D\uDCF1 Green cookie-themed backgrounds!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3330,7 +3375,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.11 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.12 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -3976,28 +4021,45 @@ function drawOutfitPreview(ox, oy, outfitId, scale) {
 function drawMenu() {
   drawBg();
   const vMenu = isValentineActive();
+  const gsMenu = isGirlScoutActive();
 
   // Title
-  X.fillStyle = '#fff'; X.strokeStyle = vMenu ? '#ff1493' : '#e91e63'; X.lineWidth = 5;
+  X.fillStyle = '#fff'; X.strokeStyle = gsMenu ? '#2e7d32' : vMenu ? '#ff1493' : '#e91e63'; X.lineWidth = 5;
   X.font = 'bold 32px "Fredoka One",cursive';
   X.textAlign = 'center'; X.textBaseline = 'middle';
   X.strokeText(T('title1'), W/2, 44);
   X.fillText(T('title1'), W/2, 44);
-  X.strokeStyle = vMenu ? '#ff69b4' : '#ff8a9e';
+  X.strokeStyle = gsMenu ? '#4caf50' : vMenu ? '#ff69b4' : '#ff8a9e';
   X.strokeText(T('title2'), W/2, 80);
   X.fillText(T('title2'), W/2, 80);
 
-  // Valentine's Event banner (below title with breathing room)
+  // Event banners (below title with breathing room)
   let nextY = 108;
+  const gsActive = isGirlScoutActive();
+  if (gsActive) {
+    // Girl Scout 24hr event banner (priority - shows first)
+    const gsEnd = new Date('2026-02-13T00:00:00');
+    const gsNow = new Date();
+    const gsHoursLeft = Math.max(0, Math.ceil((gsEnd - gsNow) / 3600000));
+    const gsMin = Math.max(0, Math.ceil(((gsEnd - gsNow) % 3600000) / 60000));
+    nextY = 114;
+    X.fillStyle = 'rgba(46,125,50,0.18)'; rrc(W/2, nextY, 300, 34, 17);
+    X.fillStyle = '#2e7d32'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83C\uDF6A GIRL SCOUT DAY \u2022 ' + gsHoursLeft + 'h ' + gsMin + 'm left!', W/2, nextY + 1);
+    nextY += 22;
+    X.fillStyle = 'rgba(46,125,50,0.12)'; rrc(W/2, nextY, 260, 20, 10);
+    X.fillStyle = '#558b2f'; X.font = 'bold 9px "Quicksand",sans-serif';
+    X.fillText('6 LIMITED items \u2022 TODAY ONLY!', W/2, nextY + 1);
+    nextY += 28;
+  }
   if (vMenu) {
     const vEnd = new Date('2026-02-16T00:00:00');
     const vNow = new Date();
     const vDays = Math.max(0, Math.ceil((vEnd - vNow) / 86400000));
-    nextY = 120;
-    X.fillStyle = 'rgba(255,20,147,0.15)'; rrc(W/2, nextY, 260, 32, 16);
-    X.fillStyle = '#ff1493'; X.font = 'bold 11px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillStyle = 'rgba(255,20,147,0.15)'; rrc(W/2, nextY, 260, 28, 14);
+    X.fillStyle = '#ff1493'; X.font = 'bold 10px "Fredoka One",sans-serif'; X.textAlign = 'center';
     X.fillText('\uD83D\uDC98 Valentine\'s Event \u2022 ' + vDays + ' days left', W/2, nextY + 1);
-    nextY += 38;
+    nextY += 34;
   }
 
   // Characters
@@ -4017,7 +4079,7 @@ function drawMenu() {
 
   // TAP TO PLAY (big, clean)
   const playY = infoY + 40;
-  X.fillStyle = vMenu ? '#ff1493' : '#ff8a9e';
+  X.fillStyle = gsMenu ? '#2e7d32' : vMenu ? '#ff1493' : '#ff8a9e';
   rrc(W/2, playY, 220, 52, 26);
   X.fillStyle = '#fff'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText(T('tapToPlay'), W/2, playY+2);
@@ -4060,7 +4122,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.11', W-10, H-8);
+  X.fillText('v10.12', W-10, H-8);
 }
 
 function drawResults() {
@@ -4122,7 +4184,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.11', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.12', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4765,7 +4827,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.11') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.12') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4847,7 +4909,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.11'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.12'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5185,7 +5247,7 @@ function buildShareCard() {
   const gridRows = [];
   for(let i=0; i<itemGrid.length; i+=5) gridRows.push(itemGrid.slice(i,i+5));
   const grid = gridRows.join('\n') || '\u2B1C\u2B1C\u2B1C';
-  const valTag = isValentineActive() ? ' \uD83D\uDC98' : '';
+  const valTag = isGirlScoutActive() ? ' \uD83C\uDF6A' : isValentineActive() ? ' \uD83D\uDC98' : '';
   const name = playerName || 'Someone';
   return `\uD83C\uDF38 ${name} scored ${score} in Aria's Sanrio Adventure!${valTag}\n\n${grid}\n\n\uD83C\uDFAF ${caught} caught | \uD83D\uDD25 ${maxCombo}x combo | \u2728 ${getCollectedCount()}/${TOTAL_ITEMS}\n\nCan you beat me? \uD83D\uDC49`;
 }

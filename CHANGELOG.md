@@ -1,5 +1,17 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.12 - Girl Scout Cookie Day Event (2026-02-12)
+- 24-HOUR Girl Scout Cookie Day event (Feb 12 only!)
+- 6 LIMITED exclusive items only available today:
+  - Thin Mint Boba (epic), Samoa Cookie Treat (rare)
+  - Cookie Scout Cinnamoroll (legendary), Tagalong Hello Kitty (epic)
+  - S'mores Pompompurin (legendary), Lemonade My Melody (epic)
+- Green cookie-themed background with floating cookie/treat particles
+- Girl Scout event banner with live hours+minutes countdown
+- Multiple simultaneous events supported (Girl Scout + Valentine overlap)
+- Girl Scout collection tab (cookie emoji filter)
+- Green-themed title, play button, and UI accents during event
+
 ## v10.11 - Retina HD Graphics (2026-02-12)
 - Retina/HiDPI canvas rendering at device pixel ratio (up to 3x)
 - Crispy text, smooth edges, and sharp graphics on all iPhone/iPad displays
