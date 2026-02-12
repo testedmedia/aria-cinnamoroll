@@ -561,6 +561,9 @@ function getLevel(s) { for (let i = LEVEL_THRESHOLDS.length-1; i >= 0; i--) { if
 let sparkles = [], texts = [], items = [];
 let bgHue = 0, shakeX = 0, shakeY = 0;
 let fever = false, feverTimer = 0;
+let achievementPopup = null; // {name, badge, timer}
+let bgmPlaying = false;
+let bgmGain = null;
 
 // Scarcity Engine: Near-miss mechanic
 let nearMissActive = false;
@@ -1276,6 +1279,9 @@ function checkAchievement(id) {
   // Auto-unlock milestone outfits on collection growth
   const cc = getCollectedCount();
   OUTFITS.forEach(o => { if (o.unlock === 'milestone' && cc >= o.milestone) unlockOutfit(o.id); });
+  // Show achievement popup
+  const achDef = ACHIEVEMENTS_DEF.find(a => a.id === id);
+  if (achDef) showAchievementPopup(achDef.name, achDef.badge);
   saveGame();
   return true;
 }
@@ -1478,6 +1484,66 @@ function sndCelebration() {
     setTimeout(() => playTone(2000 + Math.random()*1000, 0.15, 'sine', 0.03), 1200 + i * 200);
   }
   haptic([10,30,10,30,10,50,10,80]);
+}
+
+// Background Music - chill kawaii lo-fi loop (synthesized)
+function startBGM() {
+  if (bgmPlaying || !AC) return;
+  try {
+    bgmGain = AC.createGain();
+    bgmGain.gain.value = 0.04;
+    bgmGain.connect(AC.destination);
+    // Pentatonic melody loop: C D E G A
+    const notes = [262,294,330,392,440,392,330,294,262,330,392,440,523,440,392,330];
+    const dur = 0.4;
+    function playBGMLoop() {
+      if (!bgmPlaying || !AC) return;
+      const now = AC.currentTime;
+      notes.forEach((f, i) => {
+        const o = AC.createOscillator();
+        const g = AC.createGain();
+        o.type = 'sine';
+        o.frequency.value = f;
+        g.gain.value = 0.03;
+        g.gain.setTargetAtTime(0.001, now + i * dur + dur * 0.8, 0.05);
+        o.connect(g); g.connect(bgmGain);
+        o.start(now + i * dur);
+        o.stop(now + i * dur + dur);
+        // Harmony (fifth above, quieter)
+        const o2 = AC.createOscillator();
+        const g2 = AC.createGain();
+        o2.type = 'triangle';
+        o2.frequency.value = f * 1.5;
+        g2.gain.value = 0.01;
+        g2.gain.setTargetAtTime(0.001, now + i * dur + dur * 0.8, 0.05);
+        o2.connect(g2); g2.connect(bgmGain);
+        o2.start(now + i * dur);
+        o2.stop(now + i * dur + dur);
+      });
+      // Bass pad
+      const bass = AC.createOscillator();
+      const bg = AC.createGain();
+      bass.type = 'sine';
+      bass.frequency.value = 131; // C3
+      bg.gain.value = 0.025;
+      bg.gain.setTargetAtTime(0.001, now + notes.length * dur - 0.1, 0.1);
+      bass.connect(bg); bg.connect(bgmGain);
+      bass.start(now); bass.stop(now + notes.length * dur);
+      setTimeout(playBGMLoop, notes.length * dur * 1000);
+    }
+    bgmPlaying = true;
+    playBGMLoop();
+  } catch(e) {}
+}
+function stopBGM() {
+  bgmPlaying = false;
+  if (bgmGain) { try { bgmGain.gain.setTargetAtTime(0, AC.currentTime, 0.1); } catch(e) {} }
+}
+
+// Achievement popup trigger
+function showAchievementPopup(name, badge) {
+  achievementPopup = { name, badge: badge || '\uD83C\uDFC5', timer: 3.0 };
+  sndCelebration();
 }
 
 // ====== IMAGES ======
@@ -2513,7 +2579,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.14', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.15', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2797,7 +2863,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.14', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.15', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3125,17 +3191,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.14 - Girl Scout Cookie Day!', W/2, H/2 - 172);
+  X.fillText('v10.15 - Premium Game Juice!', W/2, H/2 - 172);
 
   const features = [
-    '\uD83C\uDF6A 24-HOUR Girl Scout Event LIVE!',
-    '\uD83C\uDFD5\uFE0F 6 LIMITED exclusive items TODAY ONLY!',
-    '\uD83E\uDD5C Thin Mint Boba \u2022 Samoa Cookie Treat',
-    '\uD83C\uDF6B Tagalong Hello Kitty \u2022 S\'mores Purin',
-    '\uD83C\uDF3F Cookie Scout Cinnamoroll (LEGENDARY!)',
-    '\uD83C\uDF4B Lemonade My Melody',
+    '\uD83C\uDFB5 Background music during gameplay!',
+    '\uD83C\uDFC5 Achievement unlock popups!',
+    '\uD83C\uDF08 Rainbow fever mode border glow!',
+    '\u26A1 Speed lines at high combos!',
+    '\uD83D\uDE31 "SO CLOSE!" near-miss alerts!',
+    '\uD83C\uDF6A Girl Scout Cookie Day event!',
     '\u2728 Retina HD crispy graphics!',
-    '\uD83D\uDCF1 Green cookie-themed backgrounds!',
+    '\uD83C\uDFC6 Play Again = instant restart!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3375,7 +3441,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.14 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.15 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4122,7 +4188,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.14', W-10, H-8);
+  X.fillText('v10.15', W-10, H-8);
 }
 
 function drawResults() {
@@ -4190,7 +4256,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.14', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.15', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4532,7 +4598,14 @@ function update(dt) {
     }
 
     if (it.y > H-30) {
-      if (!it.type.isBomb && !it.type.isPower) { combo = 0; missed++; fever = false; }
+      if (!it.type.isBomb && !it.type.isPower) {
+        // Near-miss: was the player close to catching it?
+        const nmDist = Math.abs(it.x - P.x);
+        if (nmDist < 60 && it.rarity && it.rarity !== 'common' && Math.random() < 0.5) {
+          nearMissActive = true; nearMissTimer = 0.8;
+        }
+        combo = 0; missed++; fever = false;
+      }
       items.splice(i, 1);
     }
   }
@@ -4566,6 +4639,7 @@ function update(dt) {
 
   if (gameTime >= ROUND) {
     state = 'results';
+    stopBGM();
     texts = []; sparkles = []; // Clear gameplay text/spark effects
     // v8.0 Challenge evaluation
     if (saveData.challenges && saveData.challenges.date === getTodayStr()) {
@@ -4621,6 +4695,32 @@ function drawGame() {
   X.save();
   X.translate(shakeX, shakeY);
   drawBg(); drawGround();
+  // Fever mode visuals: rainbow border glow + pulsing vignette
+  if (hkShower.active) {
+    const pulse = 0.3 + Math.sin(frame * 0.15) * 0.15;
+    // Rainbow border
+    const hue = (frame * 8) % 360;
+    X.strokeStyle = `hsla(${hue},100%,60%,${pulse})`;
+    X.lineWidth = 6;
+    X.strokeRect(3, 3, W-6, H-6);
+    X.strokeStyle = `hsla(${(hue+120)%360},100%,60%,${pulse*0.6})`;
+    X.lineWidth = 3;
+    X.strokeRect(8, 8, W-16, H-16);
+  }
+  // Speed lines during high combo (>= 8)
+  if (combo >= 8) {
+    X.save();
+    const slAlpha = Math.min(0.25, (combo - 8) * 0.03);
+    X.globalAlpha = slAlpha;
+    X.strokeStyle = '#fff';
+    X.lineWidth = 1.5;
+    for (let i = 0; i < 8; i++) {
+      const sx = Math.random() * W;
+      const sy = ((i * 97 + frame * 12) % (H + 100)) - 50;
+      X.beginPath(); X.moveTo(sx, sy); X.lineTo(sx + (Math.random()-0.5)*20, sy + 40 + Math.random()*30); X.stroke();
+    }
+    X.restore();
+  }
   drawPurinSide(); drawFlyC();
   items.forEach(it => {
     // v7.0: Rarity glow ring on rare+ items
@@ -4680,6 +4780,46 @@ function drawGame() {
     if (screenFlash.timer <= 0) screenFlash = null;
   }
   drawHUD();
+  // Achievement popup overlay (slides down from top)
+  if (achievementPopup) {
+    achievementPopup.timer -= 1/60;
+    const ap = achievementPopup;
+    const slideIn = Math.min(1, (3.0 - ap.timer) * 4);
+    const slideOut = ap.timer < 0.5 ? ap.timer / 0.5 : 1;
+    const apY = -50 + slideIn * 110;
+    X.globalAlpha = slideOut;
+    // Gold banner
+    X.fillStyle = 'rgba(255,215,0,0.95)';
+    rrc(W/2, apY, 280, 50, 25);
+    X.strokeStyle = '#b8860b'; X.lineWidth = 2;
+    X.beginPath();
+    const rx=W/2-140, ry=apY-25, rw=280, rh=50, rr2=25;
+    X.moveTo(rx+rr2,ry); X.lineTo(rx+rw-rr2,ry); X.quadraticCurveTo(rx+rw,ry,rx+rw,ry+rr2);
+    X.lineTo(rx+rw,ry+rh-rr2); X.quadraticCurveTo(rx+rw,ry+rh,rx+rw-rr2,ry+rh);
+    X.lineTo(rx+rr2,ry+rh); X.quadraticCurveTo(rx,ry+rh,rx,ry+rh-rr2);
+    X.lineTo(rx,ry+rr2); X.quadraticCurveTo(rx,ry,rx+rr2,ry);
+    X.stroke();
+    // Badge + text
+    X.fillStyle = '#5d4037'; X.font = 'bold 18px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    X.fillText(ap.badge + ' Achievement Unlocked!', W/2, apY - 5);
+    X.fillStyle = '#8d6e63'; X.font = 'bold 12px "Quicksand",sans-serif';
+    X.fillText(ap.name, W/2, apY + 14);
+    X.globalAlpha = 1;
+    if (ap.timer <= 0) achievementPopup = null;
+  }
+  // Near-miss "CLOSE!" feedback
+  if (nearMissActive && nearMissTimer > 0) {
+    nearMissTimer -= 1/60;
+    const nmAlpha = Math.min(1, nearMissTimer * 3);
+    X.globalAlpha = nmAlpha;
+    X.fillStyle = '#ff6b6b'; X.font = 'bold 20px "Fredoka One",sans-serif';
+    X.textAlign = 'center';
+    const nmY = H/2 - 60 - (1 - nmAlpha) * 30;
+    X.fillText('SO CLOSE!', W/2, nmY);
+    X.globalAlpha = 1;
+    if (nearMissTimer <= 0) nearMissActive = false;
+  }
   X.restore();
 
   // Blind box reveal popup overlay
@@ -4834,7 +4974,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.14') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.15') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4904,6 +5044,8 @@ function startGame() {
   applyShopBoosts();
   if (!saveData.challenges||saveData.challenges.date!==getTodayStr()) { saveData.challenges={date:getTodayStr(),list:generateDailyChallenges(),progress:[0,0,0]}; }
   ensureAudio();
+  startBGM();
+  achievementPopup = null;
   checkStreak();
   saveData.totalRoundsPlayed++;
   saveGame();
@@ -4916,7 +5058,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.14'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.15'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;

@@ -1,5 +1,13 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.15 - Premium Game Juice (2026-02-12)
+- Background music: chill kawaii lo-fi synth loop during gameplay
+- Achievement unlock popups: gold banner slides down with badge + name
+- Fever mode visuals: rainbow border glow + pulsing vignette during Hello Kitty Shower
+- Speed lines: white streaks appear at 8x+ combo (intensity scales with combo)
+- Near-miss "SO CLOSE!" feedback when rare+ items barely missed
+- BGM auto-starts on play, stops on game over
+
 ## v10.14 - Results Screen Revamp (2026-02-12)
 - "Play Again" now instantly starts a new game (no more going back to menu)
 - New "Main Menu" button on results screen for returning to home
