@@ -848,6 +848,11 @@ const OUTFITS = [
   { id:'valentine_heart', name:'Valentine Crown', desc:'Feb only (30\u2B50)', unlock:'seasonal', cost:30, startDate:'02-01', endDate:'02-28', rarity:'epic' },
   { id:'spring_bunny', name:'Spring Bunny', desc:'Mar-May (25\u2B50)', unlock:'seasonal', cost:25, startDate:'03-01', endDate:'05-31', rarity:'epic' },
   { id:'summer_shades', name:'Summer Shades', desc:'Jun-Aug (20\u2B50)', unlock:'seasonal', cost:20, startDate:'06-01', endDate:'08-31', rarity:'rare' },
+  // Girl Scouts collection (FREE)
+  { id:'gs_beret', name:'Scout Beret', desc:'Free! Girl Scouts', unlock:'free', rarity:'common' },
+  { id:'gs_sash', name:'Scout Sash', desc:'Free! Girl Scouts', unlock:'free', rarity:'common' },
+  { id:'gs_cookie_hat', name:'Cookie Hat', desc:'Free! Girl Scouts', unlock:'free', rarity:'rare' },
+  { id:'gs_trefoil', name:'Trefoil Crown', desc:'Star Shop (15\u2B50)', unlock:'shop', cost:15, rarity:'rare' },
 ];
 const SPIN_SEGMENTS = [
   { label:'1\u2B50', reward:{type:'stars',amount:1}, color:'#ffcdd2', weight:30 },
@@ -2456,7 +2461,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.9', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.10', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2734,13 +2739,13 @@ function drawCollection() {
     rr(W-14, startY + scrollPct * (maxVisH - barH), 4, barH, 2);
   }
 
-  // Back button
-  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 32, 120, 36, 18);
-  X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('Back', W/2, H - 30);
+  // Back button (moved up to avoid iOS home gesture area)
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 58, 160, 42, 21);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.9', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.10', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3054,10 +3059,10 @@ function drawAchievements() {
     }
   });
 
-  // Back button
-  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 34, 130, 40, 20);
-  X.fillStyle = '#fff'; X.font = 'bold 15px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('Back', W/2, H - 32);
+  // Back button (moved up for iOS safe area)
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H - 58, 160, 42, 21);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('Back', W/2, H - 55);
 }
 
 function drawWhatsNew() {
@@ -3068,17 +3073,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.9 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.10 - Girl Scouts Update!', W/2, H/2 - 172);
 
   const features = [
-    '\uD83D\uDC57 16 Outfits! Shop, achieve, blind box!',
+    '\uD83E\uDDE1 4 NEW Girl Scout outfits!',
+    '\uD83C\uDF6A Scout Beret, Sash & Cookie Hat FREE!',
+    '\uD83D\uDC57 20 Total outfits to collect!',
     '\uD83D\uDCF7 Upload YOUR photo as avatar!',
-    '\uD83D\uDC51 Chef, Pirate, Angel, Devil & more!',
     '\uD83C\uDF38 Seasonal outfits (Valentine, Spring...)',
     '\uD83C\uDF81 Blind Box exclusive outfit drops!',
-    '\uD83C\uDFC6 Achievement reward outfits!',
-    '\uD83D\uDCDD Change your name anytime in settings!',
-    '\u2728 Pick your gender for your profile!',
+    '\uD83D\uDCDD Change your name anytime!',
+    '\u2728 Improved buttons & iOS support!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3185,7 +3190,7 @@ function drawShop() {
   if (shopMsgTimer>0) { shopMsgTimer--; X.fillStyle='#e91e63'; X.font='bold 12px "Quicksand",sans-serif'; X.textAlign='center'; X.fillText(shopMsg,W/2,H/2+240); }
 }
 function handleShopTap(x,y) {
-  if (Math.abs(x-(W/2+155))<18 && Math.abs(y-(H/2-242))<18) { showShop=false; return; }
+  if (Math.abs(x-(W/2+155))<28 && Math.abs(y-(H/2-242))<28) { showShop=false; return; }
 
   // Flash sale tap detection
   const flash = getFlashSale();
@@ -3318,7 +3323,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.9 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.10 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -3893,6 +3898,62 @@ function drawOutfitOnPlayer(px, py) {
     // Star on side
     X.fillStyle = '#ffd700'; X.font = '8px sans-serif'; X.textAlign = 'center';
     X.fillText('\u2B50', sx+20, sy+2);
+  } else if (outfit === 'gs_beret') {
+    // Girl Scout beret - green with trefoil
+    const bx = px, by = py - 22 + bob;
+    X.fillStyle = '#00703c';
+    X.beginPath(); X.ellipse(bx, by, 18, 8, 0, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(bx, by-4, 14, Math.PI, 0); X.fill();
+    // Trefoil badge
+    X.fillStyle = '#ffd700';
+    X.beginPath(); X.arc(bx-4, by-6, 3, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(bx+4, by-6, 3, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(bx, by-10, 3, 0, Math.PI*2); X.fill();
+  } else if (outfit === 'gs_sash') {
+    // Girl Scout sash - green diagonal sash with badges
+    const sx2 = px, sy2 = py + bob;
+    X.strokeStyle = '#00703c'; X.lineWidth = 8;
+    X.beginPath(); X.moveTo(sx2-18, sy2-18); X.lineTo(sx2+14, sy2+22); X.stroke();
+    X.strokeStyle = '#006633'; X.lineWidth = 6;
+    X.beginPath(); X.moveTo(sx2-18, sy2-18); X.lineTo(sx2+14, sy2+22); X.stroke();
+    // Merit badges (colorful circles)
+    const badges = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b'];
+    badges.forEach((c,i) => { X.fillStyle = c; X.beginPath(); X.arc(sx2-12+i*7, sy2-14+i*8, 3.5, 0, Math.PI*2); X.fill(); });
+  } else if (outfit === 'gs_cookie_hat') {
+    // Cookie hat - shaped like a Thin Mint
+    const cx2 = px, cy2 = py - 24 + bob;
+    // Cookie base (brown circle)
+    X.fillStyle = '#5d3a1a';
+    X.beginPath(); X.arc(cx2, cy2, 16, 0, Math.PI*2); X.fill();
+    // Mint green center
+    X.fillStyle = '#98d8a8';
+    X.beginPath(); X.arc(cx2, cy2, 12, 0, Math.PI*2); X.fill();
+    // Chocolate drizzle
+    X.strokeStyle = '#3e2409'; X.lineWidth = 1.5;
+    for (let i = -8; i <= 8; i += 4) { X.beginPath(); X.moveTo(cx2+i, cy2-10); X.lineTo(cx2+i+2, cy2+10); X.stroke(); }
+    // Text
+    X.fillStyle = '#fff'; X.font = 'bold 6px sans-serif'; X.textAlign = 'center';
+    X.fillText('COOKIE', cx2, cy2+2);
+  } else if (outfit === 'gs_trefoil') {
+    // Trefoil crown - golden trefoil tiara
+    const tx2 = px, ty2 = py - 20 + bob;
+    // Gold band
+    X.fillStyle = '#ffd700';
+    X.beginPath(); X.ellipse(tx2, ty2+4, 20, 6, 0, Math.PI, 0); X.fill();
+    // Three trefoil leaves
+    X.fillStyle = '#00703c';
+    X.beginPath(); X.arc(tx2-8, ty2-4, 6, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(tx2+8, ty2-4, 6, 0, Math.PI*2); X.fill();
+    X.beginPath(); X.arc(tx2, ty2-10, 6, 0, Math.PI*2); X.fill();
+    // Gold outlines
+    X.strokeStyle = '#ffd700'; X.lineWidth = 1.5;
+    X.beginPath(); X.arc(tx2-8, ty2-4, 6, 0, Math.PI*2); X.stroke();
+    X.beginPath(); X.arc(tx2+8, ty2-4, 6, 0, Math.PI*2); X.stroke();
+    X.beginPath(); X.arc(tx2, ty2-10, 6, 0, Math.PI*2); X.stroke();
+    // Sparkle
+    X.fillStyle = '#fff'; X.globalAlpha = 0.6+Math.sin(frame*0.1)*0.4;
+    X.font = '7px sans-serif'; X.textAlign = 'center';
+    X.fillText('\u2728', tx2+14, ty2-8); X.globalAlpha = 1;
   }
   X.restore();
 }
@@ -3992,7 +4053,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.9', W-10, H-8);
+  X.fillText('v10.10', W-10, H-8);
 }
 
 function drawResults() {
@@ -4054,7 +4115,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.9', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.10', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4697,7 +4758,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.9') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.10') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4779,7 +4840,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.9'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.10'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -4844,8 +4905,8 @@ function handleTap(x, y) {
     return;
   }
   if (showAchievements) {
-    if (Math.abs(x-W/2)<65 && Math.abs(y-(H-34))<22) { showAchievements = false; return; }
-    if (Math.abs(x-(W-22))<18 && Math.abs(y-30)<18) { showAchievements = false; return; }
+    if (Math.abs(x-W/2)<90 && Math.abs(y-(H-58))<28) { showAchievements = false; return; }
+    if (Math.abs(x-(W-22))<28 && Math.abs(y-30)<28) { showAchievements = false; return; }
     return;
   }
   if (showShowcase) {
@@ -4902,10 +4963,10 @@ function handleTap(x, y) {
     return;
   }
   if (showCollection) {
-    // Close X
-    if (Math.abs(x-(W-24))<18 && Math.abs(y-34)<18) { showCollection = false; gamePausedForBP = false; return; }
-    // Back button
-    if (Math.abs(x-W/2)<60 && Math.abs(y-(H-32))<20) { showCollection = false; gamePausedForBP = false; return; }
+    // Close X (enlarged hit area)
+    if (Math.abs(x-(W-24))<28 && Math.abs(y-34)<28) { showCollection = false; gamePausedForBP = false; return; }
+    // Back button (moved up, enlarged)
+    if (Math.abs(x-W/2)<90 && Math.abs(y-(H-58))<28) { showCollection = false; gamePausedForBP = false; return; }
     // Tab bar
     const tabs = Object.keys(ITEM_CATEGORIES);
     const tw = (W-30) / tabs.length;

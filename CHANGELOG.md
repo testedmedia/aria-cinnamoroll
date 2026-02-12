@@ -1,5 +1,12 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.10 - Girl Scouts Update (2026-02-12)
+- 4 new Girl Scout outfits: Scout Beret (free), Scout Sash (free), Cookie Hat (free), Trefoil Crown (15 stars)
+- 20 total outfits now available
+- Fixed: Back/Close buttons enlarged and moved up for iOS safe area (home indicator)
+- All X close buttons have larger hit areas for better touch response
+- iOS app compatibility improvements
+
 ## v10.9 - Outfit Economy + Custom Avatar (2026-02-11)
 - 16 outfits with 6 unlock types: free, milestone, shop, achievement, blind box, seasonal
 - Custom avatar upload: use your own photo as the in-game character
