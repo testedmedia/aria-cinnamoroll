@@ -489,14 +489,14 @@ function closeTutorial() {
 
 function buildTutorialItems() {
   const good = [
-    {name:'Donut',draw:drawDonut,pts:'+10',bg:'#fff0f5'},
-    {name:'Boba',draw:drawBoba,pts:'+15',bg:'#fef3e8'},
-    {name:'Capybara',draw:drawCapybara,pts:'+20',bg:'#f5ebe0'},
-    {name:'Star',draw:drawStar,pts:'+5',bg:'#fffde7'},
-    {name:'Heart',draw:drawHeart,pts:'+8',bg:'#fce4ec'},
-    {name:'Rainbow',draw:drawRainbow,pts:'+30',bg:'#f3e5f5'},
+    {name:'Donut',draw:drawDonut,pts:'+69',bg:'#fff0f5'},
+    {name:'Boba',draw:drawBoba,pts:'+92',bg:'#fef3e8'},
+    {name:'Capybara',draw:drawCapybara,pts:'+138',bg:'#f5ebe0'},
+    {name:'Star',draw:drawStar,pts:'+46',bg:'#fffde7'},
+    {name:'Heart',draw:drawHeart,pts:'+58',bg:'#fce4ec'},
+    {name:'Rainbow',draw:drawRainbow,pts:'+201',bg:'#f3e5f5'},
   ];
-  const bad = [{name:'Bomb',draw:drawBomb,pts:'-20 & -2s!',bg:'#e3f2fd'}];
+  const bad = [{name:'Bomb',draw:drawBomb,pts:'-23 & -2s!',bg:'#e3f2fd'}];
   const power = [
     {name:'Magnet',draw:drawMagnet,pts:'Pull!',bg:'#e3f2fd'},
     {name:'2x Points',draw:drawDouble,pts:'Double!',bg:'#fff8e1'},
@@ -2121,23 +2121,23 @@ function drawShuriken(x, y, s) {
 
 // ====== ITEM TYPES ======
 const ITEMS = [
-  { name:'donut', pts:60, color:'#f8bbd0', draw:drawDonut, w:1.2 },
-  { name:'boba', pts:80, color:'#d4a574', draw:drawBoba, w:1.0 },
-  { name:'capybara', pts:120, color:'#b08968', draw:drawCapybara, w:1.5 },
-  { name:'star', pts:40, color:'#fff176', draw:drawStar, w:0.8 },
-  { name:'heart', pts:50, color:'#ff6b9d', draw:drawHeart, w:0.8 },
-  { name:'rainbow', pts:175, color:'#e040fb', draw:drawRainbow, w:1.0 },
+  { name:'donut', pts:69, color:'#f8bbd0', draw:drawDonut, w:1.2 },
+  { name:'boba', pts:92, color:'#d4a574', draw:drawBoba, w:1.0 },
+  { name:'capybara', pts:138, color:'#b08968', draw:drawCapybara, w:1.5 },
+  { name:'star', pts:46, color:'#fff176', draw:drawStar, w:0.8 },
+  { name:'heart', pts:58, color:'#ff6b9d', draw:drawHeart, w:0.8 },
+  { name:'rainbow', pts:201, color:'#e040fb', draw:drawRainbow, w:1.0 },
 ];
 const POWERUPS = [
   { name:'magnet', pts:0, color:'#2196f3', draw:drawMagnet, w:1.0, isPower:true },
   { name:'double', pts:0, color:'#ffd700', draw:drawDouble, w:0.8, isPower:true },
 ];
-const BOMB = { name:'bomb', pts:-20, color:'#6a1b9a', draw:drawBomb, w:1.0, isBomb:true };
+const BOMB = { name:'bomb', pts:-23, color:'#6a1b9a', draw:drawBomb, w:1.0, isBomb:true };
 const SHIELD = { name:'shield', pts:0, color:'#64c8ff', draw:drawShieldItem, w:1.0, isPower:true };
 const LUCKY = { name:'lucky', pts:0, color:'#ffd700', draw:drawLuckyStar, w:1.0 };
 const CLOCK = { name:'clock', pts:0, color:'#4caf50', draw:drawClock, w:1.0 };
 const BLINDBOX = { name:'blindbox', pts:0, color:'#ff69b4', draw:drawBlindBox, w:1.2 };
-const SHURIKEN = { name:'shuriken', pts:250, color:'#ffd700', draw:drawShuriken, w:1.0 };
+const SHURIKEN = { name:'shuriken', pts:288, color:'#ffd700', draw:drawShuriken, w:1.0 };
 
 // ====== SPAWN ======
 let spawnAcc = 0;
@@ -4252,7 +4252,7 @@ function update(dt) {
       } else if (it.type === LUCKY) {
         const rewards = ['points','magnet','double','shield'];
         const reward = rewards[Math.floor(Math.random()*rewards.length)];
-        if (reward === 'points') { score += 200; addText(it.x, it.y-20, '+200 '+T('lucky'), '#ffd700'); }
+        if (reward === 'points') { score += 230; addText(it.x, it.y-20, '+230 '+T('lucky'), '#ffd700'); }
         else if (reward === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 '+T('magnet'), '#2196f3'); }
         else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
         else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 '+T('shield'), '#64c8ff'); }
