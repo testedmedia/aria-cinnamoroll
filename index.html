@@ -554,6 +554,7 @@ let musicEnabled = localStorage.getItem('aria_music') !== '0';
 let showSettings = false;
 let showOnboarding = false;
 let onboardingSlide = 0;
+let showRatePrompt = false;
 
 // ====== STATE ======
 let state = 'menu';
@@ -2562,16 +2563,33 @@ function drawHUD() {
     py += 26;
   }
 
+  // Music/SFX toggle icons (top center-right)
+  X.font = '16px sans-serif'; X.textAlign = 'center';
+  X.globalAlpha = 0.7;
+  X.fillText(musicEnabled ? '\uD83C\uDFB5' : '\uD83D\uDD07', W-30, 68);
+  X.globalAlpha = 1;
+
+  // Pause button (top right)
+  X.fillStyle = 'rgba(255,255,255,0.6)';
+  rrc(W-16, 32, 24, 24, 12);
+  X.fillStyle = '#e91e63'; X.font = 'bold 14px sans-serif'; X.textAlign = 'center';
+  X.fillText('\u23F8', W-16, 34);
+
   if (combo >= 3) {
     const p = 1 + Math.sin(frame*0.15)*0.08;
     X.save(); X.translate(W/2, 62); X.scale(p, p);
+    // Enhanced combo background
+    const comboHue = combo >= 10 ? (frame * 6) % 360 : 0;
+    X.fillStyle = combo >= 10 ? `hsla(${comboHue},100%,50%,0.2)` : 'rgba(255,255,255,0.9)';
+    rrc(0, 0, combo >= 10 ? 160 : 130, combo >= 10 ? 34 : 28, combo >= 10 ? 17 : 14);
     X.fillStyle = 'rgba(255,255,255,0.9)';
-    rrc(0, 0, 130, 28, 14);
-    const cc = ['#ff6b9d','#e040fb','#ffd54f','#89c4f4'];
+    rrc(0, 0, combo >= 10 ? 156 : 130, combo >= 10 ? 30 : 28, combo >= 10 ? 15 : 14);
+    const cc = combo >= 10 ? ['#ff1744','#ff6d00','#ffd600','#00e676'] : ['#ff6b9d','#e040fb','#ffd54f','#89c4f4'];
     X.fillStyle = cc[Math.floor(frame*0.1)%4];
-    X.font = 'bold 15px "Fredoka One",sans-serif';
+    X.font = combo >= 10 ? 'bold 18px "Fredoka One",sans-serif' : 'bold 15px "Fredoka One",sans-serif';
     X.textAlign = 'center';
-    X.fillText(combo + 'x COMBO!', 0, 1);
+    const firePrefix = combo >= 15 ? '\uD83D\uDD25\uD83D\uDD25' : combo >= 10 ? '\uD83D\uDD25' : '';
+    X.fillText(firePrefix + combo + 'x COMBO!' + firePrefix, 0, 1);
     X.restore();
   }
 
@@ -2587,7 +2605,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.17', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.18', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2871,7 +2889,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.17', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.18', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3199,7 +3217,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.17 - Settings & Onboarding!', W/2, H/2 - 172);
+  X.fillText('v10.18 - Settings & Onboarding!', W/2, H/2 - 172);
 
   const features = [
     '\u2699\uFE0F Full settings screen (gear icon)!',
@@ -3449,7 +3467,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.17 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.18 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4196,7 +4214,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.17', W-10, H-8);
+  X.fillText('v10.18', W-10, H-8);
 }
 
 // ====== SETTINGS SCREEN ======
@@ -4392,7 +4410,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.17', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.18', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4401,6 +4419,34 @@ function getResultsBtnY() {
   const playY = 60 + 70 + 50 + 44 + 56 + 80;
   const menuY = playY + 56;
   return { play: playY, menu: menuY, collection: menuY + 44 };
+}
+
+// ====== RATE PROMPT ======
+function drawRatePrompt() {
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(255,255,255,0.97)'; rrc(W/2, H/2, 300, 220, 24);
+
+  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\u2B50 Loving the game? \u2B50', W/2, H/2 - 70);
+
+  X.fillStyle = '#555'; X.font = '14px "Quicksand",sans-serif';
+  X.fillText('Rate us and help more', W/2, H/2 - 35);
+  X.fillText('players discover the game!', W/2, H/2 - 15);
+
+  // Stars row
+  X.font = '28px sans-serif';
+  for (let i = 0; i < 5; i++) {
+    X.fillText('\u2B50', W/2 - 64 + i * 32, H/2 + 25);
+  }
+
+  // Rate button
+  X.fillStyle = '#4caf50'; rrc(W/2, H/2 + 65, 200, 44, 22);
+  X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif';
+  X.fillText('Rate Us!', W/2, H/2 + 67);
+
+  // Maybe Later
+  X.fillStyle = 'rgba(0,0,0,0.35)'; X.font = '13px "Quicksand",sans-serif';
+  X.fillText('Maybe Later', W/2, H/2 + 102);
 }
 
 function drawLoading() {
@@ -4795,7 +4841,14 @@ function update(dt) {
       saveGame();
     }
     const isNewRecord = score > hi;
-    if (isNewRecord) { hi = score; localStorage.setItem('aria_hi', hi); }
+    if (isNewRecord) {
+      hi = score; localStorage.setItem('aria_hi', hi);
+      // Show rate prompt after 3+ games if new record and haven't rated
+      const gamesPlayed = (saveData.totalRoundsPlayed || 0);
+      if (gamesPlayed >= 3 && !localStorage.getItem('aria_rated')) {
+        setTimeout(() => { showRatePrompt = true; }, 2000);
+      }
+    }
     if (!lbSaved) {
       lbSaved = true;
       // v7.0: Award stars
@@ -5105,6 +5158,7 @@ function loop(timestamp) {
     else if (state === 'results') {
       updateCelebration(dt);
       drawResults();
+      if (showRatePrompt) drawRatePrompt();
     }
   } catch(e) {}
 
@@ -5113,7 +5167,7 @@ function loop(timestamp) {
 
 // v7.0 Initialization: Onboarding + What's New + Daily popup
 if (!localStorage.getItem('aria_onboarded')) { showOnboarding = true; onboardingSlide = 0; }
-else if (saveData.lastVersion !== 'v10.17') { showWhatsNew = true; }
+else if (saveData.lastVersion !== 'v10.18') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5197,7 +5251,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.17'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.18'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5419,6 +5473,19 @@ function handleTap(x, y) {
     if (!playerName) { promptNameThenPlay(); return; }
     showTutorialOrStart();
   } else if (state === 'results') {
+    // Rate prompt overlay intercepts all taps
+    if (showRatePrompt) {
+      if (Math.abs(x-W/2)<100 && Math.abs(y-(H/2+65))<22) {
+        // Rate Us - mark as rated, open store (placeholder until App Store)
+        localStorage.setItem('aria_rated', '1'); showRatePrompt = false;
+        return;
+      }
+      if (Math.abs(x-W/2)<60 && Math.abs(y-(H/2+102))<16) {
+        // Maybe Later
+        showRatePrompt = false; return;
+      }
+      return; // Block other taps while rate prompt is up
+    }
     const rb = getResultsBtnY();
     // Play Again (immediately starts new game)
     if (Math.abs(x-W/2)<110 && Math.abs(y-rb.play)<28) {
@@ -5460,9 +5527,13 @@ C.addEventListener('touchstart', e => {
         // Menu button
         if (Math.abs(x-W/2)<70 && Math.abs(y-(H/2+75))<19) { gamePaused = false; state = 'menu'; return; }
         return;
-      } else if (Math.abs(x-(W-18))<20 && Math.abs(y-64)<20) {
+      } else if (Math.abs(x-(W-16))<18 && Math.abs(y-32)<18) {
         // Pause button tap
         gamePaused = true; return;
+      } else if (Math.abs(x-(W-30))<18 && Math.abs(y-68)<18) {
+        // Music toggle tap during gameplay
+        musicEnabled = !musicEnabled; localStorage.setItem('aria_music', musicEnabled ? '1' : '0');
+        if (!musicEnabled) stopBGM(); else startBGM(); return;
       } else if (Math.abs(x-14)<20 && Math.abs(y-64)<20) {
         handleTap(x, y);
       } else if (!primaryTouch) {

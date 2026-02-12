@@ -1,5 +1,13 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.18 - Gameplay HUD Upgrade (2026-02-12)
+- In-game music toggle icon (tap to mute/unmute during gameplay)
+- Enhanced combo counter: fire emojis at 10x+, rainbow background at 15x+
+- Pause button moved to top-right with cleaner pill design
+- "Rate Us" prompt after new high scores (3+ games played, non-intrusive)
+- Rate prompt with star display, Rate/Maybe Later buttons
+- Music toggle persists to localStorage
+
 ## v10.17 - Onboarding Priority Fix (2026-02-12)
 - Fixed: Onboarding now renders ABOVE daily login calendar (was being hidden)
 - Fixed: Login calendar suppressed during onboarding flow
