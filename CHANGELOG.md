@@ -1,5 +1,10 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.19 - Remove Onboarding, Clean What's New (2026-02-12)
+- Removed onboarding welcome carousel (goes straight to game)
+- What's New screen restored to clean version update style
+- No more extra screens blocking gameplay on launch
+
 ## v10.18 - Gameplay HUD Upgrade (2026-02-12)
 - In-game music toggle icon (tap to mute/unmute during gameplay)
 - Enhanced combo counter: fire emojis at 10x+, rainbow background at 15x+
