@@ -167,7 +167,7 @@
 <div class="tut-overlay" id="tutOv">
   <div class="tut-panel">
     <h2>How to Play! 🎮</h2>
-    <p style="color:#888;font-size:13px;margin-bottom:4px">Catch yummy treats for 30 seconds!</p>
+    <p style="color:#888;font-size:13px;margin-bottom:4px">Catch yummy treats for 25 seconds!</p>
 
     <div class="tut-section">
       <h3 style="color:#4caf50">Catch These! 🎉</h3>
@@ -550,7 +550,7 @@ function buildTutorialItems() {
 
 // ====== SETTINGS ======
 let sfxEnabled = localStorage.getItem('aria_sfx') !== '0';
-let musicEnabled = localStorage.getItem('aria_music') !== '0';
+let musicEnabled = false;
 let showSettings = false;
 let showOnboarding = false;
 let onboardingSlide = 0;
@@ -1506,61 +1506,9 @@ function sndCelebration() {
   haptic([10,30,10,30,10,50,10,80]);
 }
 
-// Background Music - chill kawaii lo-fi loop (synthesized)
-function startBGM() {
-  if (bgmPlaying || !musicEnabled) return;
-  ensureAudio();
-  if (!AC) return;
-  try {
-    bgmGain = AC.createGain();
-    bgmGain.gain.value = 0.12;
-    bgmGain.connect(AC.destination);
-    // Pentatonic melody loop: C D E G A
-    const notes = [262,294,330,392,440,392,330,294,262,330,392,440,523,440,392,330];
-    const dur = 0.4;
-    function playBGMLoop() {
-      if (!bgmPlaying || !AC) return;
-      const now = AC.currentTime;
-      notes.forEach((f, i) => {
-        const o = AC.createOscillator();
-        const g = AC.createGain();
-        o.type = 'sine';
-        o.frequency.value = f;
-        g.gain.value = 0.08;
-        g.gain.setTargetAtTime(0.001, now + i * dur + dur * 0.8, 0.05);
-        o.connect(g); g.connect(bgmGain);
-        o.start(now + i * dur);
-        o.stop(now + i * dur + dur);
-        // Harmony (fifth above, quieter)
-        const o2 = AC.createOscillator();
-        const g2 = AC.createGain();
-        o2.type = 'triangle';
-        o2.frequency.value = f * 1.5;
-        g2.gain.value = 0.03;
-        g2.gain.setTargetAtTime(0.001, now + i * dur + dur * 0.8, 0.05);
-        o2.connect(g2); g2.connect(bgmGain);
-        o2.start(now + i * dur);
-        o2.stop(now + i * dur + dur);
-      });
-      // Bass pad
-      const bass = AC.createOscillator();
-      const bg = AC.createGain();
-      bass.type = 'sine';
-      bass.frequency.value = 131; // C3
-      bg.gain.value = 0.06;
-      bg.gain.setTargetAtTime(0.001, now + notes.length * dur - 0.1, 0.1);
-      bass.connect(bg); bg.connect(bgmGain);
-      bass.start(now); bass.stop(now + notes.length * dur);
-      setTimeout(playBGMLoop, notes.length * dur * 1000);
-    }
-    bgmPlaying = true;
-    playBGMLoop();
-  } catch(e) {}
-}
-function stopBGM() {
-  bgmPlaying = false;
-  if (bgmGain) { try { bgmGain.gain.setTargetAtTime(0, AC.currentTime, 0.1); } catch(e) {} }
-}
+// Background Music removed per user request
+function startBGM() {}
+function stopBGM() {}
 
 // Achievement popup trigger
 function showAchievementPopup(name, badge) {
@@ -2606,7 +2554,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.21', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.22', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2890,7 +2838,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.21', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.22', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3218,12 +3166,11 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.21 Update', W/2, H/2 - 172);
+  X.fillText('v10.22 Update', W/2, H/2 - 172);
 
   const features = [
     '\uD83C\uDF6A Girl Scout Cookie Day - 6 LIMITED items!',
-    '\uD83C\uDFB5 Background music + in-game toggle!',
-    '\u2699\uFE0F Settings screen (sound, music, language)',
+    '\u2699\uFE0F Settings screen (sound, language)',
     '\uD83C\uDFC5 Achievement unlock popups!',
     '\uD83C\uDF08 Fever mode rainbow glow!',
     '\u26A1 Speed lines at high combos!',
@@ -3468,7 +3415,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.21 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.22 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4215,7 +4162,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.21', W-10, H-8);
+  X.fillText('v10.22', W-10, H-8);
 }
 
 // ====== SETTINGS SCREEN ======
@@ -4237,14 +4184,6 @@ function drawSettingsScreen() {
   // Toggle pill
   X.fillStyle = sfxEnabled ? '#4caf50' : '#ccc'; rrc(W/2 + 115, sy, 52, 26, 13);
   X.fillStyle = '#fff'; X.beginPath(); X.arc(sfxEnabled ? W/2+130 : W/2+100, sy, 10, 0, Math.PI*2); X.fill();
-
-  sy += rowH;
-  // Music toggle
-  X.fillStyle = '#fce4ec'; rrc(W/2, sy, 300, 44, 22);
-  X.fillStyle = '#555'; X.font = 'bold 14px "Fredoka One",sans-serif'; X.textAlign = 'left';
-  X.fillText('\uD83C\uDFB5 Background Music', W/2 - 130, sy + 2);
-  X.fillStyle = musicEnabled ? '#4caf50' : '#ccc'; rrc(W/2 + 115, sy, 52, 26, 13);
-  X.fillStyle = '#fff'; X.beginPath(); X.arc(musicEnabled ? W/2+130 : W/2+100, sy, 10, 0, Math.PI*2); X.fill();
 
   sy += rowH;
   // Language
@@ -4419,7 +4358,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.21', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.22', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -5220,7 +5159,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.21') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.22') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5307,7 +5246,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.21'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.22'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5438,12 +5377,6 @@ function handleTap(x, y) {
     // SFX toggle
     if (Math.abs(x-(W/2+115))<30 && Math.abs(y-sy)<22) {
       sfxEnabled = !sfxEnabled; localStorage.setItem('aria_sfx', sfxEnabled ? '1' : '0'); return;
-    }
-    sy += rowH;
-    // Music toggle
-    if (Math.abs(x-(W/2+115))<30 && Math.abs(y-sy)<22) {
-      musicEnabled = !musicEnabled; localStorage.setItem('aria_music', musicEnabled ? '1' : '0');
-      if (!musicEnabled) stopBGM(); return;
     }
     sy += rowH;
     // Language EN

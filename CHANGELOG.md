@@ -1,5 +1,10 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.22 - Remove Background Music (2026-02-12)
+- Removed background music from gameplay entirely
+- Removed music toggle from settings screen
+- Cleaner settings layout (SFX, Language, Name, Stats, Reset)
+
 ## v10.21 - Visual Polish Pack (2026-02-12)
 - Screen transitions: pink fade between menu/gameplay/results
 - Score count-up animation on results screen (ticks from 0 to final)
