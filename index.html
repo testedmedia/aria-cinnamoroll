@@ -41,7 +41,7 @@
     -webkit-overflow-scrolling: none;
   }
   body {
-    background: #1a1a2e;
+    background: #ffe0ec;
     display: flex; justify-content: center; align-items: center;
     height: 100dvh;
     font-family: 'Quicksand', sans-serif;
@@ -50,6 +50,7 @@
     -webkit-user-select: none; user-select: none;
     -webkit-touch-callout: none;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-font-smoothing: antialiased;
   }
   #gc {
     position: relative;
@@ -222,7 +223,13 @@
 const C = document.getElementById('g');
 const X = C.getContext('2d');
 const W = 420, H = 750;
-C.width = W; C.height = H;
+// Retina/HiDPI: render at device pixel ratio for crispy graphics
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+C.width = W * DPR; C.height = H * DPR;
+C.style.width = '100%'; C.style.height = '100%';
+X.scale(DPR, DPR);
+X.imageSmoothingEnabled = true;
+X.imageSmoothingQuality = 'high';
 
 // ====== i18n ======
 let lang = localStorage.getItem('aria_lang') || 'en';
@@ -2461,7 +2468,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.10', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.11', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2745,7 +2752,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.10', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.11', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2943,8 +2950,8 @@ function drawBlindBoxScreen() {
     // Cache this frame once fade-in is complete - prevents 60fps redraw flicker
     if (fadeIn >= 1) {
       const cache = document.createElement('canvas');
-      cache.width = W; cache.height = H;
-      cache.getContext('2d').drawImage(X.canvas, 0, 0);
+      cache.width = C.width; cache.height = C.height;
+      cache.getContext('2d').drawImage(C, 0, 0);
       bbState.revealCache = cache;
     }
   }
@@ -3073,17 +3080,17 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.10 - Girl Scouts Update!', W/2, H/2 - 172);
+  X.fillText('v10.11 - Retina HD Graphics!', W/2, H/2 - 172);
 
   const features = [
-    '\uD83E\uDDE1 4 NEW Girl Scout outfits!',
-    '\uD83C\uDF6A Scout Beret, Sash & Cookie Hat FREE!',
+    '\u2728 Retina HD crispy graphics!',
+    '\uD83D\uDCF1 iPhone-optimized rendering!',
+    '\uD83C\uDFA8 HiDPI canvas at device resolution!',
+    '\uD83E\uDDE1 4 Girl Scout outfits (free!)',
     '\uD83D\uDC57 20 Total outfits to collect!',
     '\uD83D\uDCF7 Upload YOUR photo as avatar!',
-    '\uD83C\uDF38 Seasonal outfits (Valentine, Spring...)',
-    '\uD83C\uDF81 Blind Box exclusive outfit drops!',
-    '\uD83D\uDCDD Change your name anytime!',
-    '\u2728 Improved buttons & iOS support!',
+    '\uD83C\uDF38 Seasonal & Blind Box outfits!',
+    '\uD83D\uDCDD Change name anytime in settings!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3323,7 +3330,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.10 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.11 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4053,7 +4060,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.10', W-10, H-8);
+  X.fillText('v10.11', W-10, H-8);
 }
 
 function drawResults() {
@@ -4115,7 +4122,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.10', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.11', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -4758,7 +4765,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.10') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.11') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4840,7 +4847,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.10'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.11'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;

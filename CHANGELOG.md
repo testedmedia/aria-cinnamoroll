@@ -1,5 +1,13 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.11 - Retina HD Graphics (2026-02-12)
+- Retina/HiDPI canvas rendering at device pixel ratio (up to 3x)
+- Crispy text, smooth edges, and sharp graphics on all iPhone/iPad displays
+- High-quality image smoothing enabled for all sprites
+- Anti-aliased font rendering (-webkit-font-smoothing)
+- Pink background (#ffe0ec) visible during canvas load
+- Fixed blind box reveal cache for DPR-scaled canvas
+
 ## v10.10 - Girl Scouts Update (2026-02-12)
 - 4 new Girl Scout outfits: Scout Beret (free), Scout Sash (free), Cookie Hat (free), Trefoil Crown (15 stars)
 - 20 total outfits now available
