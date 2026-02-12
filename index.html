@@ -2513,7 +2513,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.13', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.14', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2797,7 +2797,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.13', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.14', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3125,7 +3125,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.13 - Girl Scout Cookie Day!', W/2, H/2 - 172);
+  X.fillText('v10.14 - Girl Scout Cookie Day!', W/2, H/2 - 172);
 
   const features = [
     '\uD83C\uDF6A 24-HOUR Girl Scout Event LIVE!',
@@ -3375,7 +3375,7 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.13 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.14 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4122,7 +4122,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.13', W-10, H-8);
+  X.fillText('v10.14', W-10, H-8);
 }
 
 function drawResults() {
@@ -4176,22 +4176,29 @@ function drawResults() {
   X.fillStyle = '#fff'; X.font = 'bold 20px "Fredoka One",sans-serif';
   X.fillText('Play Again', W/2, playY + 2);
 
+  // Main Menu button
+  const menuY = playY + 56;
+  X.fillStyle = 'rgba(255,255,255,0.25)'; rrc(W/2, menuY, 180, 38, 19);
+  X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif';
+  X.fillText('\uD83C\uDFE0 Main Menu', W/2, menuY + 2);
+
   // Collection button (spaced below)
-  const colY = playY + 56;
+  const colY = menuY + 44;
   X.fillStyle = '#fce4ec'; rrc(W/2, colY, 180, 36, 18);
   X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
   X.fillText('\u2728 Collection ' + getCollectedCount() + '/' + TOTAL_ITEMS, W/2, colY + 2);
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.13', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.14', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
 function getResultsBtnY() {
   // y starts at 60, +70 score, +50 stats, +44 stars, +56 chars, +80 play
   const playY = 60 + 70 + 50 + 44 + 56 + 80;
-  return { play: playY, collection: playY + 56 };
+  const menuY = playY + 56;
+  return { play: playY, menu: menuY, collection: menuY + 44 };
 }
 
 function drawLoading() {
@@ -4827,7 +4834,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.13') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.14') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4909,7 +4916,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.13'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.14'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5081,8 +5088,13 @@ function handleTap(x, y) {
     showTutorialOrStart();
   } else if (state === 'results') {
     const rb = getResultsBtnY();
-    // Play Again
-    if (Math.abs(x-W/2)<110 && Math.abs(y-rb.play)<24) {
+    // Play Again (immediately starts new game)
+    if (Math.abs(x-W/2)<110 && Math.abs(y-rb.play)<28) {
+      startGame();
+      return;
+    }
+    // Main Menu
+    if (Math.abs(x-W/2)<90 && Math.abs(y-rb.menu)<20) {
       if (saveData.lastSpinDate !== getTodayStr()) { showSpin=true; spinState={phase:'idle',angle:0,speed:0,result:null}; }
       else { state = 'menu'; }
       return;

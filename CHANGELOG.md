@@ -1,5 +1,11 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.14 - Results Screen Revamp (2026-02-12)
+- "Play Again" now instantly starts a new game (no more going back to menu)
+- New "Main Menu" button on results screen for returning to home
+- Collection button repositioned below Main Menu
+- Better button layout with proper spacing
+
 ## v10.13 - Leaderboard Fix + Event Button Sync (2026-02-12)
 - Fixed: Menu button tap zones now sync with event banners (leaderboard, shop, etc.)
 - Fixed: Multiple simultaneous events properly offset all interactive elements
