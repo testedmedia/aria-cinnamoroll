@@ -2006,12 +2006,12 @@ function drawShuriken(x, y, s) {
 
 // ====== ITEM TYPES ======
 const ITEMS = [
-  { name:'donut', pts:20, color:'#f8bbd0', draw:drawDonut, w:1.2 },
-  { name:'boba', pts:25, color:'#d4a574', draw:drawBoba, w:1.0 },
-  { name:'capybara', pts:35, color:'#b08968', draw:drawCapybara, w:1.5 },
-  { name:'star', pts:12, color:'#fff176', draw:drawStar, w:0.8 },
-  { name:'heart', pts:15, color:'#ff6b9d', draw:drawHeart, w:0.8 },
-  { name:'rainbow', pts:50, color:'#e040fb', draw:drawRainbow, w:1.0 },
+  { name:'donut', pts:60, color:'#f8bbd0', draw:drawDonut, w:1.2 },
+  { name:'boba', pts:80, color:'#d4a574', draw:drawBoba, w:1.0 },
+  { name:'capybara', pts:120, color:'#b08968', draw:drawCapybara, w:1.5 },
+  { name:'star', pts:40, color:'#fff176', draw:drawStar, w:0.8 },
+  { name:'heart', pts:50, color:'#ff6b9d', draw:drawHeart, w:0.8 },
+  { name:'rainbow', pts:175, color:'#e040fb', draw:drawRainbow, w:1.0 },
 ];
 const POWERUPS = [
   { name:'magnet', pts:0, color:'#2196f3', draw:drawMagnet, w:1.0, isPower:true },
@@ -2022,7 +2022,7 @@ const SHIELD = { name:'shield', pts:0, color:'#64c8ff', draw:drawShieldItem, w:1
 const LUCKY = { name:'lucky', pts:0, color:'#ffd700', draw:drawLuckyStar, w:1.0 };
 const CLOCK = { name:'clock', pts:0, color:'#4caf50', draw:drawClock, w:1.0 };
 const BLINDBOX = { name:'blindbox', pts:0, color:'#ff69b4', draw:drawBlindBox, w:1.2 };
-const SHURIKEN = { name:'shuriken', pts:75, color:'#ffd700', draw:drawShuriken, w:1.0 };
+const SHURIKEN = { name:'shuriken', pts:250, color:'#ffd700', draw:drawShuriken, w:1.0 };
 
 // ====== SPAWN ======
 let spawnAcc = 0;
@@ -2341,7 +2341,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.7', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.8', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2624,7 +2624,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 30);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.7', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.8', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -2952,7 +2952,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.7 - Season 1: Sweet Dreams', W/2, H/2 - 172);
+  X.fillText('v10.8 - Season 1: Sweet Dreams', W/2, H/2 - 172);
 
   const features = [
     '\u2B50 Star Shop - buy power-up boosts!',
@@ -3640,7 +3640,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.7', W-10, H-8);
+  X.fillText('v10.8', W-10, H-8);
 }
 
 function drawResults() {
@@ -3701,7 +3701,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.7', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.8', W - 8, H - 8);
 }
 
 // Store button positions for results click handling
@@ -3899,7 +3899,7 @@ function update(dt) {
       } else if (it.type === LUCKY) {
         const rewards = ['points','magnet','double','shield'];
         const reward = rewards[Math.floor(Math.random()*rewards.length)];
-        if (reward === 'points') { score += 50; addText(it.x, it.y-20, '+50 '+T('lucky'), '#ffd700'); }
+        if (reward === 'points') { score += 200; addText(it.x, it.y-20, '+200 '+T('lucky'), '#ffd700'); }
         else if (reward === 'magnet') { powerups.magnet = 5; addText(it.x, it.y-20, '🧲 '+T('magnet'), '#2196f3'); }
         else if (reward === 'double') { powerups.double = 3.5; addText(it.x, it.y-20, T('pts2x'), '#ffd700'); }
         else if (reward === 'shield') { powerups.shield = true; powerups.shieldTimer = 5; addText(it.x, it.y-20, '🛡 '+T('shield'), '#64c8ff'); }
@@ -3916,15 +3916,15 @@ function update(dt) {
         if (rarity < 0.02) {
           // LEGENDARY - Cinnamoroll or Pompompurin (rarest!)
           triggerHelloKittyShower();
-          score += 100;
-          addText(it.x, it.y-20, '\u2B50 +100! \u2B50', '#ffd700');
+          score += 400;
+          addText(it.x, it.y-20, '\u2B50 +400! \u2B50', '#ffd700');
           const legChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
           const pick = legChars[Math.floor(Math.random()*legChars.length)];
           popColor = '#ffd700'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 2.5;
         } else if (rarity < 0.10) {
           // RARE - Kuromi, Badtz-Maru, or Hangyodon
-          score += 75; if (ROUND < 35) ROUND += 1;
-          addText(it.x, it.y-20, T('rare')+' +75!', '#9c27b0');
+          score += 300; if (ROUND < 35) ROUND += 1;
+          addText(it.x, it.y-20, T('rare')+' +300!', '#9c27b0');
           const rareChars = [{ik:'kuromi',n:'Kuromi',id:'kuromi'},{ik:'badtz',n:'Badtz-Maru',id:'badtz_maru'},{ik:'hangyodon',n:'Hangyodon',id:'hangyodon'}];
           const pick = rareChars[Math.floor(Math.random()*rareChars.length)];
           popColor = '#9c27b0'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 2.0;
@@ -3939,7 +3939,7 @@ function update(dt) {
           popColor = '#ff69b4'; charImgKey = pick.ik; charName = pick.n; charId = pick.id; revealTime = 1.5;
         } else {
           // COMMON - Pochacco, Keroppi
-          const bp = 15 + Math.floor(Math.random()*20);
+          const bp = 60 + Math.floor(Math.random()*80);
           score += bp;
           addText(it.x, it.y-20, '+' + bp, '#ff69b4');
           const comChars = [{ik:'pochacco',n:'Pochacco',id:'pochacco'},{ik:'keroppi',n:'Keroppi',id:'keroppi'}];
@@ -4341,7 +4341,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.7') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.8') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -4423,7 +4423,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.7'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.8'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
