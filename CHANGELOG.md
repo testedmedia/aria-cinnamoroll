@@ -1,5 +1,23 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.24 - iOS Bug Fix & Polish (2026-02-13)
+- FIXED: Collection/Trophies X button unresponsive on iPhones with Dynamic Island (moved below safe area)
+- FIXED: Share card Wordle grid always showing blank white squares (sessionCollected type mismatch)
+- FIXED: Screenshot grid always grey (same type mismatch in screenshot generator)
+- FIXED: Near-miss "SO CLOSE!" dual rendering with conflicting timers/colors (removed duplicate block)
+- FIXED: Blind box reveal massively zoomed on HiDPI devices (DPR double-scaling on cache)
+- FIXED: Tapping UI buttons during gameplay also triggered jump (removed redundant click handler)
+- FIXED: "Reset Progress" nuked device ID and cloud identity (now preserves device_id, language, SFX)
+- FIXED: Donut holes punching transparent holes through other game elements (destination-out replaced)
+- FIXED: Friend code input using prompt() which fails in WKWebView (replaced with DOM input)
+- FIXED: Touch handler missing return after collection handleTap (could cause double-processing)
+- FIXED: Audio unlock listeners firing on every touch forever (changed to once:true)
+- FIXED: Shower items appearing instantly without pop-in animation (added spawnScale:0)
+- FIXED: Game loop silently swallowing all errors (now logs to console)
+- IMPROVED: All close buttons enlarged and moved for better iOS touch targets
+- IMPROVED: Collection close now properly unpauses gameplay
+- iOS: App builds clean on Xcode 26.2 / Capacitor 8.1 / iPhone 17 Pro simulator
+
 ## v10.23 - Social & Viral Features (2026-02-13)
 - NEW: Friend System - add friends by 6-character code, view friends list, remove friends
 - NEW: Screenshot Sharing - generate score card image, share via Web Share API or download

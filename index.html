@@ -1702,7 +1702,7 @@ function unlockAudio() {
   }
 }
 ['touchstart','click'].forEach(evt => {
-  document.addEventListener(evt, unlockAudio, {once:false,passive:true});
+  document.addEventListener(evt, unlockAudio, {once:true,passive:true});
 });
 function playTone(freq, dur, type, vol) {
   if (!sfxEnabled) return;
@@ -1863,11 +1863,9 @@ function drawDonut(x, y, s) {
     ctx.save(); ctx.translate(x+Math.cos(a)*s*0.62, y+Math.sin(a)*s*0.62);
     ctx.rotate(a); ctx.fillRect(-1.5, -0.8, 3, 1.6); ctx.restore();
   });
-  // Cute donut hole in center
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
+  // Cute donut hole in center (use background color instead of destination-out to avoid punch-through)
+  ctx.fillStyle = '#ffe0ec'; // match game background
   ctx.beginPath(); ctx.arc(x, y, s*0.32, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
   // Hole inner rim shadow
   ctx.strokeStyle = 'rgba(200,120,140,0.4)';
   ctx.lineWidth = 1.5;
@@ -2517,7 +2515,7 @@ function triggerHelloKittyShower() {
   for (let i = 0; i < 8; i++) {
     const x = 30 + Math.random()*(W-60);
     const t = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-    items.push({ x, y:-25-Math.random()*100, type:t, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0 });
+    items.push({ x, y:-25-Math.random()*100, type:t, speed:100+Math.random()*80, wobble:Math.random()*Math.PI*2, size:14+Math.random()*4, t:0, spawnScale:0 });
   }
 }
 
@@ -2798,7 +2796,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.23', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.24', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -3016,11 +3014,11 @@ function drawCollection() {
   X.fillStyle = 'rgba(255,255,255,0.92)';
   rrc(W/2, H/2, W-16, H-30, 20);
 
-  // Close X
+  // Close X (positioned below Dynamic Island safe area)
   X.fillStyle = '#ff8a9e';
-  X.beginPath(); X.arc(W-24, 34, 16, 0, Math.PI*2); X.fill();
-  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('✕', W-24, 34); X.textBaseline = 'alphabetic';
+  X.beginPath(); X.arc(W-28, 48, 18, 0, Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 20px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('✕', W-28, 48); X.textBaseline = 'alphabetic';
 
   // Title + progress
   X.fillStyle = '#e91e63'; X.font = 'bold 20px "Fredoka One",sans-serif'; X.textAlign = 'center';
@@ -3082,7 +3080,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.23', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.24', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3174,7 +3172,10 @@ function drawBlindBoxScreen() {
   } else if (bbState.phase === 'reveal') {
     // Once fade-in is done, cache to offscreen canvas - zero flicker from 60fps redraw
     if (bbState.revealCache) {
+      X.save();
+      X.setTransform(1, 0, 0, 1, 0, 0); // reset DPR scaling to draw cached DPR-scaled image 1:1
       X.drawImage(bbState.revealCache, 0, 0);
+      X.restore();
       return;
     }
 
@@ -3356,12 +3357,12 @@ function drawAchievements() {
 
   // Close X
   X.fillStyle = '#ff8a9e';
-  X.beginPath(); X.arc(W-22, 30, 16, 0, Math.PI*2); X.fill();
-  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
-  X.fillText('\u2715', W-22, 30); X.textBaseline = 'alphabetic';
+  X.beginPath(); X.arc(W-28, 48, 18, 0, Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 20px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715', W-28, 48); X.textBaseline = 'alphabetic';
 
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\uD83C\uDFC6 Trophies \uD83C\uDFC6', W/2, 52);
+  X.fillText('\uD83C\uDFC6 Trophies \uD83C\uDFC6', W/2, 62);
   X.fillStyle = '#999'; X.font = 'bold 13px "Quicksand",sans-serif';
   X.fillText(getAchievementCount()+'/'+ACHIEVEMENTS_DEF.length+' Unlocked', W/2, 74);
 
@@ -3410,7 +3411,7 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.23 Update', W/2, H/2 - 172);
+  X.fillText('v10.24 Update', W/2, H/2 - 172);
 
   const features = [
     '\uD83D\uDC6B Friend System - add friends by code!',
@@ -3774,8 +3775,15 @@ function handleFriendsTap(x,y) {
     return;
   }
   if (Math.abs(x-W/2)<130 && Math.abs(y-(H/2-160))<25) {
-    const code = prompt('Enter 6-character friend code:');
-    if (code) { friendInputCode = code.trim().toUpperCase().slice(0,6); }
+    // Use a temporary DOM input for WKWebView compatibility (prompt() may not work)
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.maxLength = 6; inp.placeholder = 'Friend code';
+    inp.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:24px;text-align:center;padding:16px;border-radius:16px;border:3px solid #e91e63;width:200px;font-family:"Fredoka One",cursive;color:#e91e63;background:#fff;text-transform:uppercase;';
+    document.body.appendChild(inp);
+    inp.focus();
+    const done = () => { const v = inp.value.trim().toUpperCase().slice(0,6); if (v) friendInputCode = v; inp.remove(); };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+    inp.addEventListener('blur', done);
     return;
   }
   // Share referral link
@@ -3832,12 +3840,19 @@ async function generateScreenshot() {
   const rarityColors = {common:'#e0e0e0',rare:'#64b5f6',epic:'#ce93d8',legendary:'#ffd54f',secret:'#ffb74d'};
   const items = (sessionCollected||[]).slice(0,15);
   const gridX = W/2 - 75, gridY = 225;
-  items.forEach((id, i) => {
-    const it = SEASON_ITEMS.find(s=>s.id===id);
-    const col = it ? (rarityColors[it.rarity]||'#e0e0e0') : '#e0e0e0';
+  items.forEach((item, i) => {
+    // sessionCollected stores objects {id, name, rarity, ...}, not plain IDs
+    const rarity = typeof item === 'object' ? item.rarity : (SEASON_ITEMS.find(s=>s.id===item)||{}).rarity;
+    const col = rarity ? (rarityColors[rarity]||'#e0e0e0') : '#e0e0e0';
     const gx = gridX + (i%5)*32, gy = gridY + Math.floor(i/5)*32;
     ox.fillStyle = col;
-    ox.beginPath(); ox.roundRect(gx,gy,28,28,6); ox.fill();
+    ox.beginPath();
+    const rn = 6;
+    ox.moveTo(gx+rn,gy); ox.lineTo(gx+28-rn,gy);
+    ox.quadraticCurveTo(gx+28,gy,gx+28,gy+rn); ox.lineTo(gx+28,gy+28-rn);
+    ox.quadraticCurveTo(gx+28,gy+28,gx+28-rn,gy+28); ox.lineTo(gx+rn,gy+28);
+    ox.quadraticCurveTo(gx,gy+28,gx,gy+28-rn); ox.lineTo(gx,gy+rn);
+    ox.quadraticCurveTo(gx,gy,gx+rn,gy); ox.closePath(); ox.fill();
   });
 
   // Footer
@@ -3867,7 +3882,7 @@ async function shareScreenshot() {
   setTimeout(() => { btn.textContent = '\uD83D\uDCF8 Share Screenshot'; }, 2000);
 }
 
-// ====== v10.23 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== v10.24 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4623,7 +4638,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.23', W-10, H-8);
+  X.fillText('v10.24', W-10, H-8);
 }
 
 // ====== SETTINGS SCREEN ======
@@ -4819,7 +4834,7 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.23', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.24', W - 8, H - 8);
 
   // Friend beat toast
   if (friendBeatToast && friendBeatToast.timer > 0) {
@@ -5123,7 +5138,7 @@ function update(dt) {
         // Near-miss: 20% chance when getting powerup/common to show "almost legendary"
         if ((rarityTier === 'powerup' || rarityTier === 'common') && Math.random() < 0.2) {
           nearMissActive = true;
-          nearMissTimer = 120;
+          nearMissTimer = 1.5; // seconds (consistent with dt-based decrement)
           const legChars = [{ik:'cinna',n:'Cinnamoroll',id:'cinnamoroll'},{ik:'purin',n:'Pompompurin',id:'pompompurin'}];
           const legPick = legChars[Math.floor(Math.random()*legChars.length)];
           nearMissItem = { emoji: '👑', name: legPick.n };
@@ -5559,21 +5574,7 @@ function drawGame() {
     X.globalAlpha = 1;
   }
 
-  // Near-miss display
-  if (nearMissActive && nearMissTimer > 0) {
-    nearMissTimer--;
-    const nmAlpha = Math.min(1, nearMissTimer / 30);
-    X.save();
-    X.globalAlpha = nmAlpha * (0.7 + Math.sin(Date.now()/100) * 0.3);
-    X.textAlign = 'center';
-    X.font = 'bold 16px "Fredoka One",sans-serif';
-    X.fillStyle = '#ffd700';
-    X.shadowColor = '#ffd700';
-    X.shadowBlur = 20;
-    X.fillText('SO CLOSE to ' + (nearMissItem ? nearMissItem.emoji + ' ' + nearMissItem.name : '👑 Legendary') + '!', W/2, 500);
-    X.restore();
-    if (nearMissTimer <= 0) nearMissActive = false;
-  }
+  // Near-miss display (removed duplicate - handled at line 5456)
 }
 
 // ====== GAME LOOP - rAF primary, visibility fallback ======
@@ -5626,13 +5627,13 @@ function loop(timestamp) {
         X.fillRect(0, 0, W, H);
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('Game loop error:', e); }
 
   if (useRAF) loopId = requestAnimationFrame(loop);
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.23') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.24') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5737,7 +5738,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.23'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.24'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5803,7 +5804,7 @@ function handleTap(x, y) {
   }
   if (showAchievements) {
     if (Math.abs(x-W/2)<90 && Math.abs(y-(H-58))<28) { showAchievements = false; return; }
-    if (Math.abs(x-(W-22))<28 && Math.abs(y-30)<28) { showAchievements = false; return; }
+    if (Math.abs(x-(W-28))<32 && Math.abs(y-48)<32) { showAchievements = false; return; }
     return;
   }
   if (showShowcase) {
@@ -5882,7 +5883,13 @@ function handleTap(x, y) {
     // Reset Progress
     if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) {
       if (confirm('Reset ALL progress? This cannot be undone!')) {
-        localStorage.clear(); location.reload();
+        // Only clear game data, preserve device ID and settings
+        const keepKeys = ['aria_device_id', 'aria_lang', 'aria_sfx'];
+        const kept = {};
+        keepKeys.forEach(k => { const v = localStorage.getItem(k); if (v) kept[k] = v; });
+        localStorage.clear();
+        Object.entries(kept).forEach(([k,v]) => localStorage.setItem(k, v));
+        location.reload();
       }
       return;
     }
@@ -5891,10 +5898,10 @@ function handleTap(x, y) {
 
 
   if (showCollection) {
-    // Close X (enlarged hit area)
-    if (Math.abs(x-(W-24))<28 && Math.abs(y-34)<28) { showCollection = false; gamePausedForBP = false; return; }
+    // Close X (enlarged hit area, below Dynamic Island)
+    if (Math.abs(x-(W-28))<32 && Math.abs(y-48)<32) { showCollection = false; gamePausedForBP = false; gamePaused = false; return; }
     // Back button (moved up, enlarged)
-    if (Math.abs(x-W/2)<90 && Math.abs(y-(H-58))<28) { showCollection = false; gamePausedForBP = false; return; }
+    if (Math.abs(x-W/2)<100 && Math.abs(y-(H-58))<32) { showCollection = false; gamePausedForBP = false; gamePaused = false; return; }
     // Tab bar
     const tabs = Object.keys(ITEM_CATEGORIES);
     const tw = (W-30) / tabs.length;
@@ -6001,6 +6008,7 @@ C.addEventListener('touchstart', e => {
       // Check backpack overlay or backpack icon
       if (showCollection) {
         handleTap(x, y);
+        return;
       } else if (gamePaused) {
         // Resume button
         if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+20))<22) { gamePaused = false; return; }
@@ -6110,9 +6118,7 @@ C.addEventListener('wheel', e => {
     outfitScrollY = Math.min(0, outfitScrollY - e.deltaY * 0.5);
   }
 }, {passive:false});
-C.addEventListener('click', e => {
-  if (state === 'playing') jump();
-});
+// Click jump removed - handled by mousedown to avoid double-firing with UI buttons
 
 document.addEventListener('keydown', e => {
   if (state !== 'playing') { if (e.code === 'Space') handleTap(W/2, H/2); return; }
@@ -6134,9 +6140,10 @@ function getURL() { return window.location.origin+window.location.pathname+'?s='
 function buildShareCard() {
   // Build Wordle-style emoji grid from session items
   const rarityEmoji = {common:'\u2B1C',rare:'\uD83D\uDFE6',epic:'\uD83D\uDFEA',legendary:'\uD83D\uDFE8',secret:'\u2B50'};
-  const itemGrid = (sessionCollected||[]).slice(0,15).map(id => {
-    const it = SEASON_ITEMS.find(s=>s.id===id);
-    return it ? (rarityEmoji[it.rarity]||'\u2B1C') : '\u2B1C';
+  const itemGrid = (sessionCollected||[]).slice(0,15).map(item => {
+    // sessionCollected stores objects {id, name, rarity, ...}, not plain IDs
+    const rarity = typeof item === 'object' ? item.rarity : (SEASON_ITEMS.find(s=>s.id===item)||{}).rarity;
+    return rarity ? (rarityEmoji[rarity]||'\u2B1C') : '\u2B1C';
   }).join('');
   const gridRows = [];
   for(let i=0; i<itemGrid.length; i+=5) gridRows.push(itemGrid.slice(i,i+5));
