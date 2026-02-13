@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Aria's Sanrio Adventure - Free Kawaii Catching Game</title>
-<meta name="description" content="Free kawaii catching game! Catch boba, treats & collect 41 Sanrio characters including Cinnamoroll, Hello Kitty & Pompompurin. Valentine's Day event LIVE!">
+<meta name="description" content="Free kawaii catching game! Catch boba, treats & collect 46 Sanrio characters including Cinnamoroll, Hello Kitty & Pompompurin. Add friends, share screenshots, climb leaderboards!">
 <meta name="keywords" content="sanrio game, cinnamoroll game, hello kitty game, kawaii game, free browser game, catching game, pompompurin, my melody, kuromi, valentine game">
 <meta name="theme-color" content="#ff69b4">
 <!-- Open Graph -->
@@ -91,6 +91,8 @@
   .lb-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1002; justify-content:center; align-items:center; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
   .lb-overlay.active { display:flex; }
   .lb-panel { background:#fff; border-radius:24px; padding:24px 20px; width:min(90vw,340px); text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:popIn .3s cubic-bezier(.34,1.56,.64,1); max-height:80vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .lb-tab { padding:6px 14px; border-radius:20px; border:2px solid #e0e0e0; background:#f5f5f5; font-family:'Quicksand',sans-serif; font-weight:700; font-size:12px; color:#888; cursor:pointer; transition:all .2s; }
+  .lb-tab.active { background:#e91e63; color:#fff; border-color:#e91e63; }
   .lb-panel h2 { font-family:'Fredoka One',cursive; color:#e91e63; margin-bottom:4px; font-size:22px; }
   .lb-panel .lb-sub { color:#999; font-size:12px; margin-bottom:14px; }
   .lb-row { display:flex; align-items:center; padding:12px 14px; border-radius:12px; margin-bottom:6px; }
@@ -198,8 +200,12 @@
 
 <div class="lb-overlay" id="lbOv">
   <div class="lb-panel">
-    <h2>Global Leaderboard 🏆</h2>
-    <p class="lb-sub">Top Players Worldwide</p>
+    <h2 id="lbTitle">Leaderboard 🏆</h2>
+    <div style="display:flex;gap:4px;justify-content:center;margin-bottom:10px">
+      <button class="lb-tab active" data-tab="global" onclick="switchLBTab('global')">🌍 Global</button>
+      <button class="lb-tab" data-tab="friends" onclick="switchLBTab('friends')">👫 Friends</button>
+      <button class="lb-tab" data-tab="weekly" onclick="switchLBTab('weekly')">📅 Weekly</button>
+    </div>
     <div id="lbList"></div>
     <button class="close-btn" style="font-size:15px;color:#e91e63;font-weight:700" onclick="closeLB()">Close</button>
   </div>
@@ -213,6 +219,7 @@
     <div class="share-btns">
       <button class="sbtn tw" onclick="shareTW()">Share on X</button>
       <button class="sbtn wa" onclick="shareWA()">Share on WhatsApp</button>
+      <button class="sbtn cp" id="ssBtn" onclick="shareScreenshot()" style="background:#e8f5e9;border-color:#66bb6a;color:#2e7d32">📸 Share Screenshot</button>
       <button class="sbtn cp" id="cpBtn" onclick="copyLnk()">📋 Copy Score Card</button>
     </div>
     <button class="close-btn" onclick="closeShare()">Close</button>
@@ -352,29 +359,246 @@ async function sbFetch(path, opts = {}) {
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
     };
-    if (opts.method === 'POST') hdrs['Prefer'] = 'return=minimal';
+    if ((opts.method === 'POST' || opts.method === 'PATCH' || opts.method === 'DELETE') && !opts.headers?.['Prefer']) {
+      hdrs['Prefer'] = 'return=minimal';
+    }
     const res = await fetch(SB_URL + '/rest/v1/' + path, {
       ...opts,
       headers: { ...hdrs, ...opts.headers },
     });
     if (!res.ok) throw new Error(res.status);
-    if (opts.method === 'POST') return true;
-    return await res.json();
+    const ct = res.headers.get('content-type');
+    if (ct && ct.includes('json')) return await res.json();
+    return true;
   } catch(e) { return null; }
 }
 
+// ====== DEVICE IDENTITY + CLOUD SYNC ======
+let DEVICE_ID = localStorage.getItem('aria_device_id');
+if (!DEVICE_ID) { DEVICE_ID = crypto.randomUUID(); localStorage.setItem('aria_device_id', DEVICE_ID); }
+let PLAYER_ID = null;
+let FRIEND_CODE = null;
+let PLAYER_RECORD = null;
+let friendsList = [];
+
+function generateFriendCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+async function ensurePlayer(name) {
+  const pName = name || playerName || 'Player';
+  try {
+    const existing = await sbFetch('sanrio_players?device_id=eq.' + DEVICE_ID + '&select=*&limit=1');
+    if (existing && existing.length > 0) {
+      PLAYER_RECORD = existing[0];
+      PLAYER_ID = PLAYER_RECORD.id;
+      FRIEND_CODE = PLAYER_RECORD.friend_code;
+      sbFetch('sanrio_players?device_id=eq.' + DEVICE_ID, {
+        method: 'PATCH',
+        body: JSON.stringify({ display_name: pName, last_seen: new Date().toISOString() }),
+      });
+      return PLAYER_RECORD;
+    }
+    const code = generateFriendCode();
+    const res = await sbFetch('sanrio_players', {
+      method: 'POST',
+      body: JSON.stringify({
+        device_id: DEVICE_ID,
+        display_name: pName,
+        friend_code: code,
+        stars: saveData?.stars || 0,
+        best_score: saveData?.bestScore || 0,
+        total_rounds: saveData?.totalRoundsPlayed || 0,
+        collection: saveData?.collection || {},
+        save_data: saveData || {},
+        platform: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'web'
+      }),
+      headers: { 'Prefer': 'return=representation' }
+    });
+    if (res && res.length > 0) {
+      PLAYER_RECORD = res[0];
+      PLAYER_ID = PLAYER_RECORD.id;
+      FRIEND_CODE = PLAYER_RECORD.friend_code;
+    } else if (res && res.id) {
+      PLAYER_RECORD = res;
+      PLAYER_ID = res.id;
+      FRIEND_CODE = res.friend_code;
+    }
+    return PLAYER_RECORD;
+  } catch(e) { return null; }
+}
+
+let _cloudSaveTimer = null;
+function cloudSave() {
+  if (!PLAYER_ID) return;
+  clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer = setTimeout(() => {
+    sbFetch('sanrio_players?id=eq.' + PLAYER_ID, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        stars: saveData.stars,
+        best_score: saveData.bestScore,
+        total_rounds: saveData.totalRoundsPlayed,
+        collection: saveData.collection,
+        save_data: saveData,
+        last_seen: new Date().toISOString()
+      }),
+    });
+  }, 3000);
+}
+
+// ====== FRIEND SYSTEM ======
+async function loadFriends() {
+  if (!PLAYER_ID) return [];
+  try {
+    const sent = await sbFetch('sanrio_friendships?requester_id=eq.' + PLAYER_ID + '&select=addressee_id');
+    const recv = await sbFetch('sanrio_friendships?addressee_id=eq.' + PLAYER_ID + '&select=requester_id');
+    const ids = new Set();
+    if (sent) sent.forEach(f => ids.add(f.addressee_id));
+    if (recv) recv.forEach(f => ids.add(f.requester_id));
+    if (ids.size === 0) { friendsList = []; return []; }
+    const idList = Array.from(ids).map(id => '"' + id + '"').join(',');
+    const players = await sbFetch('sanrio_players?id=in.(' + Array.from(ids).join(',') + ')&select=id,display_name,friend_code,best_score,last_seen');
+    friendsList = players || [];
+    return friendsList;
+  } catch(e) { return []; }
+}
+
+async function addFriendByCode(code) {
+  if (!PLAYER_ID || !code) return { ok: false, msg: 'Not ready' };
+  code = code.trim().toUpperCase();
+  if (code === FRIEND_CODE) return { ok: false, msg: 'That\'s your code!' };
+  if (friendsList.length >= 50) return { ok: false, msg: 'Max 50 friends' };
+  try {
+    const found = await sbFetch('sanrio_players?friend_code=eq.' + code + '&select=id,display_name&limit=1');
+    if (!found || found.length === 0) return { ok: false, msg: 'Code not found' };
+    const friendId = found[0].id;
+    if (friendsList.some(f => f.id === friendId)) return { ok: false, msg: 'Already friends!' };
+    await sbFetch('sanrio_friendships', {
+      method: 'POST',
+      body: JSON.stringify({ requester_id: PLAYER_ID, addressee_id: friendId })
+    });
+    await loadFriends();
+    return { ok: true, msg: 'Added ' + found[0].display_name + '!' };
+  } catch(e) { return { ok: false, msg: 'Error adding friend' }; }
+}
+
+async function removeFriend(friendId) {
+  if (!PLAYER_ID) return;
+  await sbFetch('sanrio_friendships?or=(and(requester_id.eq.' + PLAYER_ID + ',addressee_id.eq.' + friendId + '),and(requester_id.eq.' + friendId + ',addressee_id.eq.' + PLAYER_ID + '))', { method: 'DELETE' });
+  await loadFriends();
+}
+
+// ====== REFERRAL SYSTEM ======
+async function processReferral(refCode) {
+  if (!PLAYER_ID || !refCode || saveData.referredBy) return;
+  try {
+    const found = await sbFetch('sanrio_players?friend_code=eq.' + refCode + '&select=id,referral_count&limit=1');
+    if (!found || found.length === 0) return;
+    const referrer = found[0];
+    if (referrer.id === PLAYER_ID) return;
+    if ((referrer.referral_count || 0) >= 50) return;
+    // Credit referee (this player)
+    saveData.stars += 3;
+    saveData.referredBy = refCode;
+    saveGame();
+    // Credit referrer
+    await sbFetch('rpc/credit_sanrio_referral', {
+      method: 'POST',
+      body: JSON.stringify({ referrer_uuid: referrer.id, stars_amount: 5 })
+    });
+    // Record referral
+    await sbFetch('sanrio_referrals', {
+      method: 'POST',
+      body: JSON.stringify({ referrer_id: referrer.id, referee_id: PLAYER_ID })
+    });
+  } catch(e) {}
+}
+
+// ====== ANTI-CHEAT ======
+async function hashScore(sc, cgt, dur) {
+  const msg = sc + ':' + cgt + ':' + dur + ':' + DEVICE_ID + ':' + Date.now();
+  const data = new TextEncoder().encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+let _lastScoreTime = 0;
+
 let globalLB = [];
+let friendLB = [];
+let weeklyLB = [];
+let lbTab = 'global'; // global | friends | weekly
+
 async function loadGlobalLB() {
-  const data = await sbFetch('game_leaderboard?select=name,score,created_at&order=score.desc&limit=20');
-  if (data) globalLB = data;
+  const data = await sbFetch('sanrio_scores?select=score,combo,caught,created_at,player_id,sanrio_players(display_name,friend_code)&order=score.desc&limit=50');
+  if (data) globalLB = data.map(s => ({ name: s.sanrio_players?.display_name || 'Player', score: s.score, friendCode: s.sanrio_players?.friend_code }));
+  else {
+    const old = await sbFetch('game_leaderboard?select=name,score,created_at&order=score.desc&limit=50');
+    if (old) globalLB = old.map(e => ({ name: e.name, score: e.score }));
+  }
   return globalLB;
 }
 
-async function saveGlobalScore(name, sc, cmb, cgt) {
-  return sbFetch('game_leaderboard', {
+async function loadWeeklyLB() {
+  const now = new Date();
+  const week = now.getFullYear() + '-W' + String(Math.ceil(((now - new Date(now.getFullYear(),0,1)) / 86400000 + new Date(now.getFullYear(),0,1).getDay() + 1) / 7)).padStart(2,'0');
+  const isoWeek = new Date().toISOString().slice(0,4) + '-' + String(getISOWeek(now)).padStart(2,'0');
+  const data = await sbFetch('sanrio_scores?select=score,combo,caught,player_id,sanrio_players(display_name,friend_code)&period_week=eq.' + isoWeek + '&order=score.desc&limit=50');
+  if (data) weeklyLB = data.map(s => ({ name: s.sanrio_players?.display_name || 'Player', score: s.score, friendCode: s.sanrio_players?.friend_code }));
+  return weeklyLB;
+}
+
+function getISOWeek(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+async function loadFriendLB() {
+  if (!PLAYER_ID || friendsList.length === 0) { friendLB = []; return []; }
+  const ids = friendsList.map(f => f.id).concat(PLAYER_ID);
+  const data = await sbFetch('sanrio_scores?select=score,combo,caught,player_id,sanrio_players(display_name,friend_code)&player_id=in.(' + ids.join(',') + ')&order=score.desc&limit=50');
+  if (data) friendLB = data.map(s => ({ name: s.sanrio_players?.display_name || 'Player', score: s.score, friendCode: s.sanrio_players?.friend_code }));
+  return friendLB;
+}
+
+async function saveGlobalScore(name, sc, cmb, cgt, dur) {
+  // Rate limit: 1 score per 20s
+  const now = Date.now();
+  if (now - _lastScoreTime < 20000) return;
+  _lastScoreTime = now;
+  // Plausibility check
+  if (dur > 0 && sc / dur > 200) return;
+  // Save to new table
+  if (PLAYER_ID) {
+    const h = await hashScore(sc, cgt, dur || 0);
+    sbFetch('sanrio_scores', {
+      method: 'POST',
+      body: JSON.stringify({ player_id: PLAYER_ID, score: sc, combo: cmb || 0, caught: cgt || 0, duration_s: dur || 0, client_hash: h }),
+    });
+  }
+  // Backward compat: also save to old table
+  sbFetch('game_leaderboard', {
     method: 'POST',
     body: JSON.stringify({ name: name || 'Player', score: sc, combo: cmb || 0, caught: cgt || 0 }),
   });
+  loadGlobalLB();
+}
+
+// Check if new score beats any friend
+async function checkFriendBeaten(newScore) {
+  if (!PLAYER_ID || friendsList.length === 0) return null;
+  for (const f of friendsList) {
+    if (f.best_score > 0 && newScore > f.best_score) {
+      return f.display_name;
+    }
+  }
+  return null;
 }
 
 // ====== ANALYTICS ======
@@ -421,28 +645,42 @@ function getLeaderboard() {
   if (globalLB.length > 0) return globalLB.map(e => ({ name: e.name, score: e.score }));
   try { return JSON.parse(localStorage.getItem('aria_lb') || '[]'); } catch(e) { return []; }
 }
-function saveToLeaderboard(name, sc, cmb, cgt) {
+function saveToLeaderboard(name, sc, cmb, cgt, dur) {
   // Save to local
   const lb = [];
   try { lb.push(...JSON.parse(localStorage.getItem('aria_lb') || '[]')); } catch(e) {}
   lb.push({ name: name || 'Player', score: sc, date: Date.now() });
   lb.sort((a,b) => b.score - a.score);
-  if (lb.length > 20) lb.length = 20;
+  if (lb.length > 50) lb.length = 50;
   localStorage.setItem('aria_lb', JSON.stringify(lb));
   // Save to global (async, non-blocking)
-  saveGlobalScore(name, sc, cmb, cgt).then(() => loadGlobalLB());
+  saveGlobalScore(name, sc, cmb, cgt, dur).then(() => loadGlobalLB());
+  // Check if beat a friend's score
+  checkFriendBeaten(sc).then(beaten => {
+    if (beaten) friendBeatToast = { name: beaten, timer: 4 };
+  });
 }
 function renderLB() {
-  const lb = getLeaderboard();
+  const lb = lbTab === 'friends' ? friendLB : lbTab === 'weekly' ? weeklyLB : getLeaderboard();
   const el = document.getElementById('lbList');
-  if (!lb.length) { el.innerHTML = '<div class="lb-empty">No scores yet! Play to get on the board!</div>'; return; }
+  const titles = { global: 'Global Leaderboard 🏆', friends: 'Friends Leaderboard 👫', weekly: 'This Week 📅' };
+  document.getElementById('lbTitle').textContent = titles[lbTab] || titles.global;
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === lbTab));
+  if (!lb.length) { el.innerHTML = '<div class="lb-empty">' + (lbTab==='friends' ? 'Add friends to see their scores!' : 'No scores yet!') + '</div>'; return; }
   const medals = ['🥇','🥈','🥉'];
-  el.innerHTML = lb.slice(0, 15).map((e, i) => {
+  el.innerHTML = lb.slice(0, 50).map((e, i) => {
     const rc = i===0?'g':i===1?'s':i===2?'b':'';
-    return '<div class="lb-row"><div class="lb-rank '+rc+'">'+(medals[i]||(i+1))+'</div><div class="lb-name">'+e.name+'</div><div class="lb-score">'+e.score+'</div></div>';
+    const fc = e.friendCode ? '<span style="font-size:10px;color:#bbb;margin-left:4px">' + e.friendCode + '</span>' : '';
+    return '<div class="lb-row"><div class="lb-rank '+rc+'">'+(medals[i]||(i+1))+'</div><div class="lb-name">'+e.name+fc+'</div><div class="lb-score">'+e.score+'</div></div>';
   }).join('');
 }
-function openLB() { loadGlobalLB().then(() => { renderLB(); document.getElementById('lbOv').classList.add('active'); trackEvent('leaderboard_view'); }); }
+function switchLBTab(tab) {
+  lbTab = tab;
+  if (tab === 'friends') loadFriendLB().then(() => renderLB());
+  else if (tab === 'weekly') loadWeeklyLB().then(() => renderLB());
+  else renderLB();
+}
+function openLB() { lbTab = 'global'; loadGlobalLB().then(() => { renderLB(); document.getElementById('lbOv').classList.add('active'); trackEvent('leaderboard_view'); }); }
 function closeLB() { document.getElementById('lbOv').classList.remove('active'); }
 document.getElementById('lbOv').addEventListener('click', e => { if(e.target===e.currentTarget) closeLB(); });
 function promptName() {
@@ -469,6 +707,7 @@ function saveName() {
   if (selectedGender) { localStorage.setItem('aria_gender', selectedGender); saveData.gender = selectedGender; saveGame(); }
   trackEvent('name_set', { detail: v });
   document.getElementById('nameOv').classList.remove('active');
+  ensurePlayer(v);
   if (nameCallback) { const cb = nameCallback; nameCallback = null; cb(); }
 }
 function promptNameThenPlay() { nameCallback = showTutorialOrStart; promptName(); }
@@ -792,6 +1031,7 @@ const ACHIEVEMENTS_DEF = [
   { id:'social-butterfly', name:'Social Butterfly', desc:'Share score 5 times', badge:'💕' },
   { id:'dedicated-fan', name:'Dedicated Fan', desc:'Complete 3 seven-day streaks', badge:'💎' },
   { id:'top-3', name:'Top 3', desc:'Reach top 3 on leaderboard', badge:'🏅' },
+  { id:'referral-king', name:'Referral King', desc:'Refer 10 friends', badge:'👑' },
 ];
 
 const ITEM_CATEGORIES = {
@@ -934,6 +1174,7 @@ const DEFAULT_SAVE = {
   lastSpinDate: null,
   hasShared: false,
   referredBy: null,
+  friendCodeInput: '',
   flashSale: { itemId: null, discount: 0, expiresAt: null },
   dailyFinds: { date: null, legendary: 0, secret: 0, epic: 0 },
   loginCalendar: { week: null, day: 0, claimed: [] },
@@ -942,6 +1183,7 @@ const DEFAULT_SAVE = {
 // ====== SAVE / LOAD SYSTEM ======
 function saveGame() {
   try { localStorage.setItem('aria_save_v7', JSON.stringify(saveData)); } catch(e) {}
+  cloudSave();
 }
 function loadGame() {
   let d;
@@ -1038,10 +1280,11 @@ function getAllActiveEvents() {
 function isGirlScoutActive() {
   return getAllActiveEvents().some(e => e.seasonalTag === 'girlscout');
 }
-// Backward compatibility
-function isValentineActive() {
-  return getAllActiveEvents().some(e => e.seasonalTag === 'valentine');
+// Generic event check + backward compatibility
+function isEventActive(tag) {
+  return getAllActiveEvents().some(e => e.seasonalTag === tag);
 }
+function isValentineActive() { return isEventActive('valentine'); }
 function getRandomSeasonItem(rarity) {
   const activeEvents = getAllActiveEvents();
   const activeTags = activeEvents.map(e => e.seasonalTag);
@@ -1379,6 +1622,7 @@ let showLoginCalendar = false;
 let loginCalendarReward = null;
 let loginCalendarClaimed = false;
 let loginCalendarAnim = 0;
+let friendBeatToast = null;
 let collectionScrollY = 0;
 let collectionTab = 'all';
 let showcaseEditing = false;
@@ -2554,7 +2798,7 @@ function drawHUD() {
   }
   // Version always visible
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.22', W-8, H-8);
+  X.textAlign = 'right'; X.fillText('v10.23', W-8, H-8);
   // Backpack icon (top-left)
   drawBackpackIcon(14, 64);
 
@@ -2838,7 +3082,7 @@ function drawCollection() {
   X.fillText('Back', W/2, H - 55);
 
   X.fillStyle = 'rgba(0,0,0,0.2)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.22', W-14, H-12);
+  X.textAlign = 'right'; X.fillText('v10.23', W-14, H-12);
 }
 
 function drawBlindBoxScreen() {
@@ -3166,16 +3410,16 @@ function drawWhatsNew() {
   X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText("🎉 What's New! 🎉", W/2, H/2 - 200);
   X.fillStyle = '#9c27b0'; X.font = 'bold 14px "Fredoka One",sans-serif';
-  X.fillText('v10.22 Update', W/2, H/2 - 172);
+  X.fillText('v10.23 Update', W/2, H/2 - 172);
 
   const features = [
-    '\uD83C\uDF6A Girl Scout Cookie Day - 6 LIMITED items!',
-    '\u2699\uFE0F Settings screen (sound, language)',
-    '\uD83C\uDFC5 Achievement unlock popups!',
-    '\uD83C\uDF08 Fever mode rainbow glow!',
-    '\u26A1 Speed lines at high combos!',
-    '\uD83D\uDD25 Fire combo counter (10x+)!',
-    '\uD83C\uDFAE Play Again = instant restart!',
+    '\uD83D\uDC6B Friend System - add friends by code!',
+    '\uD83D\uDCF8 Screenshot sharing with score card!',
+    '\uD83C\uDFC6 Leaderboard tabs: Global/Friends/Weekly!',
+    '\uD83C\uDF81 Referral rewards - invite for +5\u2B50!',
+    '\uD83C\uDFB0 Lucky Spin from main menu!',
+    '\u2601\uFE0F Cloud save - progress synced!',
+    '\uD83D\uDD14 Push notification support!',
   ];
   features.forEach((f, i) => {
     X.fillStyle = '#555'; X.font = '12px "Quicksand",sans-serif'; X.textAlign = 'center';
@@ -3415,7 +3659,215 @@ function handleSpinTap(x,y) {
   if (spinState.phase==='result'&&Math.abs(x-W/2)<60&&Math.abs(y-(H/2+215))<20) { showSpin=false; spinState.phase='idle'; state='menu'; return; }
 }
 
-// ====== v10.22 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
+// ====== FRIENDS SCREEN (canvas-drawn) ======
+let showFriends = false;
+let friendScrollY = 0;
+let friendAddResult = null;
+let friendAddTimer = 0;
+let friendInputCode = '';
+let friendInputActive = false;
+
+function drawFriendsScreen() {
+  drawBg();
+  X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
+  X.fillStyle = 'rgba(255,255,255,0.97)'; rrc(W/2,H/2,360,620,24);
+
+  // Close X
+  X.fillStyle = '#ff8a9e'; X.beginPath(); X.arc(W/2+165,H/2-290,16,0,Math.PI*2); X.fill();
+  X.fillStyle = '#fff'; X.font = 'bold 18px sans-serif'; X.textAlign = 'center'; X.textBaseline = 'middle';
+  X.fillText('\u2715',W/2+165,H/2-290); X.textBaseline = 'alphabetic';
+
+  // Title
+  X.fillStyle = '#e91e63'; X.font = 'bold 22px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83D\uDC6B Friends',W/2,H/2-260);
+
+  // Your friend code
+  X.fillStyle = '#f5f5f5'; rrc(W/2,H/2-218,300,50,14);
+  X.fillStyle = '#888'; X.font = '12px "Quicksand",sans-serif';
+  X.fillText('Your Friend Code (tap to copy):',W/2,H/2-234);
+  X.fillStyle = '#e91e63'; X.font = 'bold 26px "Fredoka One",sans-serif';
+  X.fillText(FRIEND_CODE || '------',W/2,H/2-208);
+
+  // Add friend input area
+  X.fillStyle = '#fce4ec'; rrc(W/2,H/2-160,300,44,12);
+  X.fillStyle = friendInputCode ? '#333' : '#bbb'; X.font = '16px "Fredoka One",sans-serif';
+  X.fillText(friendInputCode || 'Enter friend code...',W/2,H/2-158);
+
+  // Add button
+  X.fillStyle = '#e91e63'; rrc(W/2+120,H/2-160,60,34,12);
+  X.fillStyle = '#fff'; X.font = 'bold 12px "Fredoka One",sans-serif';
+  X.fillText('Add',W/2+120,H/2-158);
+
+  // Add result message
+  if (friendAddResult && friendAddTimer > 0) {
+    X.fillStyle = friendAddResult.ok ? '#4caf50' : '#f44336'; X.font = 'bold 12px "Quicksand",sans-serif';
+    X.fillText(friendAddResult.msg,W/2,H/2-130);
+    friendAddTimer -= 1/60;
+  }
+
+  // Share & Earn referral section
+  X.fillStyle = '#fff3e0'; rrc(W/2,H/2-95,300,46,12);
+  X.fillStyle = '#ff8f00'; X.font = 'bold 12px "Fredoka One",sans-serif';
+  X.fillText('\uD83C\uDF81 Share & Earn: Invite friends for +5\u2B50 each!',W/2,H/2-100);
+  X.fillStyle = '#888'; X.font = '10px "Quicksand",sans-serif';
+  X.fillText('They get +3\u2B50 too! Max 50 referrals (250\u2B50)',W/2,H/2-84);
+
+  // Share referral link button
+  X.fillStyle = '#ff8a9e'; rrc(W/2,H/2-56,180,34,17);
+  X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif';
+  X.fillText('\uD83D\uDCE4 Share Referral Link',W/2,H/2-54);
+
+  // Friends list header
+  const listTop = H/2 - 26;
+  X.fillStyle = '#555'; X.font = 'bold 14px "Fredoka One",sans-serif';
+  X.fillText('Friends (' + friendsList.length + '/50)', W/2, listTop);
+
+  // Friends list
+  const listStartY = listTop + 20;
+  const rowH = 46;
+  const maxVisible = 6;
+  X.save();
+  X.beginPath(); X.rect(W/2-170,listStartY-10,340,maxVisible*rowH+10); X.clip();
+  if (friendsList.length === 0) {
+    X.fillStyle = '#bbb'; X.font = '13px "Quicksand",sans-serif';
+    X.fillText('No friends yet! Share your code above.',W/2,listStartY+30);
+  } else {
+    friendsList.forEach((f, i) => {
+      const fy = listStartY + i * rowH - friendScrollY;
+      if (fy < listStartY - rowH || fy > listStartY + maxVisible * rowH) return;
+      X.fillStyle = i % 2 === 0 ? '#fff5f8' : '#fff'; rrc(W/2,fy+rowH/2-4,320,rowH-6,10);
+      X.fillStyle = '#333'; X.font = 'bold 13px "Quicksand",sans-serif'; X.textAlign = 'left';
+      X.fillText(f.display_name,W/2-145,fy+12);
+      X.fillStyle = '#888'; X.font = '11px "Quicksand",sans-serif';
+      X.fillText('Best: ' + (f.best_score||0) + ' \u2022 ' + f.friend_code,W/2-145,fy+28);
+      // Remove button
+      X.textAlign = 'center';
+      X.fillStyle = '#ffcdd2'; rrc(W/2+140,fy+16,40,24,12);
+      X.fillStyle = '#e53935'; X.font = 'bold 10px sans-serif';
+      X.fillText('\u2715',W/2+140,fy+18);
+    });
+  }
+  X.restore();
+  X.textAlign = 'center';
+
+  // Back button
+  X.fillStyle = '#f5f5f5'; rrc(W/2,H/2+290,140,36,18);
+  X.fillStyle = '#888'; X.font = 'bold 14px "Fredoka One",sans-serif';
+  X.fillText('Back',W/2,H/2+292);
+}
+
+function handleFriendsTap(x,y) {
+  // Close X
+  if (Math.abs(x-(W/2+165))<18 && Math.abs(y-(H/2-290))<18) { showFriends = false; return; }
+  // Back button
+  if (Math.abs(x-W/2)<70 && Math.abs(y-(H/2+292))<20) { showFriends = false; return; }
+  // Copy friend code
+  if (Math.abs(x-W/2)<150 && Math.abs(y-(H/2-218))<30 && FRIEND_CODE) {
+    navigator.clipboard.writeText(FRIEND_CODE).catch(()=>{});
+    friendAddResult = { ok: true, msg: 'Code copied!' }; friendAddTimer = 2;
+    if (navigator.vibrate) navigator.vibrate(10);
+    return;
+  }
+  // Add friend button or input tap
+  if (Math.abs(x-(W/2+120))<35 && Math.abs(y-(H/2-160))<20 && friendInputCode.length >= 4) {
+    addFriendByCode(friendInputCode).then(r => { friendAddResult = r; friendAddTimer = 3; if (r.ok) friendInputCode = ''; });
+    return;
+  }
+  if (Math.abs(x-W/2)<130 && Math.abs(y-(H/2-160))<25) {
+    const code = prompt('Enter 6-character friend code:');
+    if (code) { friendInputCode = code.trim().toUpperCase().slice(0,6); }
+    return;
+  }
+  // Share referral link
+  if (Math.abs(x-W/2)<90 && Math.abs(y-(H/2-56))<20) {
+    const url = window.location.origin + window.location.pathname + '?ref=' + (FRIEND_CODE || '');
+    const txt = '\uD83C\uDF38 Play Aria\'s Sanrio Adventure with me! Get +3\u2B50 bonus!\n' + url;
+    if (navigator.share) navigator.share({ title: 'Aria\'s Sanrio Adventure', text: txt, url: url }).catch(()=>{});
+    else navigator.clipboard.writeText(txt).then(() => { friendAddResult = { ok:true, msg:'Link copied!' }; friendAddTimer = 2; });
+    return;
+  }
+  // Remove friend - check each friend row
+  const listTop = H/2 - 26 + 20;
+  const rowH = 46;
+  friendsList.forEach((f, i) => {
+    const fy = listTop + i * rowH - friendScrollY;
+    if (Math.abs(x-(W/2+140))<24 && Math.abs(y-(fy+16))<16) {
+      if (confirm('Remove ' + f.display_name + '?')) removeFriend(f.id);
+    }
+  });
+}
+
+// ====== SCREENSHOT GENERATION ======
+async function generateScreenshot() {
+  const offCanvas = document.createElement('canvas');
+  const scale = 2;
+  offCanvas.width = W * scale;
+  offCanvas.height = (H * 0.5) * scale;
+  const ox = offCanvas.getContext('2d');
+  ox.scale(scale, scale);
+  ox.imageSmoothingEnabled = true;
+
+  // Background gradient
+  const bg = ox.createLinearGradient(0,0,0,H*0.5);
+  bg.addColorStop(0,'#ffe0ec'); bg.addColorStop(1,'#ffc1d6');
+  ox.fillStyle = bg; ox.fillRect(0,0,W,H*0.5);
+
+  // Score banner
+  ox.fillStyle = 'rgba(255,255,255,0.9)';
+  ox.beginPath(); ox.roundRect(20,20,W-40,H*0.5-80,20); ox.fill();
+
+  ox.fillStyle = '#e91e63'; ox.font = 'bold 28px "Fredoka One",sans-serif'; ox.textAlign = 'center';
+  ox.fillText("Aria's Sanrio Adventure", W/2, 65);
+
+  ox.fillStyle = '#ff6b9d'; ox.font = 'bold 56px "Fredoka One",sans-serif';
+  ox.fillText(score.toLocaleString(), W/2, 140);
+
+  ox.fillStyle = '#888'; ox.font = 'bold 16px "Quicksand",sans-serif';
+  ox.fillText((playerName||'Player') + ' \u2022 ' + caught + ' caught \u2022 ' + maxCombo + 'x combo', W/2, 175);
+
+  ox.fillStyle = '#e91e63'; ox.font = '14px "Quicksand",sans-serif';
+  ox.fillText('\u2728 ' + getCollectedCount() + '/' + TOTAL_ITEMS + ' items collected', W/2, 205);
+
+  // Wordle grid
+  const rarityColors = {common:'#e0e0e0',rare:'#64b5f6',epic:'#ce93d8',legendary:'#ffd54f',secret:'#ffb74d'};
+  const items = (sessionCollected||[]).slice(0,15);
+  const gridX = W/2 - 75, gridY = 225;
+  items.forEach((id, i) => {
+    const it = SEASON_ITEMS.find(s=>s.id===id);
+    const col = it ? (rarityColors[it.rarity]||'#e0e0e0') : '#e0e0e0';
+    const gx = gridX + (i%5)*32, gy = gridY + Math.floor(i/5)*32;
+    ox.fillStyle = col;
+    ox.beginPath(); ox.roundRect(gx,gy,28,28,6); ox.fill();
+  });
+
+  // Footer
+  ox.fillStyle = '#e91e63'; ox.font = 'bold 13px "Quicksand",sans-serif';
+  ox.fillText('Can you beat me? \uD83D\uDC49 aria-cinnamoroll.vercel.app', W/2, H*0.5-30);
+
+  return new Promise(resolve => offCanvas.toBlob(resolve, 'image/png'));
+}
+
+async function shareScreenshot() {
+  trackEvent('share_screenshot',{score});
+  const btn = document.getElementById('ssBtn');
+  btn.textContent = '\u23F3 Generating...';
+  try {
+    const blob = await generateScreenshot();
+    const file = new File([blob], 'sanrio-score.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "Aria's Sanrio Adventure", text: getTxt() });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'sanrio-score.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    btn.textContent = '\u2705 Shared!';
+  } catch(e) { btn.textContent = '\uD83D\uDCF8 Share Screenshot'; }
+  setTimeout(() => { btn.textContent = '\uD83D\uDCF8 Share Screenshot'; }, 2000);
+}
+
+// ====== v10.23 OUTFIT SELECTOR SCREEN (scrollable, multi-unlock) ======
 let outfitScrollY = 0;
 function drawOutfitSelector() {
   drawBg();
@@ -4150,6 +4602,15 @@ function drawMenu() {
   X.fillStyle = '#fce4ec'; rrc(W/2+btnW/2+gap/2, r3Y, btnW, btnH, btnR);
   X.fillStyle = '#e91e63'; X.font = 'bold 12px "Fredoka One",sans-serif';
   X.fillText('\uD83D\uDC57 Outfits', W/2+btnW/2+gap/2, r3Y+2);
+  // Row 4: Lucky Spin | Friends
+  const r4Y = r3Y + btnH + gap;
+  const spinAvail = saveData.lastSpinDate !== getTodayStr();
+  X.fillStyle = spinAvail ? '#e8eaf6' : '#f0f0f0'; rrc(W/2-btnW/2-gap/2, r4Y, btnW, btnH, btnR);
+  X.fillStyle = spinAvail ? '#3f51b5' : '#999'; X.font = 'bold 12px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83C\uDFB0 Lucky Spin' + (spinAvail ? ' \u2728' : ''), W/2-btnW/2-gap/2, r4Y+2);
+  X.fillStyle = '#e3f2fd'; rrc(W/2+btnW/2+gap/2, r4Y, btnW, btnH, btnR);
+  X.fillStyle = '#1565c0'; X.font = 'bold 12px "Fredoka One",sans-serif';
+  X.fillText('\uD83D\uDC6B Friends' + (friendsList.length > 0 ? ' (' + friendsList.length + ')' : ''), W/2+btnW/2+gap/2, r4Y+2);
 
   // Settings gear (top-right)
   X.fillStyle = 'rgba(255,255,255,0.7)';
@@ -4162,7 +4623,7 @@ function drawMenu() {
   // Version (bottom-right, subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
   X.textAlign = 'right';
-  X.fillText('v10.22', W-10, H-8);
+  X.fillText('v10.23', W-10, H-8);
 }
 
 // ====== SETTINGS SCREEN ======
@@ -4358,7 +4819,18 @@ function drawResults() {
 
   // Version (subtle)
   X.fillStyle = 'rgba(255,255,255,0.4)'; X.font = 'bold 10px "Quicksand",sans-serif';
-  X.textAlign = 'right'; X.fillText('v10.22', W - 8, H - 8);
+  X.textAlign = 'right'; X.fillText('v10.23', W - 8, H - 8);
+
+  // Friend beat toast
+  if (friendBeatToast && friendBeatToast.timer > 0) {
+    const ta = Math.min(1, friendBeatToast.timer);
+    X.globalAlpha = ta;
+    X.fillStyle = 'rgba(76,175,80,0.95)'; rrc(W/2, 30, 300, 40, 20);
+    X.fillStyle = '#fff'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+    X.fillText('\uD83D\uDD25 You beat ' + friendBeatToast.name + '\'s record!', W/2, 32);
+    X.globalAlpha = 1;
+    friendBeatToast.timer -= 1/60;
+  }
 }
 
 // Store button positions for results click handling
@@ -4820,7 +5292,7 @@ function update(dt) {
       const pos = lb.findIndex(e => e.name === playerName);
       if (pos >= 0 && pos < 3) checkAchievement('top-3');
       saveGame();
-      saveToLeaderboard(playerName || 'Player', score, maxCombo, caught);
+      saveToLeaderboard(playerName || 'Player', score, maxCombo, caught, ROUND);
       startCelebration();
       trackEvent('play_end', { score, combo: maxCombo, caught, duration_s: ROUND, detail: 'missed='+missed+' stars='+starsEarned });
       if (isNewRecord) trackEvent('new_record', { score, combo: maxCombo, caught });
@@ -5128,6 +5600,7 @@ function loop(timestamp) {
     else if (showShop) { drawShop(); }
     else if (showChallenges) { drawChallengesScreen(); }
     else if (showSpin) { drawLuckySpin(); }
+    else if (showFriends) { drawFriendsScreen(); }
     else if (showOutfits) { drawOutfitSelector(); }
     else if (showSettings) { drawSettingsScreen(); }
     else if (showLoginCalendar) { drawLoginCalendar(); }
@@ -5159,7 +5632,7 @@ function loop(timestamp) {
 }
 
 // v7.0 Initialization: What's New + Daily popup
-if (saveData.lastVersion !== 'v10.22') { showWhatsNew = true; }
+if (saveData.lastVersion !== 'v10.23') { showWhatsNew = true; }
 else {
   const today = new Date().toISOString().slice(0,10);
   if (saveData.streak.lastClaimDate !== today) { showDaily = true; }
@@ -5175,6 +5648,24 @@ setTimeout(() => {
 }, 800);
 
 loopId = requestAnimationFrame(loop);
+
+// ====== IDENTITY + REFERRAL INIT ======
+setTimeout(async () => {
+  if (playerName) {
+    await ensurePlayer(playerName);
+    await loadFriends();
+    // Process referral from URL
+    const refCode = new URLSearchParams(window.location.search).get('ref');
+    if (refCode && refCode.length >= 4 && !saveData.referredBy) {
+      processReferral(refCode.toUpperCase());
+    }
+  }
+}, 1500);
+
+// ====== SERVICE WORKER ======
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -5246,7 +5737,7 @@ function handleTap(x, y) {
   // Overlay screens (highest priority)
   if (showWhatsNew) {
     if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+180))<22) {
-      showWhatsNew = false; saveData.lastVersion = 'v10.22'; saveGame();
+      showWhatsNew = false; saveData.lastVersion = 'v10.23'; saveGame();
       // Show daily after what's new
       const today = new Date().toISOString().slice(0,10);
       if (saveData.streak.lastClaimDate !== today) showDaily = true;
@@ -5336,6 +5827,7 @@ function handleTap(x, y) {
   if (showShop) { handleShopTap(x,y); return; }
   if (showChallenges) { handleChallengeTap(x,y); return; }
   if (showSpin) { handleSpinTap(x,y); return; }
+  if (showFriends) { handleFriendsTap(x,y); return; }
   if (showOutfits) { handleOutfitTap(x,y); return; }
   if (showLoginCalendar) {
     const calData = saveData.loginCalendar || { week: null, day: 0, claimed: [] };
@@ -5443,9 +5935,23 @@ function handleTap(x, y) {
       showChallenges=true; return;
     }
     if (Math.abs(x-rightX)<btnW/2 && Math.abs(y-r3Y)<btnH/2) { showOutfits=true; outfitScrollY=0; return; }
-    // Tap to Play (anywhere else)
-    if (!playerName) { promptNameThenPlay(); return; }
-    showTutorialOrStart();
+    // Row 4: Lucky Spin (left) | Friends (right)
+    const r4Y = r3Y + btnH + gap;
+    if (Math.abs(x-leftX)<btnW/2 && Math.abs(y-r4Y)<btnH/2) {
+      showSpin = true; spinState = { phase:'idle', angle:0, speed:0, result:null };
+      return;
+    }
+    if (Math.abs(x-rightX)<btnW/2 && Math.abs(y-r4Y)<btnH/2) {
+      if (PLAYER_ID) { loadFriends(); showFriends = true; friendScrollY = 0; }
+      else if (playerName) { ensurePlayer().then(() => { loadFriends(); showFriends = true; friendScrollY = 0; }); }
+      else { promptNameThenPlay(); }
+      return;
+    }
+    // Tap to Play (anywhere else near play button)
+    if (Math.abs(y - playY) < 30) {
+      if (!playerName) { promptNameThenPlay(); return; }
+      showTutorialOrStart();
+    }
   } else if (state === 'results') {
     // Rate prompt overlay intercepts all taps
     if (showRatePrompt) {

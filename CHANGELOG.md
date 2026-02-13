@@ -1,5 +1,26 @@
 # Changelog - Aria's Sanrio Adventure (Flappy Cinnamoroll)
 
+## v10.23 - Social & Viral Features (2026-02-13)
+- NEW: Friend System - add friends by 6-character code, view friends list, remove friends
+- NEW: Screenshot Sharing - generate score card image, share via Web Share API or download
+- NEW: Leaderboard Tabs - Global, Friends, and Weekly leaderboards (top 50)
+- NEW: Referral System - share referral links, +5 stars for referrer, +3 for referee (max 50)
+- NEW: Lucky Spin accessible from main menu (Row 4 button)
+- NEW: Cloud Save - progress syncs to Supabase automatically
+- NEW: Device Identity - anonymous player profile with friend code
+- NEW: Anti-cheat - SHA256 score hashing, rate limiting, plausibility checks
+- NEW: Friend beat notification toast on results screen
+- NEW: "Referral King" achievement for 10 successful referrals
+- NEW: Service Worker for offline support and push notifications
+- NEW: Events SOP document for standardized seasonal event creation
+- IMPROVED: Leaderboard now shows 50 entries (was 20) with friend codes
+- IMPROVED: Share overlay now includes screenshot button
+- IMPROVED: Referral URL uses friend codes instead of player names
+- IMPROVED: Generic isEventActive(tag) helper replaces individual event checks
+- BACKEND: Supabase sanrio_players, sanrio_scores, sanrio_friendships, sanrio_referrals tables
+- BACKEND: Row-level security policies on all new tables
+- BACKEND: Score period triggers for weekly/monthly leaderboard partitioning
+
 ## v10.22 - Remove Background Music (2026-02-12)
 - Removed background music from gameplay entirely
 - Removed music toggle from settings screen
