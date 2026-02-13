@@ -38,33 +38,3 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Push notification handler
-self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {};
-  const title = data.title || "Aria's Sanrio Adventure";
-  const options = {
-    body: data.body || 'Come back and play!',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [100, 50, 100],
-    data: { url: data.url || '/' },
-    actions: [{ action: 'play', title: 'Play Now!' }]
-  };
-  e.waitUntil(self.registration.showNotification(title, options));
-});
-
-// Notification click - open game
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  const url = e.notification.data?.url || '/';
-  e.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes('aria-cinnamoroll') || client.url.includes('flappy-cinnamoroll')) {
-          return client.focus();
-        }
-      }
-      return clients.openWindow(url);
-    })
-  );
-});

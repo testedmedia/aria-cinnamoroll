@@ -4,382 +4,419 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aria's Sanrio Adventure - Free Kawaii Catching Game</title>
-<meta name="description" content="Catch boba, treats & collect 41+ Sanrio characters in this adorable kawaii catching game! Free on iOS & web.">
-<meta property="og:title" content="Aria's Sanrio Adventure">
-<meta property="og:description" content="Free kawaii catching game with 41+ collectible Sanrio characters!">
+<meta name="description" content="Catch boba, treats & collect 30+ Sanrio characters in this adorable kawaii catching game! Free on iOS & web. Open blind boxes, unlock outfits, compete globally!">
+<meta property="og:title" content="Aria's Sanrio Adventure - Free Kawaii Catching Game">
+<meta property="og:description" content="Catch treats & collect 30+ Sanrio characters! Free on iOS & web.">
 <meta property="og:image" content="https://aria-cinnamoroll.vercel.app/og-image.png">
 <meta property="og:url" content="https://aria-cinnamoroll.vercel.app/site.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Quicksand',sans-serif;background:#fff;color:#333;overflow-x:hidden}
-.hero{background:linear-gradient(135deg,#ffe0ec 0%,#e3f2fd 50%,#f3e5f5 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(255,105,180,0.08) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(147,112,219,0.08) 0%,transparent 50%);animation:float 20s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,20px)}}
-.hero-content{position:relative;z-index:1;max-width:600px}
-.hero h1{font-family:'Fredoka One',cursive;font-size:clamp(32px,7vw,56px);color:#e91e63;margin-bottom:8px;text-shadow:0 2px 8px rgba(233,30,99,0.15)}
-.hero .subtitle{font-family:'Fredoka One',cursive;font-size:clamp(18px,4vw,28px);color:#9c27b0;margin-bottom:24px}
-.hero p{font-size:16px;color:#666;margin-bottom:32px;line-height:1.6}
-.chars{display:flex;justify-content:center;gap:12px;margin:30px 0;flex-wrap:wrap}
-.char-circle{width:64px;height:64px;border-radius:50%;background:#fff;box-shadow:0 4px 16px rgba(233,30,99,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;animation:bob 3s ease-in-out infinite}
-.char-circle:nth-child(2){animation-delay:0.3s}.char-circle:nth-child(3){animation-delay:0.6s}.char-circle:nth-child(4){animation-delay:0.9s}.char-circle:nth-child(5){animation-delay:1.2s}.char-circle:nth-child(6){animation-delay:1.5s}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.cta-group{display:flex;flex-direction:column;gap:12px;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:16px 40px;border-radius:50px;font-family:'Fredoka One',cursive;font-size:18px;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
-.btn-primary{background:linear-gradient(135deg,#ff8a9e,#e91e63);color:#fff;box-shadow:0 6px 24px rgba(233,30,99,0.35)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(233,30,99,0.45)}
-.btn-secondary{background:#fff;color:#e91e63;border:2px solid #ffb3c6;box-shadow:0 4px 16px rgba(0,0,0,0.06)}
-.btn-secondary:hover{background:#fff5f8;transform:translateY(-2px)}
-.badge{display:inline-block;background:rgba(233,30,99,0.1);color:#e91e63;font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:16px;letter-spacing:1px}
-section{padding:80px 20px}
-.section-title{font-family:'Fredoka One',cursive;font-size:clamp(24px,5vw,36px);text-align:center;margin-bottom:12px}
-.section-sub{text-align:center;color:#888;font-size:15px;margin-bottom:48px;max-width:500px;margin-left:auto;margin-right:auto}
-.features{background:#fff}
-.features .section-title{color:#e91e63}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;max-width:900px;margin:0 auto}
-.feat-card{background:linear-gradient(135deg,#fff5f8,#fff);border:2px solid #ffe0ec;border-radius:20px;padding:28px 24px;text-align:center;transition:transform .2s}
-.feat-card:hover{transform:translateY(-4px)}
-.feat-icon{font-size:36px;margin-bottom:12px}
-.feat-card h3{font-family:'Fredoka One',cursive;font-size:16px;color:#e91e63;margin-bottom:6px}
-.feat-card p{font-size:13px;color:#888;line-height:1.5}
-.collect{background:linear-gradient(135deg,#f3e5f5,#e8eaf6)}
-.collect .section-title{color:#9c27b0}
-.collect-grid{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;max-width:700px;margin:0 auto}
-.collect-item{width:80px;height:96px;background:#fff;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.06);gap:4px}
-.collect-item img{width:40px;height:40px;object-fit:contain}
-.collect-item span{font-size:9px;font-weight:700;color:#666}
-.outfits{background:#fff}
-.outfits .section-title{color:#ff8f00}
-.outfit-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;max-width:700px;margin:0 auto}
-.outfit-chip{background:linear-gradient(135deg,#fff8e1,#fff);border:2px solid #ffe0b2;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:700;color:#ff8f00;display:flex;align-items:center;gap:6px}
-.download{background:linear-gradient(135deg,#ffe0ec,#f3e5f5);text-align:center}
-.download .section-title{color:#e91e63}
-.phone-mock{max-width:260px;margin:0 auto 32px;background:#1a1a2e;border-radius:32px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
-.phone-screen{background:linear-gradient(135deg,#fce4ec,#e3f2fd,#f3e5f5);border-radius:22px;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;font-size:48px;flex-direction:column;gap:8px}
-.phone-screen span{font-family:'Fredoka One',cursive;font-size:14px;color:#e91e63}
-footer{background:#1a1a2e;color:rgba(255,255,255,0.6);text-align:center;padding:40px 20px;font-size:13px}
-footer a{color:#ff69b4;text-decoration:none}
-footer a:hover{text-decoration:underline}
-.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
-.stats{display:flex;justify-content:center;gap:32px;margin:32px 0;flex-wrap:wrap}
-.stat{text-align:center}
-.stat-num{font-family:'Fredoka One',cursive;font-size:32px;color:#e91e63}
-.stat-label{font-size:12px;color:#888;margin-top:4px}
+:root{--pink:#e91e63;--purple:#9c27b0;--light-pink:#ffe0ec;--accent:#ff69b4;--dark:#1a1a2e}
+body{font-family:'Quicksand',sans-serif;background:#fff;color:#333;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-/* Language Toggle */
-.lang-toggle-wrap{position:fixed;top:16px;right:16px;z-index:1000}
-.lang-toggle{display:flex;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-radius:50px;overflow:hidden;box-shadow:0 4px 20px rgba(233,30,99,0.18);border:2px solid #ffb3c6}
-.lang-btn{padding:8px 18px;font-family:'Fredoka One',cursive;font-size:14px;border:none;background:transparent;color:#e91e63;cursor:pointer;transition:all .2s;letter-spacing:0.5px}
-.lang-btn.active{background:linear-gradient(135deg,#ff8a9e,#e91e63);color:#fff}
-.lang-btn:hover:not(.active){background:rgba(233,30,99,0.08)}
+/* === NAV === */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;transition:background .3s,box-shadow .3s}
+nav.scrolled{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 2px 20px rgba(233,30,99,0.1)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo img{width:36px;height:36px;border-radius:10px}
+.nav-logo span{font-family:'Fredoka One',cursive;font-size:16px;color:var(--pink)}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-links a{text-decoration:none;font-weight:700;font-size:13px;color:#666;transition:color .2s}
+.nav-links a:hover{color:var(--pink)}
+.nav-cta{background:linear-gradient(135deg,#ff8a9e,var(--pink));color:#fff!important;padding:8px 20px;border-radius:50px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 4px 16px rgba(233,30,99,0.3)}
+.lang-toggle{display:flex;background:rgba(255,255,255,0.9);border-radius:50px;overflow:hidden;border:2px solid #ffb3c6}
+.lang-btn{padding:5px 12px;font-family:'Fredoka One',cursive;font-size:11px;border:none;background:transparent;color:var(--pink);cursor:pointer;transition:all .2s}
+.lang-btn.active{background:var(--pink);color:#fff}
 
-@media(max-width:600px){
-  .hero{min-height:auto;padding:60px 20px}
+/* === HERO === */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 60px;background:linear-gradient(160deg,#fff5f8 0%,#fce4ec 30%,#f3e5f5 60%,#e8eaf6 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:
+  radial-gradient(circle at 20% 30%,rgba(255,105,180,0.12) 0%,transparent 50%),
+  radial-gradient(circle at 80% 70%,rgba(156,39,176,0.1) 0%,transparent 50%),
+  radial-gradient(circle at 50% 50%,rgba(255,255,255,0.4) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+.hero-text{max-width:480px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(233,30,99,0.1);color:var(--pink);font-size:12px;font-weight:700;padding:6px 16px;border-radius:50px;margin-bottom:20px;letter-spacing:1.5px}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--pink);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'Fredoka One',cursive;font-size:clamp(36px,5vw,52px);color:var(--dark);line-height:1.15;margin-bottom:16px}
+.hero h1 span{background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:17px;color:#666;line-height:1.7;margin-bottom:28px}
+.hero-stats{display:flex;gap:28px;margin-bottom:32px}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:'Fredoka One',cursive;font-size:28px;color:var(--pink)}
+.hero-stat-label{font-size:11px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border-radius:50px;font-family:'Fredoka One',cursive;font-size:16px;text-decoration:none;transition:all .25s;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,#ff8a9e,var(--pink));color:#fff;box-shadow:0 8px 30px rgba(233,30,99,0.35)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(233,30,99,0.45)}
+.btn-secondary{background:#fff;color:var(--pink);border:2px solid #ffb3c6;box-shadow:0 4px 16px rgba(0,0,0,0.05)}
+.btn-secondary:hover{background:#fff5f8;transform:translateY(-3px)}
+
+/* Phone mockup in hero */
+.hero-phone{position:relative;display:flex;justify-content:center}
+.phone-frame{width:280px;background:var(--dark);border-radius:40px;padding:14px;box-shadow:0 30px 80px rgba(26,26,46,0.3),0 0 0 2px rgba(255,255,255,0.1) inset;position:relative}
+.phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:100px;height:28px;background:var(--dark);border-radius:0 0 16px 16px;z-index:2}
+.phone-screen{border-radius:28px;overflow:hidden;aspect-ratio:9/19.5;background:#ffe0ec}
+.phone-screen img{width:100%;height:100%;object-fit:cover}
+.phone-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:350px;height:350px;background:radial-gradient(circle,rgba(255,105,180,0.2) 0%,transparent 70%);pointer-events:none;z-index:-1}
+
+/* Floating characters around phone */
+.float-char{position:absolute;animation:floaty 4s ease-in-out infinite}
+.float-char img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15))}
+.float-char:nth-child(2){top:10%;right:-20px;animation-delay:0.5s}
+.float-char:nth-child(3){bottom:20%;left:-30px;animation-delay:1s}
+.float-char:nth-child(4){top:30%;left:-40px;animation-delay:1.5s}
+.float-char:nth-child(5){bottom:10%;right:-25px;animation-delay:0.8s}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+
+/* === SCREENSHOTS CAROUSEL === */
+.screenshots{padding:100px 24px;background:#fff;text-align:center}
+.section-badge{display:inline-block;background:rgba(233,30,99,0.08);color:var(--pink);font-size:11px;font-weight:700;padding:6px 16px;border-radius:50px;margin-bottom:16px;letter-spacing:1.5px;text-transform:uppercase}
+.section-title{font-family:'Fredoka One',cursive;font-size:clamp(28px,4vw,42px);margin-bottom:12px}
+.section-sub{color:#888;font-size:16px;margin-bottom:48px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.6}
+.screenshots .section-title{color:var(--dark)}
+.ss-scroll{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ss-scroll::-webkit-scrollbar{display:none}
+.ss-card{flex:0 0 auto;width:240px;scroll-snap-align:center;border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.12);transition:transform .3s}
+.ss-card:hover{transform:scale(1.03)}
+.ss-card img{width:100%;display:block}
+
+/* === FEATURES === */
+.features{padding:100px 24px;background:linear-gradient(180deg,#fff 0%,#fff5f8 100%)}
+.features .section-title{color:var(--pink)}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:1000px;margin:0 auto}
+.feat-card{background:#fff;border:2px solid #fce4ec;border-radius:24px;padding:32px 28px;transition:all .3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--pink),var(--purple));opacity:0;transition:opacity .3s}
+.feat-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(233,30,99,0.12);border-color:var(--pink)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{font-size:36px;margin-bottom:14px}
+.feat-card h3{font-family:'Fredoka One',cursive;font-size:17px;color:var(--pink);margin-bottom:8px}
+.feat-card p{font-size:14px;color:#888;line-height:1.6}
+
+/* === CHARACTERS === */
+.characters{padding:100px 24px;background:linear-gradient(160deg,#f3e5f5 0%,#e8eaf6 100%)}
+.characters .section-title{color:var(--purple)}
+.char-grid{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;max-width:800px;margin:0 auto}
+.char-card{width:90px;background:#fff;border-radius:20px;padding:14px 8px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.06);transition:transform .3s;cursor:default}
+.char-card:hover{transform:translateY(-6px) scale(1.05)}
+.char-card img{width:48px;height:48px;object-fit:contain;margin-bottom:6px}
+.char-card span{font-size:9px;font-weight:700;color:#666;display:block}
+
+/* === DOWNLOAD CTA === */
+.download{padding:100px 24px;background:linear-gradient(160deg,var(--light-pink) 0%,#f3e5f5 50%,#e8eaf6 100%);text-align:center;position:relative;overflow:hidden}
+.download .section-title{color:var(--pink);margin-bottom:16px}
+.download-desc{color:#666;font-size:16px;max-width:450px;margin:0 auto 40px;line-height:1.6}
+.download-icon{width:120px;height:120px;border-radius:28px;box-shadow:0 16px 48px rgba(233,30,99,0.25);margin:0 auto 32px;display:block}
+.download-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* === FOOTER === */
+footer{background:var(--dark);color:rgba(255,255,255,0.5);text-align:center;padding:60px 24px 40px}
+.footer-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.footer-brand img{width:40px;height:40px;border-radius:10px}
+.footer-brand span{font-family:'Fredoka One',cursive;font-size:18px;color:#fff}
+.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+.footer-links a{color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s}
+.footer-links a:hover{color:var(--accent)}
+.footer-divider{width:60px;height:2px;background:rgba(255,255,255,0.1);margin:24px auto;border-radius:1px}
+footer p{font-size:12px;margin-bottom:8px}
+footer .disclaimer{font-size:11px;opacity:.5;max-width:400px;margin:12px auto 0}
+
+/* === RESPONSIVE === */
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr;text-align:center;gap:40px}
+  .hero-text{max-width:100%}
+  .hero-stats{justify-content:center}
+  .hero-btns{justify-content:center}
+  .phone-frame{width:220px}
+  .float-char img{width:40px;height:40px}
+  .float-char:nth-child(2){right:0}.float-char:nth-child(3){left:0}.float-char:nth-child(4){left:-10px}.float-char:nth-child(5){right:0}
+  .nav-links a:not(.nav-cta){display:none}
   .feat-grid{grid-template-columns:1fr}
-  .char-circle{width:48px;height:48px;font-size:22px}
-  .stats{gap:20px}
-  .stat-num{font-size:24px}
-  .lang-toggle-wrap{top:10px;right:10px}
-  .lang-btn{padding:6px 14px;font-size:12px}
+  .char-card{width:72px}
+  .char-card img{width:36px;height:36px}
 }
+@media(max-width:480px){
+  .hero{padding:80px 16px 40px}
+  .hero-stats{gap:16px}
+  .hero-stat-num{font-size:22px}
+  .phone-frame{width:200px}
+  .ss-card{width:200px}
+}
+
+/* Sparkle animation */
+.sparkle{position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;animation:sparkle 3s ease-in-out infinite}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1)}}
 </style>
 </head>
 <body>
 
-<!-- Language Toggle -->
-<div class="lang-toggle-wrap">
-  <div class="lang-toggle">
-    <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <img src="icon-512.png" alt="Aria's Sanrio Adventure">
+    <span>Aria's Sanrio Adventure</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features" data-i18n="navFeatures">Features</a>
+    <a href="#characters" data-i18n="navChars">Characters</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+    </div>
+    <a href="/index.html" class="nav-cta" data-i18n="navPlay">Play Free</a>
   </div>
-</div>
+</nav>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-content">
-    <div class="badge" data-i18n="badge">FREE TO PLAY</div>
-    <h1>Aria's Sanrio Adventure</h1>
-    <p class="subtitle" data-i18n="subtitle">Kawaii Catching Game</p>
-    <div class="chars">
-      <div class="char-circle"><img src="cinnamoroll2.png" width="40" alt="Cinnamoroll"></div>
-      <div class="char-circle"><img src="hellokitty.png" width="40" alt="Hello Kitty"></div>
-      <div class="char-circle"><img src="pompompurin.png" width="40" alt="Pompompurin"></div>
-      <div class="char-circle"><img src="kuromi.png" width="36" alt="Kuromi"></div>
-      <div class="char-circle"><img src="mymelody.png" width="40" alt="My Melody"></div>
-      <div class="char-circle"><img src="gudetama.png" width="36" alt="Gudetama"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge" data-i18n="badge">FREE TO PLAY</div>
+      <h1 data-i18n-html="heroTitle">Catch Treats with <span>Sanrio Friends!</span></h1>
+      <p class="hero-desc" data-i18n="heroDesc">The cutest catching game ever made. Collect 30+ Sanrio characters, open blind boxes, unlock outfits, and compete on the global leaderboard.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num">30+</div><div class="hero-stat-label" data-i18n="statChars">Characters</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">20</div><div class="hero-stat-label" data-i18n="statOutfits">Outfits</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label" data-i18n="statSeasons">Seasons</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">1M+</div><div class="hero-stat-label" data-i18n="statPlays">Games Played</div></div>
+      </div>
+      <div class="hero-btns">
+        <a href="/index.html" class="btn btn-primary" data-i18n="ctaPlay">Play Now - It's Free!</a>
+        <a href="#download" class="btn btn-secondary" data-i18n="ctaApp">Get the App</a>
+      </div>
     </div>
-    <p data-i18n="heroDesc">Catch boba, treats & collect adorable Sanrio characters! Open blind boxes, unlock outfits, and climb the global leaderboard.</p>
-    <div class="stats">
-      <div class="stat"><div class="stat-num">41+</div><div class="stat-label" data-i18n="statCollectibles">Collectibles</div></div>
-      <div class="stat"><div class="stat-num">16</div><div class="stat-label" data-i18n="statOutfits">Outfits</div></div>
-      <div class="stat"><div class="stat-num">12</div><div class="stat-label" data-i18n="statCharacters">Characters</div></div>
-      <div class="stat"><div class="stat-num">4</div><div class="stat-label" data-i18n="statSeasons">Seasons</div></div>
-    </div>
-    <div class="cta-group">
-      <a href="/index.html" class="btn btn-primary" data-i18n="ctaPlay">Play Now - Free!</a>
-      <a href="#download" class="btn btn-secondary" data-i18n="ctaDownload">Download the App</a>
+    <div class="hero-phone">
+      <div class="phone-glow"></div>
+      <div class="float-char"><img src="cinnamoroll2.png" alt="Cinnamoroll"></div>
+      <div class="float-char"><img src="pompompurin.png" alt="Pompompurin"></div>
+      <div class="float-char"><img src="kuromi.png" alt="Kuromi"></div>
+      <div class="float-char"><img src="mymelody.png" alt="My Melody"></div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <img src="sanrio-05-menu-mobile.png" alt="Game screenshot">
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- SCREENSHOTS -->
+<section class="screenshots" id="screenshots">
+  <div class="section-badge" data-i18n="ssBadge">GAMEPLAY</div>
+  <h2 class="section-title" data-i18n="ssTitle">See It In Action</h2>
+  <p class="section-sub" data-i18n="ssSub">Gorgeous kawaii visuals, satisfying gameplay, and tons of content to discover</p>
+  <div class="ss-scroll">
+    <div class="ss-card"><img src="sanrio-05-menu-mobile.png" alt="Main Menu"></div>
+    <div class="ss-card"><img src="sanrio-check-kuromi.png" alt="Kuromi Collection"></div>
+    <div class="ss-card"><img src="sanrio-14-claim-result.png" alt="Blind Box"></div>
+    <div class="ss-card"><img src="sanrio-12-daily-check.png" alt="Daily Rewards"></div>
+    <div class="ss-card"><img src="sanrio-11-after-whatsnew.png" alt="What's New"></div>
+    <div class="ss-card"><img src="sanrio-check-pompompurin.png" alt="Pompompurin"></div>
+    <div class="ss-card"><img src="sanrio-check-hellokitty.png" alt="Hello Kitty"></div>
+    <div class="ss-card"><img src="sanrio-check-mymelody.png" alt="My Melody"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
 <section class="features" id="features">
-  <h2 class="section-title" data-i18n="featTitle">Why You'll Love It</h2>
-  <p class="section-sub" data-i18n="featSub">Everything a Sanrio fan could dream of, in one adorable game</p>
+  <div style="text-align:center">
+    <div class="section-badge" data-i18n="featBadge">FEATURES</div>
+    <h2 class="section-title" data-i18n="featTitle">Why You'll Love It</h2>
+    <p class="section-sub" data-i18n="featSub">Everything a Sanrio fan could dream of</p>
+  </div>
   <div class="feat-grid">
     <div class="feat-card">
       <div class="feat-icon">🎁</div>
-      <h3 data-i18n="feat1Title">Blind Box Pulls</h3>
-      <p data-i18n="feat1Desc">Open mystery boxes to discover rare Sanrio characters with epic reveal animations!</p>
+      <h3 data-i18n="f1t">Blind Box Pulls</h3>
+      <p data-i18n="f1d">Open mystery boxes to discover rare Sanrio characters with epic reveal animations!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">👗</div>
-      <h3 data-i18n="feat2Title">16 Outfits</h3>
-      <p data-i18n="feat2Desc">Unlock costumes from the shop, achievements, blind boxes & seasonal events!</p>
+      <h3 data-i18n="f2t">20 Outfits</h3>
+      <p data-i18n="f2d">Unlock costumes from the shop, achievements, blind boxes & seasonal events!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">📷</div>
-      <h3 data-i18n="feat3Title">Custom Avatar</h3>
-      <p data-i18n="feat3Desc">Upload your own photo as the in-game character. Your game, your look!</p>
+      <h3 data-i18n="f3t">Custom Avatar</h3>
+      <p data-i18n="f3d">Upload your own photo as the in-game character. Your game, your look!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🏆</div>
-      <h3 data-i18n="feat4Title">Global Leaderboard</h3>
-      <p data-i18n="feat4Desc">Compete with players worldwide. Can you reach the top 3?</p>
+      <h3 data-i18n="f4t">Global Leaderboard</h3>
+      <p data-i18n="f4d">Compete with players worldwide. Can you reach the top?</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🎯</div>
-      <h3 data-i18n="feat5Title">Daily Challenges</h3>
-      <p data-i18n="feat5Desc">3 new challenges every day. Complete them for bonus stars!</p>
+      <h3 data-i18n="f5t">Daily Challenges</h3>
+      <p data-i18n="f5d">3 new challenges every day. Complete them for bonus stars!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">💝</div>
-      <h3 data-i18n="feat6Title">Seasonal Events</h3>
-      <p data-i18n="feat6Desc">Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!</p>
+      <h3 data-i18n="f6t">Seasonal Events</h3>
+      <p data-i18n="f6d">Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!</p>
     </div>
     <div class="feat-card">
       <div class="feat-icon">🎰</div>
-      <h3 data-i18n="feat7Title">Lucky Spin</h3>
-      <p data-i18n="feat7Desc">Free daily spin wheel for stars, rare pulls, and surprise rewards!</p>
+      <h3 data-i18n="f7t">Lucky Spin</h3>
+      <p data-i18n="f7d">Free daily spin for stars, rare pulls, and surprise rewards!</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">⭐</div>
-      <h3 data-i18n="feat8Title">Star Shop</h3>
-      <p data-i18n="feat8Desc">Spend earned stars on power-ups, outfits, and flash sale deals!</p>
+      <div class="feat-icon">👫</div>
+      <h3 data-i18n="f8t">Friend System</h3>
+      <p data-i18n="f8d">Add friends with codes, compare scores, and send gifts!</p>
     </div>
   </div>
 </section>
 
-<section class="collect" id="characters">
-  <h2 class="section-title" data-i18n="collectTitle">Collect Them All!</h2>
-  <p class="section-sub" data-i18n="collectSub">12 beloved Sanrio characters with themed items across 5 rarity tiers</p>
-  <div class="collect-grid">
-    <div class="collect-item"><img src="cinnamoroll2.png" alt="Cinnamoroll"><span>Cinnamoroll</span></div>
-    <div class="collect-item"><img src="hellokitty.png" alt="Hello Kitty"><span>Hello Kitty</span></div>
-    <div class="collect-item"><img src="pompompurin.png" alt="Pompompurin"><span>Pompompurin</span></div>
-    <div class="collect-item"><img src="kuromi.png" alt="Kuromi"><span>Kuromi</span></div>
-    <div class="collect-item"><img src="mymelody.png" alt="My Melody"><span>My Melody</span></div>
-    <div class="collect-item"><img src="pochacco.png" alt="Pochacco"><span>Pochacco</span></div>
-    <div class="collect-item"><img src="keroppi.png" alt="Keroppi"><span>Keroppi</span></div>
-    <div class="collect-item"><img src="gudetama.png" alt="Gudetama"><span>Gudetama</span></div>
-    <div class="collect-item"><img src="badtzmaru.png" alt="Badtz-Maru"><span>Badtz-Maru</span></div>
-    <div class="collect-item"><img src="tuxedosam.png" alt="Tuxedo Sam"><span>Tuxedo Sam</span></div>
-    <div class="collect-item"><img src="littletwinstars.png" alt="Twin Stars"><span>Twin Stars</span></div>
-    <div class="collect-item"><img src="hangyodon.png" alt="Hangyodon"><span>Hangyodon</span></div>
+<!-- CHARACTERS -->
+<section class="characters" id="characters">
+  <div style="text-align:center">
+    <div class="section-badge" data-i18n="charBadge">COLLECTION</div>
+    <h2 class="section-title" data-i18n="charTitle">Collect Them All!</h2>
+    <p class="section-sub" data-i18n="charSub">12 beloved Sanrio characters with themed items across 5 rarity tiers</p>
+  </div>
+  <div class="char-grid">
+    <div class="char-card"><img src="cinnamoroll2.png" alt="Cinnamoroll"><span>Cinnamoroll</span></div>
+    <div class="char-card"><img src="hellokitty.png" alt="Hello Kitty"><span>Hello Kitty</span></div>
+    <div class="char-card"><img src="pompompurin.png" alt="Pompompurin"><span>Pompompurin</span></div>
+    <div class="char-card"><img src="kuromi.png" alt="Kuromi"><span>Kuromi</span></div>
+    <div class="char-card"><img src="mymelody.png" alt="My Melody"><span>My Melody</span></div>
+    <div class="char-card"><img src="pochacco.png" alt="Pochacco"><span>Pochacco</span></div>
+    <div class="char-card"><img src="keroppi.png" alt="Keroppi"><span>Keroppi</span></div>
+    <div class="char-card"><img src="gudetama.png" alt="Gudetama"><span>Gudetama</span></div>
+    <div class="char-card"><img src="badtzmaru.png" alt="Badtz-Maru"><span>Badtz-Maru</span></div>
+    <div class="char-card"><img src="tuxedosam.png" alt="Tuxedo Sam"><span>Tuxedo Sam</span></div>
+    <div class="char-card"><img src="littletwinstars.png" alt="Twin Stars"><span>Twin Stars</span></div>
+    <div class="char-card"><img src="hangyodon.png" alt="Hangyodon"><span>Hangyodon</span></div>
   </div>
 </section>
 
-<section class="outfits" id="outfits">
-  <h2 class="section-title" data-i18n="outfitTitle">Dress Up Your Character!</h2>
-  <p class="section-sub" data-i18n="outfitSub">16 outfits to unlock through gameplay, shopping, achievements & more</p>
-  <div class="outfit-row">
-    <div class="outfit-chip" data-i18n="outfit1">🎀 Hello Kitty Bow</div>
-    <div class="outfit-chip" data-i18n="outfit2">🐰 My Melody Hood</div>
-    <div class="outfit-chip" data-i18n="outfit3">☁️ Cinnamoroll Ears</div>
-    <div class="outfit-chip" data-i18n="outfit4">💀 Kuromi Hat</div>
-    <div class="outfit-chip" data-i18n="outfit5">👑 Kawaii Queen</div>
-    <div class="outfit-chip" data-i18n="outfit6">👨‍🍳 Chef Hat</div>
-    <div class="outfit-chip" data-i18n="outfit7">🏴‍☠️ Pirate Bandana</div>
-    <div class="outfit-chip" data-i18n="outfit8">🌸 Flower Crown</div>
-    <div class="outfit-chip" data-i18n="outfit9">👑 Golden Crown</div>
-    <div class="outfit-chip" data-i18n="outfit10">🌈 Rainbow Aura</div>
-    <div class="outfit-chip" data-i18n="outfit11">😇 Angel Wings</div>
-    <div class="outfit-chip" data-i18n="outfit12">😈 Devil Horns</div>
-    <div class="outfit-chip" data-i18n="outfit13">💕 Valentine Crown</div>
-    <div class="outfit-chip" data-i18n="outfit14">🐇 Spring Bunny</div>
-    <div class="outfit-chip" data-i18n="outfit15">😎 Summer Shades</div>
-  </div>
-</section>
-
+<!-- DOWNLOAD CTA -->
 <section class="download" id="download">
-  <h2 class="section-title" data-i18n="dlTitle">Get the App!</h2>
-  <p class="section-sub" data-i18n="dlSub">Play anytime, anywhere. Free on your phone or tablet.</p>
-  <div class="phone-mock">
-    <div class="phone-screen">
-      <img src="icon-512.png" width="80" style="border-radius:18px">
-      <span>Aria's Sanrio Adventure</span>
-    </div>
-  </div>
-  <div class="cta-group">
-    <a href="/index.html" class="btn btn-primary" data-i18n="dlCta">Play in Browser - Free!</a>
-    <p style="color:#999;font-size:13px;margin-top:8px" data-i18n="dlComingSoon">App Store version coming soon!</p>
+  <div class="section-badge" data-i18n="dlBadge">DOWNLOAD</div>
+  <h2 class="section-title" data-i18n="dlTitle">Get Aria's Sanrio Adventure</h2>
+  <p class="download-desc" data-i18n="dlDesc">Play anytime, anywhere. Free on your phone, tablet, or browser. No account needed.</p>
+  <img src="icon-512.png" alt="App Icon" class="download-icon">
+  <div class="download-btns">
+    <a href="/index.html" class="btn btn-primary" data-i18n="dlPlay">Play in Browser - Free!</a>
+    <a href="#" class="btn btn-secondary" data-i18n="dlIOS">App Store - Coming Soon</a>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
-  <div class="footer-links">
-    <a href="/index.html" data-i18n="footGame">Play Game</a>
-    <a href="/privacy.html" data-i18n="footPrivacy">Privacy Policy</a>
-    <a href="/terms.html" data-i18n="footTerms">Terms of Service</a>
-    <a href="#features" data-i18n="footFeatures">Features</a>
-    <a href="#characters" data-i18n="footCharacters">Characters</a>
+  <div class="footer-brand">
+    <img src="icon-512.png" alt="Logo">
+    <span>Aria's Sanrio Adventure</span>
   </div>
-  <p data-i18n="footCopy">Aria's Sanrio Adventure v10.9 &copy; 2026. Made with 💖</p>
-  <p style="margin-top:8px;font-size:11px" data-i18n="footDisclaimer">This is a fan-made game. Sanrio characters are trademarks of Sanrio Co., Ltd.</p>
+  <div class="footer-links">
+    <a href="/index.html" data-i18n="fPlay">Play Game</a>
+    <a href="/privacy.html" data-i18n="fPrivacy">Privacy Policy</a>
+    <a href="/terms.html" data-i18n="fTerms">Terms of Service</a>
+    <a href="#features" data-i18n="fFeatures">Features</a>
+    <a href="#characters" data-i18n="fChars">Characters</a>
+  </div>
+  <div class="footer-divider"></div>
+  <p data-i18n="fCopy">&copy; 2026 Aria's Sanrio Adventure. Made with love.</p>
+  <p class="disclaimer" data-i18n="fDisclaimer">This is an independent fan-made game. Not affiliated with or endorsed by Sanrio Co., Ltd. All Sanrio character names and likenesses are the property of their respective owners.</p>
 </footer>
 
 <script>
+// Sticky nav
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const el = document.querySelector(a.getAttribute('href'));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// i18n
 const i18n = {
   en: {
-    badge: "FREE TO PLAY",
-    subtitle: "Kawaii Catching Game",
-    heroDesc: "Catch boba, treats & collect adorable Sanrio characters! Open blind boxes, unlock outfits, and climb the global leaderboard.",
-    statCollectibles: "Collectibles",
-    statOutfits: "Outfits",
-    statCharacters: "Characters",
-    statSeasons: "Seasons",
-    ctaPlay: "Play Now - Free!",
-    ctaDownload: "Download the App",
-    featTitle: "Why You'll Love It",
-    featSub: "Everything a Sanrio fan could dream of, in one adorable game",
-    feat1Title: "Blind Box Pulls",
-    feat1Desc: "Open mystery boxes to discover rare Sanrio characters with epic reveal animations!",
-    feat2Title: "16 Outfits",
-    feat2Desc: "Unlock costumes from the shop, achievements, blind boxes & seasonal events!",
-    feat3Title: "Custom Avatar",
-    feat3Desc: "Upload your own photo as the in-game character. Your game, your look!",
-    feat4Title: "Global Leaderboard",
-    feat4Desc: "Compete with players worldwide. Can you reach the top 3?",
-    feat5Title: "Daily Challenges",
-    feat5Desc: "3 new challenges every day. Complete them for bonus stars!",
-    feat6Title: "Seasonal Events",
-    feat6Desc: "Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!",
-    feat7Title: "Lucky Spin",
-    feat7Desc: "Free daily spin wheel for stars, rare pulls, and surprise rewards!",
-    feat8Title: "Star Shop",
-    feat8Desc: "Spend earned stars on power-ups, outfits, and flash sale deals!",
-    collectTitle: "Collect Them All!",
-    collectSub: "12 beloved Sanrio characters with themed items across 5 rarity tiers",
-    outfitTitle: "Dress Up Your Character!",
-    outfitSub: "16 outfits to unlock through gameplay, shopping, achievements & more",
-    outfit1: "\u{1F380} Hello Kitty Bow",
-    outfit2: "\u{1F430} My Melody Hood",
-    outfit3: "\u2601\uFE0F Cinnamoroll Ears",
-    outfit4: "\u{1F480} Kuromi Hat",
-    outfit5: "\u{1F451} Kawaii Queen",
-    outfit6: "\u{1F468}\u200D\u{1F373} Chef Hat",
-    outfit7: "\u{1F3F4}\u200D\u2620\uFE0F Pirate Bandana",
-    outfit8: "\u{1F338} Flower Crown",
-    outfit9: "\u{1F451} Golden Crown",
-    outfit10: "\u{1F308} Rainbow Aura",
-    outfit11: "\u{1F607} Angel Wings",
-    outfit12: "\u{1F608} Devil Horns",
-    outfit13: "\u{1F495} Valentine Crown",
-    outfit14: "\u{1F407} Spring Bunny",
-    outfit15: "\u{1F60E} Summer Shades",
-    dlTitle: "Get the App!",
-    dlSub: "Play anytime, anywhere. Free on your phone or tablet.",
-    dlCta: "Play in Browser - Free!",
-    dlComingSoon: "App Store version coming soon!",
-    footGame: "Play Game",
-    footPrivacy: "Privacy Policy",
-    footTerms: "Terms of Service",
-    footFeatures: "Features",
-    footCharacters: "Characters",
-    footCopy: "Aria's Sanrio Adventure v10.9 \u00A9 2026. Made with \u{1F496}",
-    footDisclaimer: "This is a fan-made game. Sanrio characters are trademarks of Sanrio Co., Ltd."
+    navFeatures:"Features",navChars:"Characters",navPlay:"Play Free",
+    badge:"FREE TO PLAY",
+    heroDesc:"The cutest catching game ever made. Collect 30+ Sanrio characters, open blind boxes, unlock outfits, and compete on the global leaderboard.",
+    statChars:"Characters",statOutfits:"Outfits",statSeasons:"Seasons",statPlays:"Games Played",
+    ctaPlay:"Play Now - It's Free!",ctaApp:"Get the App",
+    ssBadge:"GAMEPLAY",ssTitle:"See It In Action",ssSub:"Gorgeous kawaii visuals, satisfying gameplay, and tons of content to discover",
+    featBadge:"FEATURES",featTitle:"Why You'll Love It",featSub:"Everything a Sanrio fan could dream of",
+    f1t:"Blind Box Pulls",f1d:"Open mystery boxes to discover rare Sanrio characters with epic reveal animations!",
+    f2t:"20 Outfits",f2d:"Unlock costumes from the shop, achievements, blind boxes & seasonal events!",
+    f3t:"Custom Avatar",f3d:"Upload your own photo as the in-game character. Your game, your look!",
+    f4t:"Global Leaderboard",f4d:"Compete with players worldwide. Can you reach the top?",
+    f5t:"Daily Challenges",f5d:"3 new challenges every day. Complete them for bonus stars!",
+    f6t:"Seasonal Events",f6d:"Valentine's, Cherry Blossom, Summer Splash & Halloween with exclusive items!",
+    f7t:"Lucky Spin",f7d:"Free daily spin for stars, rare pulls, and surprise rewards!",
+    f8t:"Friend System",f8d:"Add friends with codes, compare scores, and send gifts!",
+    charBadge:"COLLECTION",charTitle:"Collect Them All!",charSub:"12 beloved Sanrio characters with themed items across 5 rarity tiers",
+    dlBadge:"DOWNLOAD",dlTitle:"Get Aria's Sanrio Adventure",dlDesc:"Play anytime, anywhere. Free on your phone, tablet, or browser. No account needed.",
+    dlPlay:"Play in Browser - Free!",dlIOS:"App Store - Coming Soon",
+    fPlay:"Play Game",fPrivacy:"Privacy Policy",fTerms:"Terms of Service",fFeatures:"Features",fChars:"Characters",
+    fCopy:"\u00A9 2026 Aria's Sanrio Adventure. Made with love.",
+    fDisclaimer:"This is an independent fan-made game. Not affiliated with or endorsed by Sanrio Co., Ltd. All Sanrio character names and likenesses are the property of their respective owners."
   },
   es: {
-    badge: "GRATIS PARA JUGAR",
-    subtitle: "Juego Kawaii de Atrapar",
-    heroDesc: "\u00A1Atrapa boba, dulces y colecciona adorables personajes de Sanrio! Abre cajas sorpresa, desbloquea trajes y sube en la tabla de posiciones global.",
-    statCollectibles: "Coleccionables",
-    statOutfits: "Trajes",
-    statCharacters: "Personajes",
-    statSeasons: "Temporadas",
-    ctaPlay: "\u00A1Jugar Ahora - Gratis!",
-    ctaDownload: "Descargar la App",
-    featTitle: "\u00BFPor Qu\u00E9 Te Encantar\u00E1?",
-    featSub: "Todo lo que un fan de Sanrio podr\u00EDa so\u00F1ar, en un juego adorable",
-    feat1Title: "Cajas Sorpresa",
-    feat1Desc: "\u00A1Abre cajas misteriosas para descubrir personajes raros de Sanrio con animaciones espectaculares!",
-    feat2Title: "16 Trajes",
-    feat2Desc: "\u00A1Desbloquea disfraces en la tienda, logros, cajas sorpresa y eventos de temporada!",
-    feat3Title: "Avatar Personalizado",
-    feat3Desc: "\u00A1Sube tu propia foto como personaje del juego. Tu juego, tu estilo!",
-    feat4Title: "Tabla de L\u00EDderes Global",
-    feat4Desc: "\u00A1Compite con jugadores de todo el mundo! \u00BFPuedes llegar al top 3?",
-    feat5Title: "Desaf\u00EDos Diarios",
-    feat5Desc: "\u00A13 desaf\u00EDos nuevos cada d\u00EDa. \u00A1Compl\u00E9talos para ganar estrellas extra!",
-    feat6Title: "Eventos de Temporada",
-    feat6Desc: "\u00A1San Valent\u00EDn, Flores de Cerezo, Verano y Halloween con objetos exclusivos!",
-    feat7Title: "Ruleta de la Suerte",
-    feat7Desc: "\u00A1Gira la ruleta gratis cada d\u00EDa para ganar estrellas, premios raros y sorpresas!",
-    feat8Title: "Tienda de Estrellas",
-    feat8Desc: "\u00A1Gasta tus estrellas en mejoras, trajes y ofertas rel\u00E1mpago!",
-    collectTitle: "\u00A1Colecci\u00F3nalos Todos!",
-    collectSub: "12 queridos personajes de Sanrio con objetos tem\u00E1ticos en 5 niveles de rareza",
-    outfitTitle: "\u00A1Viste a Tu Personaje!",
-    outfitSub: "16 trajes para desbloquear jugando, comprando, con logros y m\u00E1s",
-    outfit1: "\u{1F380} Lazo de Hello Kitty",
-    outfit2: "\u{1F430} Capucha de My Melody",
-    outfit3: "\u2601\uFE0F Orejas de Cinnamoroll",
-    outfit4: "\u{1F480} Gorro de Kuromi",
-    outfit5: "\u{1F451} Reina Kawaii",
-    outfit6: "\u{1F468}\u200D\u{1F373} Gorro de Chef",
-    outfit7: "\u{1F3F4}\u200D\u2620\uFE0F Pa\u00F1uelo Pirata",
-    outfit8: "\u{1F338} Corona de Flores",
-    outfit9: "\u{1F451} Corona Dorada",
-    outfit10: "\u{1F308} Aura Arco\u00EDris",
-    outfit11: "\u{1F607} Alas de \u00C1ngel",
-    outfit12: "\u{1F608} Cuernos de Diablito",
-    outfit13: "\u{1F495} Corona de San Valent\u00EDn",
-    outfit14: "\u{1F407} Conejito de Primavera",
-    outfit15: "\u{1F60E} Lentes de Verano",
-    dlTitle: "\u00A1Obt\u00E9n la App!",
-    dlSub: "Juega cuando quieras, donde quieras. Gratis en tu tel\u00E9fono o tablet.",
-    dlCta: "\u00A1Jugar en el Navegador - Gratis!",
-    dlComingSoon: "\u00A1Versi\u00F3n de App Store pr\u00F3ximamente!",
-    footGame: "Jugar",
-    footPrivacy: "Pol\u00EDtica de Privacidad",
-    footTerms: "T\u00E9rminos de Servicio",
-    footFeatures: "Caracter\u00EDsticas",
-    footCharacters: "Personajes",
-    footCopy: "Aria's Sanrio Adventure v10.9 \u00A9 2026. Hecho con \u{1F496}",
-    footDisclaimer: "Este es un juego hecho por fans. Los personajes de Sanrio son marcas registradas de Sanrio Co., Ltd."
+    navFeatures:"Funciones",navChars:"Personajes",navPlay:"Jugar Gratis",
+    badge:"GRATIS PARA JUGAR",
+    heroDesc:"El juego de atrapar m\u00E1s lindo jam\u00E1s creado. Colecciona 30+ personajes de Sanrio, abre cajas sorpresa, desbloquea trajes y compite en la tabla de l\u00EDderes global.",
+    statChars:"Personajes",statOutfits:"Trajes",statSeasons:"Temporadas",statPlays:"Partidas Jugadas",
+    ctaPlay:"\u00A1Jugar Ahora - Es Gratis!",ctaApp:"Obtener la App",
+    ssBadge:"JUGABILIDAD",ssTitle:"M\u00EDralo en Acci\u00F3n",ssSub:"Visuales kawaii hermosos, jugabilidad satisfactoria y toneladas de contenido",
+    featBadge:"FUNCIONES",featTitle:"\u00BFPor Qu\u00E9 Te Encantar\u00E1?",featSub:"Todo lo que un fan de Sanrio podr\u00EDa so\u00F1ar",
+    f1t:"Cajas Sorpresa",f1d:"\u00A1Abre cajas misteriosas para descubrir personajes raros de Sanrio!",
+    f2t:"20 Trajes",f2d:"\u00A1Desbloquea disfraces en la tienda, logros y eventos!",
+    f3t:"Avatar Personalizado",f3d:"\u00A1Sube tu propia foto como personaje del juego!",
+    f4t:"Tabla de L\u00EDderes",f4d:"\u00A1Compite con jugadores de todo el mundo!",
+    f5t:"Desaf\u00EDos Diarios",f5d:"\u00A13 desaf\u00EDos nuevos cada d\u00EDa!",
+    f6t:"Eventos de Temporada",f6d:"\u00A1San Valent\u00EDn, Flores de Cerezo, Verano y Halloween!",
+    f7t:"Ruleta de la Suerte",f7d:"\u00A1Gira la ruleta gratis para premios!",
+    f8t:"Sistema de Amigos",f8d:"\u00A1Agrega amigos con c\u00F3digos y compara puntuaciones!",
+    charBadge:"COLECCI\u00D3N",charTitle:"\u00A1Colecci\u00F3nalos Todos!",charSub:"12 queridos personajes de Sanrio en 5 niveles de rareza",
+    dlBadge:"DESCARGAR",dlTitle:"Obt\u00E9n Aria's Sanrio Adventure",dlDesc:"Juega cuando quieras, donde quieras. Gratis en tu tel\u00E9fono, tablet o navegador.",
+    dlPlay:"\u00A1Jugar en Navegador - Gratis!",dlIOS:"App Store - Pr\u00F3ximamente",
+    fPlay:"Jugar",fPrivacy:"Privacidad",fTerms:"T\u00E9rminos",fFeatures:"Funciones",fChars:"Personajes",
+    fCopy:"\u00A9 2026 Aria's Sanrio Adventure. Hecho con amor.",
+    fDisclaimer:"Este es un juego hecho por fans. No est\u00E1 afiliado ni respaldado por Sanrio Co., Ltd."
   }
 };
 
 function setLang(lang) {
-  document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    var key = el.getAttribute('data-i18n');
-    if (i18n[lang] && i18n[lang][key]) {
-      el.textContent = i18n[lang][key];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang] && i18n[lang][key]) el.textContent = i18n[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (key === 'heroTitle') {
+      el.innerHTML = lang === 'es'
+        ? 'Atrapa Dulces con <span>Amigos Sanrio!</span>'
+        : 'Catch Treats with <span>Sanrio Friends!</span>';
     }
   });
-  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+  document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
   });
   document.documentElement.lang = lang;
   localStorage.setItem('aria-lang', lang);
 }
 
-// Initialize from saved preference
 (function() {
   var saved = localStorage.getItem('aria-lang');
-  if (saved && (saved === 'en' || saved === 'es')) {
-    setLang(saved);
-  }
+  if (saved && (saved === 'en' || saved === 'es')) setLang(saved);
 })();
 </script>
 

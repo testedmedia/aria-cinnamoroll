@@ -794,6 +794,8 @@ let showSettings = false;
 let showOnboarding = false;
 let onboardingSlide = 0;
 let showRatePrompt = false;
+let gDt = 1/60; // global delta time for draw functions (set each frame in loop)
+let confirmDialog = null; // { msg, onYes } canvas-based confirm dialog
 
 // ====== STATE ======
 let state = 'menu';
@@ -3800,7 +3802,7 @@ function handleFriendsTap(x,y) {
   friendsList.forEach((f, i) => {
     const fy = listTop + i * rowH - friendScrollY;
     if (Math.abs(x-(W/2+140))<24 && Math.abs(y-(fy+16))<16) {
-      if (confirm('Remove ' + f.display_name + '?')) removeFriend(f.id);
+      confirmDialog = { msg: 'Remove ' + f.display_name + '?', onYes: () => removeFriend(f.id) };
     }
   });
 }
@@ -4645,13 +4647,13 @@ function drawMenu() {
 function drawSettingsScreen() {
   drawBg();
   // Panel background
-  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 520, 24);
+  X.fillStyle = 'rgba(255,255,255,0.95)'; rrc(W/2, H/2, 340, 620, 24);
 
   X.fillStyle = '#e91e63'; X.font = 'bold 24px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('\u2699\uFE0F Settings', W/2, H/2 - 220);
+  X.fillText('\u2699\uFE0F Settings', W/2, H/2 - 270);
 
-  let sy = H/2 - 170;
-  const rowH = 56;
+  let sy = H/2 - 220;
+  const rowH = 52;
 
   // Sound Effects toggle
   X.fillStyle = '#fce4ec'; rrc(W/2, sy, 300, 44, 22);
@@ -4690,10 +4692,26 @@ function drawSettingsScreen() {
   X.fillStyle = '#e74c3c'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
   X.fillText('\u26A0\uFE0F Reset All Progress', W/2, sy + 2);
 
+  sy += rowH;
+  // Privacy Policy
+  X.fillStyle = '#e8eaf6'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#3f51b5'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83D\uDD12 Privacy Policy', W/2, sy + 2);
+
+  sy += rowH;
+  // Terms of Service
+  X.fillStyle = '#e8eaf6'; rrc(W/2, sy, 300, 44, 22);
+  X.fillStyle = '#3f51b5'; X.font = 'bold 13px "Fredoka One",sans-serif'; X.textAlign = 'center';
+  X.fillText('\uD83D\uDCC4 Terms of Service', W/2, sy + 2);
+
+  // Fan-game disclaimer
+  X.fillStyle = '#999'; X.font = '10px "Quicksand",sans-serif'; X.textAlign = 'center';
+  X.fillText('Fan-made game. Not affiliated with Sanrio Co., Ltd.', W/2, sy + 38);
+
   // Back button
-  X.fillStyle = '#ff8a9e'; rrc(W/2, H/2 + 230, 160, 42, 21);
+  X.fillStyle = '#ff8a9e'; rrc(W/2, H/2 + 280, 160, 42, 21);
   X.fillStyle = '#fff'; X.font = 'bold 16px "Fredoka One",sans-serif'; X.textAlign = 'center';
-  X.fillText('Back', W/2, H/2 + 232);
+  X.fillText('Back', W/2, H/2 + 282);
 }
 
 // ====== ONBOARDING WELCOME SCREENS ======
@@ -5577,6 +5595,43 @@ function drawGame() {
   // Near-miss display (removed duplicate - handled at line 5456)
 }
 
+// === TEST BRIDGE (only loads with ?test=1) ===
+if (location.search.includes('test=1')) {
+  window.__GAME = {
+    get state() { return state; },
+    get score() { return score; },
+    get combo() { return combo; },
+    get maxCombo() { return maxCombo; },
+    get caught() { return caught; },
+    get missed() { return missed; },
+    get hi() { return hi; },
+    get stars() { return saveData.stars; },
+    get showShop() { return showShop; },
+    get showCollection() { return showCollection; },
+    get showFriends() { return showFriends; },
+    get showBlindBox() { return showBlindBox; },
+    get showSpin() { return showSpin; },
+    get playerName() { return playerName; },
+    get saveData() { return saveData; },
+    get SHOP_ITEMS() { return SHOP_ITEMS; },
+    get SANRIO_CHARS() { return SANRIO_CHARS; },
+    get SEASON_ITEMS() { return SEASON_ITEMS; },
+    get globalLB() { return globalLB; },
+    get friendsList() { return friendsList; },
+    startGame: function() { startGame(); },
+    openShop: function() { showShop = true; },
+    closeShop: function() { showShop = false; },
+    openCollection: function() { showCollection = true; collectionScrollY = 0; },
+    closeCollection: function() { showCollection = false; },
+    openLB: function() { openLB(); },
+    closeLB: function() { closeLB(); },
+    openFriends: function() { if (PLAYER_ID) { loadFriends(); showFriends = true; friendScrollY = 0; } else { showFriends = true; friendScrollY = 0; } },
+    closeFriends: function() { showFriends = false; },
+    setStars: function(n) { saveData.stars = n; },
+    setState: function(s) { state = s; },
+  };
+}
+
 // ====== GAME LOOP - rAF primary, visibility fallback ======
 let lt = 0;
 let loopId = null;
@@ -5586,6 +5641,7 @@ function loop(timestamp) {
   if (!lt) lt = timestamp || performance.now();
   const now = timestamp || performance.now();
   const dt = Math.min((now - lt) / 1000, 0.05);
+  gDt = dt;
   lt = now;
   frame++;
 
@@ -5615,6 +5671,26 @@ function loop(timestamp) {
       updateCelebration(dt);
       drawResults();
       if (showRatePrompt) drawRatePrompt();
+    }
+    // Confirm dialog overlay (canvas-based, WKWebView safe)
+    if (confirmDialog) {
+      X.fillStyle = 'rgba(0,0,0,0.5)'; X.fillRect(0,0,W,H);
+      X.fillStyle = 'rgba(255,255,255,0.97)'; rrc(W/2, H/2, 300, 160, 24);
+      X.fillStyle = '#e91e63'; X.font = 'bold 18px "Fredoka One",sans-serif'; X.textAlign = 'center';
+      X.fillText('Confirm', W/2, H/2 - 40);
+      X.fillStyle = '#555'; X.font = '13px "Quicksand",sans-serif';
+      // Word wrap the message
+      const words = confirmDialog.msg.split(' ');
+      let line = '', lineY = H/2 - 12;
+      words.forEach(w => { if ((line + w).length > 30) { X.fillText(line.trim(), W/2, lineY); lineY += 18; line = ''; } line += w + ' '; });
+      if (line.trim()) X.fillText(line.trim(), W/2, lineY);
+      // Yes button
+      X.fillStyle = '#f44336'; rrc(W/2-65, H/2+50, 100, 40, 14);
+      X.fillStyle = '#fff'; X.font = 'bold 14px "Fredoka One",sans-serif';
+      X.fillText('Yes', W/2-65, H/2+52);
+      // No button
+      X.fillStyle = '#e0e0e0'; rrc(W/2+65, H/2+50, 100, 40, 14);
+      X.fillStyle = '#555'; X.fillText('Cancel', W/2+65, H/2+52);
     }
     // Screen transition overlay
     if (transition) {
@@ -5664,7 +5740,7 @@ setTimeout(async () => {
 }, 1500);
 
 // ====== SERVICE WORKER ======
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && window.location.protocol !== 'capacitor:') {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 
@@ -5864,9 +5940,9 @@ function handleTap(x, y) {
   // Settings screen taps
   if (showSettings) {
     // Back button
-    if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+230))<22) { showSettings = false; return; }
-    let sy = H/2 - 170;
-    const rowH = 56;
+    if (Math.abs(x-W/2)<80 && Math.abs(y-(H/2+280))<22) { showSettings = false; return; }
+    let sy = H/2 - 220;
+    const rowH = 52;
     // SFX toggle
     if (Math.abs(x-(W/2+115))<30 && Math.abs(y-sy)<22) {
       sfxEnabled = !sfxEnabled; localStorage.setItem('aria_sfx', sfxEnabled ? '1' : '0'); return;
@@ -5882,15 +5958,26 @@ function handleTap(x, y) {
     sy += rowH * 2;
     // Reset Progress
     if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) {
-      if (confirm('Reset ALL progress? This cannot be undone!')) {
-        // Only clear game data, preserve device ID and settings
+      confirmDialog = { msg: 'Reset ALL progress? This cannot be undone!', onYes: () => {
         const keepKeys = ['aria_device_id', 'aria_lang', 'aria_sfx'];
         const kept = {};
         keepKeys.forEach(k => { const v = localStorage.getItem(k); if (v) kept[k] = v; });
         localStorage.clear();
         Object.entries(kept).forEach(([k,v]) => localStorage.setItem(k, v));
         location.reload();
-      }
+      }};
+      return;
+    }
+    sy += rowH;
+    // Privacy Policy
+    if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) {
+      window.location.href = 'privacy.html';
+      return;
+    }
+    sy += rowH;
+    // Terms of Service
+    if (Math.abs(x-W/2)<150 && Math.abs(y-sy)<22) {
+      window.location.href = 'terms.html';
       return;
     }
     return;
@@ -6003,6 +6090,13 @@ C.addEventListener('touchstart', e => {
   for (let i = 0; i < e.changedTouches.length; i++) {
     const touch = e.changedTouches[i];
     const {x, y} = gc(touch.clientX, touch.clientY);
+
+    // Confirm dialog intercepts all taps when active
+    if (confirmDialog) {
+      if (Math.abs(x-(W/2-65))<55 && Math.abs(y-(H/2+50))<24) { const cb = confirmDialog.onYes; confirmDialog = null; if (cb) cb(); }
+      else if (Math.abs(x-(W/2+65))<55 && Math.abs(y-(H/2+50))<24) { confirmDialog = null; }
+      return;
+    }
 
     if (state === 'playing') {
       // Check backpack overlay or backpack icon
@@ -6153,8 +6247,18 @@ function buildShareCard() {
   return `\uD83C\uDF38 ${name} scored ${score} in Aria's Sanrio Adventure!${valTag}\n\n${grid}\n\n\uD83C\uDFAF ${caught} caught | \uD83D\uDD25 ${maxCombo}x combo | \u2728 ${getCollectedCount()}/${TOTAL_ITEMS}\n\nCan you beat me? \uD83D\uDC49`;
 }
 function getTxt() { return buildShareCard(); }
-function shareTW() { trackEvent('share_tw',{score}); window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(getTxt())+'&url='+encodeURIComponent(getURL())); }
-function shareWA() { trackEvent('share_wa',{score}); window.open('https://wa.me/?text='+encodeURIComponent(getTxt()+'\n'+getURL())); }
+function shareTW() {
+  trackEvent('share_tw',{score});
+  const txt = getTxt(), url = getURL();
+  if (navigator.share) { navigator.share({title:"Aria's Sanrio Adventure",text:txt,url:url}).catch(()=>{}); }
+  else { window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt)+'&url='+encodeURIComponent(url)); }
+}
+function shareWA() {
+  trackEvent('share_wa',{score});
+  const txt = getTxt()+'\n'+getURL();
+  if (navigator.share) { navigator.share({title:"Aria's Sanrio Adventure",text:txt}).catch(()=>{}); }
+  else { window.open('https://wa.me/?text='+encodeURIComponent(txt)); }
+}
 function shareChallenge() {
   trackEvent('share_challenge',{score:hi});
   const url = window.location.origin + window.location.pathname + '?ref=' + encodeURIComponent(playerName||'Player');

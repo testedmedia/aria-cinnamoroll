@@ -60,6 +60,8 @@
 <p data-i18n="collect_progress"></p>
 <p data-i18n="collect_leaderboard"></p>
 <p data-i18n="collect_avatar"></p>
+<p data-i18n="collect_gameplay"></p>
+<p data-i18n="collect_device"></p>
 
 <h2 data-i18n="nocollect_title"></h2>
 <ul>
@@ -68,8 +70,6 @@
 <li data-i18n="nocollect_3"></li>
 <li data-i18n="nocollect_4"></li>
 <li data-i18n="nocollect_5"></li>
-<li data-i18n="nocollect_6"></li>
-<li data-i18n="nocollect_7"></li>
 </ul>
 
 <h2 data-i18n="children_title"></h2>
@@ -88,26 +88,26 @@
 const i18n = {
   en: {
     title: "Privacy Policy",
-    date: "Last updated: February 11, 2026",
+    date: "Last updated: February 13, 2026",
     overview_title: "Overview",
     overview_body: "Aria's Sanrio Adventure is a free casual game designed for players of all ages. We take privacy seriously, especially for younger players.",
     collect_title: "Data We Collect",
     collect_name: "<strong>Player Name:</strong> Stored locally on your device only. Used for the in-game leaderboard. Never sent to third parties.",
     collect_progress: "<strong>Game Progress:</strong> Your collection, scores, outfits, and stars are stored locally on your device using browser storage (localStorage).",
-    collect_leaderboard: "<strong>Leaderboard Scores:</strong> If you play the game, your chosen display name and score may be submitted to our anonymous leaderboard. No personal information, email, or device identifiers are collected.",
+    collect_leaderboard: "<strong>Leaderboard Scores:</strong> If you play the game, your chosen display name and score may be submitted to our anonymous leaderboard hosted on Supabase. No email or real name is required.",
     collect_avatar: "<strong>Custom Avatar Photos:</strong> If you upload a photo as your avatar, it is stored locally on your device only. It is never uploaded to any server.",
+    collect_gameplay: "<strong>Gameplay Events:</strong> Anonymous gameplay events (e.g. rounds played, items collected) may be recorded via Supabase for game balancing and improvement. These are not linked to your identity.",
+    collect_device: "<strong>Basic Device Info:</strong> Basic technical information such as screen size and browser type may be collected anonymously to optimize the game experience.",
     nocollect_title: "Data We Do NOT Collect",
     nocollect_1: "No email addresses",
     nocollect_2: "No real names (only chosen display names)",
     nocollect_3: "No location data",
-    nocollect_4: "No device identifiers",
-    nocollect_5: "No analytics or tracking",
-    nocollect_6: "No cookies",
-    nocollect_7: "No advertising data",
+    nocollect_4: "No advertising data",
+    nocollect_5: "No cookies for tracking purposes",
     children_title: "Children's Privacy",
-    children_body: "This game is suitable for all ages. We do not knowingly collect personal information from children. The only data stored is gameplay progress on the local device.",
+    children_body: "This game is suitable for all ages. We do not knowingly collect personal information from children. Gameplay data is anonymous and not linked to any individual identity.",
     thirdparty_title: "Third-Party Services",
-    thirdparty_body: "This game does not use any third-party analytics, advertising, or tracking services.",
+    thirdparty_body: "This game uses <strong>Supabase</strong> as a backend service for leaderboards, friend codes, cloud sync, and anonymous gameplay analytics. Supabase processes data in accordance with their privacy policy. No third-party advertising or tracking services are used.",
     changes_title: "Changes to This Policy",
     changes_body: "We may update this policy from time to time. Changes will be reflected on this page with an updated date.",
     contact_title: "Contact",
@@ -115,26 +115,26 @@ const i18n = {
   },
   es: {
     title: "Politica de Privacidad",
-    date: "Ultima actualizacion: 11 de febrero de 2026",
+    date: "Ultima actualizacion: 13 de febrero de 2026",
     overview_title: "Descripcion General",
     overview_body: "Aria's Sanrio Adventure es un juego casual gratuito disenado para jugadores de todas las edades. Nos tomamos la privacidad muy en serio, especialmente para los jugadores mas jovenes.",
     collect_title: "Datos que Recopilamos",
     collect_name: "<strong>Nombre del Jugador:</strong> Se almacena unicamente en su dispositivo de forma local. Se utiliza para la tabla de clasificacion del juego. Nunca se envia a terceros.",
     collect_progress: "<strong>Progreso del Juego:</strong> Su coleccion, puntuaciones, atuendos y estrellas se almacenan localmente en su dispositivo mediante el almacenamiento del navegador (localStorage).",
-    collect_leaderboard: "<strong>Puntuaciones de la Tabla de Clasificacion:</strong> Si juega el juego, su nombre de pantalla elegido y su puntuacion pueden ser enviados a nuestra tabla de clasificacion anonima. No se recopila informacion personal, correo electronico ni identificadores del dispositivo.",
+    collect_leaderboard: "<strong>Puntuaciones de la Tabla de Clasificacion:</strong> Si juega el juego, su nombre de pantalla elegido y su puntuacion pueden ser enviados a nuestra tabla de clasificacion anonima alojada en Supabase. No se requiere correo electronico ni nombre real.",
     collect_avatar: "<strong>Fotos de Avatar Personalizadas:</strong> Si sube una foto como su avatar, se almacena unicamente en su dispositivo de forma local. Nunca se sube a ningun servidor.",
+    collect_gameplay: "<strong>Eventos de Juego:</strong> Eventos anonimos de juego (por ejemplo, rondas jugadas, objetos recolectados) pueden ser registrados a traves de Supabase para equilibrar y mejorar el juego. Estos no estan vinculados a su identidad.",
+    collect_device: "<strong>Informacion Basica del Dispositivo:</strong> Informacion tecnica basica como el tamano de pantalla y tipo de navegador puede ser recopilada anonimamente para optimizar la experiencia de juego.",
     nocollect_title: "Datos que NO Recopilamos",
     nocollect_1: "Sin direcciones de correo electronico",
     nocollect_2: "Sin nombres reales (solo nombres de pantalla elegidos)",
     nocollect_3: "Sin datos de ubicacion",
-    nocollect_4: "Sin identificadores de dispositivo",
-    nocollect_5: "Sin analiticas ni rastreo",
-    nocollect_6: "Sin cookies",
-    nocollect_7: "Sin datos publicitarios",
+    nocollect_4: "Sin datos publicitarios",
+    nocollect_5: "Sin cookies con fines de rastreo",
     children_title: "Privacidad de los Menores",
-    children_body: "Este juego es apto para todas las edades. No recopilamos intencionalmente informacion personal de menores. Los unicos datos almacenados son el progreso del juego en el dispositivo local.",
+    children_body: "Este juego es apto para todas las edades. No recopilamos intencionalmente informacion personal de menores. Los datos de juego son anonimos y no estan vinculados a ninguna identidad individual.",
     thirdparty_title: "Servicios de Terceros",
-    thirdparty_body: "Este juego no utiliza ningun servicio de analiticas, publicidad o rastreo de terceros.",
+    thirdparty_body: "Este juego utiliza <strong>Supabase</strong> como servicio backend para tablas de clasificacion, codigos de amigos, sincronizacion en la nube y analiticas anonimas de juego. Supabase procesa los datos de acuerdo con su politica de privacidad. No se utilizan servicios de publicidad ni rastreo de terceros.",
     changes_title: "Cambios en Esta Politica",
     changes_body: "Podemos actualizar esta politica de vez en cuando. Los cambios se reflejaran en esta pagina con una fecha de actualizacion.",
     contact_title: "Contacto",
